@@ -1,0 +1,299 @@
+import { useRef, useEffect, useCallback, useState } from 'react'
+import { useEditorStore } from '@/stores/editorStore'
+import { WysiwygEditor } from './WysiwygEditor'
+import { SourceEditor } from './SourceEditor'
+import { SearchBar } from './SearchBar'
+import { InsertDialog } from './InsertDialog'
+import { TemplateGallery } from './TemplateGallery'
+import { SettingsPanel } from '../Settings/SettingsPanel'
+import { AccountPanel } from '../Account/AccountPanel'
+import { FilePlus, FolderOpen, Home, Clock, FileText, UserCircle, Settings } from 'lucide-react'
+import logoSrc from '@/assets/logo.svg'
+
+// 检测是否在 Electron 环境中
+const isElectron = typeof window !== 'undefined' && window.api !== undefined
+
+// 欢迎页侧栏页面类型
+type WelcomeView = 'home' | 'account' | 'settings'
+
+/** 编辑器容器：根据当前标签和视图模式渲染编辑器 */
+export function EditorContainer() {
+    const tabs = useEditorStore(s => s.tabs)
+    const activeTabId = useEditorStore(s => s.activeTabId)
+    const addTab = useEditorStore(s => s.addTab)
+    const activeTab = tabs.find(t => t.id === activeTabId)
+    const viewMode = useEditorStore(s => s.viewMode)
+    const zoom = useEditorStore(s => s.zoom)
+    const recentFiles = useEditorStore(s => s.recentFiles)
+    const commandRef = useRef<((cmd: string, payload?: unknown) => void) | null>(null)
+
+    // 欢迎页侧栏状态
+    const [welcomeView, setWelcomeView] = useState<WelcomeView>('home')
+
+    // 处理文件打开
+    const handleOpenFile = useCallback(async () => {
+        if (!isElectron) {
+            addTab(null, '# 浏览器模式\n\n在 Electron 环境中可以打开本地文件。\n')
+            return
+        }
+
+        const result = await window.api.file.openDialog()
+        if (result.success && result.filePaths) {
+            for (const filePath of result.filePaths) {
+                const readResult = await window.api.file.read(filePath)
+                if (readResult.success && readResult.content !== undefined) {
+                    const tabId = addTab(filePath, readResult.content)
+                    useEditorStore.getState().markSaved(tabId, filePath)
+                }
+            }
+        }
+    }, [addTab])
+
+    // 处理新建文件
+    const handleNewFile = useCallback(() => {
+        addTab(null, '# 新文档\n\n开始编写...\n')
+    }, [addTab])
+
+    // 打开最近文件
+    const handleOpenRecentFile = useCallback(async (filePath: string) => {
+        if (!isElectron) return
+
+        const readResult = await window.api.file.read(filePath)
+        if (readResult.success && readResult.content !== undefined) {
+            const tabId = addTab(filePath, readResult.content)
+            useEditorStore.getState().markSaved(tabId, filePath)
+        }
+    }, [addTab])
+
+    // 监听外部打开文件
+    useEffect(() => {
+        if (!isElectron) return
+
+        const unsubscribe = window.api.file.onOpenedExternal(async (filePath: string) => {
+            const readResult = await window.api.file.read(filePath)
+            if (readResult.success && readResult.content !== undefined) {
+                const tabId = addTab(filePath, readResult.content)
+                useEditorStore.getState().markSaved(tabId, filePath)
+            }
+        })
+        return () => { unsubscribe() }
+    }, [addTab])
+
+    // 快捷键处理
+    useEffect(() => {
+        const handleKeyDown = async (e: KeyboardEvent) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'n':
+                        e.preventDefault()
+                        handleNewFile()
+                        break
+                    case 'o':
+                        e.preventDefault()
+                        handleOpenFile()
+                        break
+                    case 's': {
+                        e.preventDefault()
+                        if (!isElectron) break
+
+                        const tab = useEditorStore.getState().getActiveTab()
+                        if (!tab) break
+
+                        if (e.shiftKey || !tab.filePath) {
+                            const result = await window.api.file.saveAs(tab.content, tab.filePath ?? undefined)
+                            if (result.success && result.filePath) {
+                                useEditorStore.getState().markSaved(tab.id, result.filePath)
+                            }
+                        } else {
+                            const result = await window.api.file.save(tab.filePath, tab.content)
+                            if (result.success) {
+                                useEditorStore.getState().markSaved(tab.id)
+                            }
+                        }
+                        break
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [handleNewFile, handleOpenFile])
+
+    // 动态获取时间以显示相应的问候语
+    const hour = new Date().getHours()
+    const greeting = hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好'
+
+    // 格式化相对时间
+    const formatRelativeTime = (timestamp: number) => {
+        const diff = Date.now() - timestamp
+        const minutes = Math.floor(diff / 60000)
+        if (minutes < 1) return '刚刚'
+        if (minutes < 60) return `${minutes} 分钟前`
+        const hours = Math.floor(minutes / 60)
+        if (hours < 24) return `${hours} 小时前`
+        const days = Math.floor(hours / 24)
+        return `${days} 天前`
+    }
+
+    // 缩放样式
+    const zoomStyle = {
+        transform: `scale(${zoom / 100})`,
+        transformOrigin: 'top center',
+        width: zoom !== 100 ? `${10000 / zoom}% ` : '100%',
+    }
+
+    // 无标签时显示欢迎页
+    if (!activeTab) {
+        return (
+            <div className="welcome-word">
+                <div className="welcome-word__sidebar">
+                    <div className="welcome-word__sidebar-brand">
+                        <img src={logoSrc} alt="logo" className="welcome-word__sidebar-logo" />
+                        <span className="welcome-word__sidebar-brand-name">MYmd</span>
+                    </div>
+
+                    <div className="welcome-word__sidebar-top">
+                        <button
+                            className={`welcome-word__sidebar-btn ${welcomeView === 'home' ? 'active' : ''}`}
+                            onClick={() => setWelcomeView('home')}
+                        >
+                            <Home size={28} strokeWidth={1} />
+                            <span>开始</span>
+                        </button>
+                        <button className="welcome-word__sidebar-btn" onClick={handleNewFile}>
+                            <FilePlus size={28} strokeWidth={1} />
+                            <span>新建</span>
+                        </button>
+                        <button className="welcome-word__sidebar-btn" onClick={handleOpenFile}>
+                            <FolderOpen size={28} strokeWidth={1} />
+                            <span>打开</span>
+                        </button>
+                    </div>
+                    <div className="welcome-word__sidebar-bottom">
+                        <div className="welcome-word__sidebar-divider"></div>
+                        <button
+                            className={`welcome-word__sidebar-btn text-only ${welcomeView === 'account' ? 'active' : ''}`}
+                            onClick={() => setWelcomeView('account')}
+                        >
+                            账户
+                        </button>
+                        <button
+                            className={`welcome-word__sidebar-btn text-only ${welcomeView === 'settings' ? 'active' : ''}`}
+                            onClick={() => setWelcomeView('settings')}
+                        >
+                            选项
+                        </button>
+                    </div>
+                </div>
+
+                {/* 欢迎页主内容区根据侧栏选择切换 */}
+                {welcomeView === 'account' ? (
+                    <AccountPanel />
+                ) : welcomeView === 'settings' ? (
+                    <SettingsPanel />
+                ) : (
+                    <div className="welcome-word__main">
+                        <div className="welcome-word__header">
+                            <img src={logoSrc} alt="logo" className="welcome-word__logo" />
+                            <h1 className="welcome-word__title">{greeting}</h1>
+                        </div>
+
+                        <div className="welcome-word__section">
+                            <TemplateGallery />
+                        </div>
+
+                        <div className="welcome-word__section">
+                            <div className="welcome-word__recent-header">
+                                <h2 className="welcome-word__section-title active">最近</h2>
+                                <h2 className="welcome-word__section-title">已固定</h2>
+                                <h2 className="welcome-word__section-title">与我共享</h2>
+                            </div>
+                            <div className="welcome-word__recent-list">
+                                <table className="welcome-word__recent-table">
+                                    <thead>
+                                        <tr>
+                                            <th>名称</th>
+                                            <th>修改时间</th>
+                                            <th>位置</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {recentFiles.length > 0 ? (
+                                            recentFiles.map((file, idx) => (
+                                                <tr
+                                                    key={idx}
+                                                    className="welcome-word__recent-row"
+                                                    onClick={() => handleOpenRecentFile(file.path)}
+                                                    style={{ cursor: 'pointer' }}
+                                                >
+                                                    <td>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <FileText size={16} color="var(--accent)" strokeWidth={1.5} />
+                                                            {file.title}
+                                                        </div>
+                                                    </td>
+                                                    <td>{formatRelativeTime(file.time)}</td>
+                                                    <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
+                                                        {file.path.split(/[\\/]/).slice(0, -1).join('\\')}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr className="welcome-word__recent-empty-row">
+                                                <td colSpan={3}>
+                                                    <div className="welcome-word__recent-empty">
+                                                        <Clock size={36} color="var(--text-muted)" strokeWidth={1.5} style={{ marginBottom: '8px' }} />
+                                                        没有最近打开的文档。
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        )
+    }
+
+    return (
+        <div className="editor-container">
+            <SearchBar />
+            <InsertDialog />
+            {viewMode === 'wysiwyg' ? (
+                <div className="editor-workspace" style={zoomStyle}>
+                    <WysiwygEditor
+                        key={activeTab.id}
+                        tabId={activeTab.id}
+                        content={activeTab.content}
+                        onCommandRef={commandRef}
+                    />
+                </div>
+            ) : (
+                <div className="editor-split">
+                    <div className="editor-split__source">
+                        <SourceEditor
+                            key={`source - ${activeTab.id} `}
+                            tabId={activeTab.id}
+                            content={activeTab.content}
+                        />
+                    </div>
+                    <div className="editor-split__divider" />
+                    <div className="editor-split__preview editor-workspace" style={zoomStyle}>
+                        <WysiwygEditor
+                            key={`preview - ${activeTab.id} `}
+                            tabId={activeTab.id}
+                            content={activeTab.content}
+                            onCommandRef={commandRef}
+                        />
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+export { EditorContainer as default }

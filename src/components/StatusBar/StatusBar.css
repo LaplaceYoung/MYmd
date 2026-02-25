@@ -1,0 +1,140 @@
+/* ===================================================
+   状态栏样式 (Fluent Design Word 风格)
+   =================================================== */
+
+.statusbar {
+    display: flex;
+    align-items: center;
+    height: var(--statusbar-height);
+    /* 极窄 26px */
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-light);
+    color: var(--text-secondary);
+    font-size: 11px;
+    flex-shrink: 0;
+    user-select: none;
+    font-family: var(--font-sans);
+}
+
+.statusbar__left {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.statusbar__right {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding-right: var(--space-2);
+}
+
+.statusbar__spacer {
+    flex: 1;
+}
+
+/* 左侧文字徽印块 */
+.statusbar__btn {
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-3);
+    height: 100%;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.statusbar__btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* 右侧图标 */
+.statusbar__icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 100%;
+    color: var(--text-secondary);
+    background: transparent;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.statusbar__icon-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.statusbar__icon-btn.active {
+    background: var(--border-light);
+    color: var(--text-primary);
+}
+
+/* 缩放滑块及控制组 */
+.statusbar__zoom-controls {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    margin-left: var(--space-4);
+}
+
+.statusbar__zoom-label {
+    min-width: 40px;
+    text-align: right;
+    margin-right: var(--space-2);
+    cursor: pointer;
+}
+
+.statusbar__zoom-label:hover {
+    color: var(--text-primary);
+}
+
+.statusbar__zoom-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--text-secondary);
+    background: transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.statusbar__zoom-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.statusbar__slider-container {
+    display: flex;
+    align-items: center;
+    width: 100px;
+    padding: 0 var(--space-2);
+}
+
+/* 原生拖拽滑块样式化 (类似 Word) */
+.statusbar__slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+    margin: 0;
+}
+
+.statusbar__slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 8px;
+    height: 16px;
+    border-radius: 4px;
+    background: var(--text-muted);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.statusbar__slider::-webkit-slider-thumb:hover {
+    background: var(--accent);
+}

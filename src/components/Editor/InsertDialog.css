@@ -1,0 +1,243 @@
+.insert-dialog__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 150ms ease-out;
+}
+
+.insert-dialog {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-16);
+    width: 440px;
+    max-width: calc(100vw - 40px);
+    animation: slideDown 200ms ease-out;
+}
+
+.insert-dialog__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.insert-dialog__title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.insert-dialog__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    transition: all var(--transition-fast);
+}
+
+.insert-dialog__close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.insert-dialog__body {
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.insert-dialog__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.insert-dialog__label {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.insert-dialog__input {
+    height: 36px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    font-family: var(--font-sans);
+    transition: border-color var(--transition-fast);
+    outline: none;
+}
+
+.insert-dialog__input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-muted);
+}
+
+.insert-dialog__url-row {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.insert-dialog__url-row .insert-dialog__input {
+    flex: 1;
+}
+
+.insert-dialog__browse-btn {
+    height: 36px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+}
+
+.insert-dialog__browse-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+}
+
+.insert-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.insert-dialog__btn {
+    height: 34px;
+    padding: 0 var(--space-5);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: 1px solid transparent;
+}
+
+.insert-dialog__btn--cancel {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+
+.insert-dialog__btn--cancel:hover {
+    background: var(--bg-hover);
+}
+
+.insert-dialog__btn--confirm {
+    background: var(--accent);
+    color: var(--accent-text);
+}
+
+.insert-dialog__btn--confirm:hover {
+    background: var(--accent-hover);
+}
+
+.insert-dialog__btn--confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 标签切换 */
+.insert-dialog__tabs {
+    display: flex;
+    gap: var(--space-1);
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: var(--space-2);
+}
+
+.insert-dialog__tab {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.insert-dialog__tab:hover {
+    background: var(--bg-hover);
+}
+
+.insert-dialog__tab.active {
+    background: var(--accent-muted);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* 上传区域 */
+.insert-dialog__upload-area {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: center;
+}
+
+.insert-dialog__upload-area:hover {
+    border-color: var(--accent);
+    background: var(--accent-muted);
+}
+
+.insert-dialog__upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+}
+
+.insert-dialog__upload-formats {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.insert-dialog__upload-selected {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.insert-dialog__upload-filename {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+    flex: 1;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.insert-dialog__upload-hint {
+    font-size: 11px;
+    color: var(--accent);
+}

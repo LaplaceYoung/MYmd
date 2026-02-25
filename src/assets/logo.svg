@@ -1,0 +1,76 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background Document Drop Shadow -->
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+    
+    <!-- Front Panel Shadow -->
+    <filter id="frontShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="12" dy="20" stdDeviation="24" flood-color="#000000" flood-opacity="0.8"/>
+    </filter>
+    
+    <!-- Flap Shadow -->
+    <filter id="flapShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="-4" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.8"/>
+    </filter>
+
+    <!-- Back Page Gradient (Dark Shape) -->
+    <linearGradient id="backDocGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111624"/>
+      <stop offset="100%" stop-color="#010203"/>
+    </linearGradient>
+
+    <!-- Main Blue Document Gradient -->
+    <linearGradient id="docGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2D5A9E"/>
+      <stop offset="35%" stop-color="#11295A"/>
+      <stop offset="100%" stop-color="#030713"/>
+    </linearGradient>
+
+    <!-- Fold Flap Gradient -->
+    <linearGradient id="foldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3d62a2"/>
+      <stop offset="100%" stop-color="#142b5a"/>
+    </linearGradient>
+
+    <!-- Front Dark Panel Gradient -->
+    <linearGradient id="frontGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#343C4A"/>
+      <stop offset="100%" stop-color="#1A1F26"/>
+    </linearGradient>
+    
+    <!-- Inner Panel Border Highlight for 3D effect -->
+    <linearGradient id="panelBorder" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background stacked page -->
+  <path d="M 210 60 H 420 V 120 A 24 24 0 0 0 444 144 H 504 V 460 A 32 32 0 0 1 472 492 H 210 A 32 32 0 0 1 178 460 V 92 A 32 32 0 0 1 210 60 Z" fill="url(#backDocGrad)" filter="url(#shadow)"/>
+
+  <!-- Main Document Group -->
+  <g filter="url(#shadow)">
+    <!-- Base Page -->
+    <path d="M 180 30 H 390 V 90 A 24 24 0 0 0 414 114 H 474 V 430 A 32 32 0 0 1 442 462 H 180 A 32 32 0 0 1 148 430 V 62 A 32 32 0 0 1 180 30 Z" fill="url(#docGrad)" />
+    
+    <!-- Top left corner highlight -->
+    <path d="M 179 31.5 H 388" stroke="#5a88d1" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <!-- Folded Flap Effect -->
+    <path d="M 390 30 V 90 A 24 24 0 0 0 414 114 H 474 C 434 104, 404 64, 390 30 Z" fill="#0b1733" filter="url(#flapShadow)"/> 
+    <path d="M 390 30 V 90 A 24 24 0 0 0 414 114 H 474 C 434 104, 404 64, 390 30 Z" fill="url(#foldGrad)"/>
+    <!-- Fold Flap Edge Highlight -->
+    <path d="M 389 30 V 90 A 24 24 0 0 0 414 114 H 473 C 434 104, 404 64, 390 30 Z" fill="none" stroke="#6ca0ef" stroke-width="1.5" opacity="0.6"/>
+  </g>
+
+  <!-- Front Square Panel -->
+  <g filter="url(#frontShadow)">
+    <rect x="36" y="146" width="260" height="260" rx="42" fill="url(#frontGrad)"/>
+    <rect x="37.5" y="147.5" width="257" height="257" rx="40.5" fill="none" stroke="url(#panelBorder)" stroke-width="3"/>
+  </g>
+
+  <!-- The "M" Logo Text -->
+  <text x="166" y="328" font-family="'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif" font-size="168" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="-4">M</text>
+</svg>

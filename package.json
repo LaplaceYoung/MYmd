@@ -1,0 +1,71 @@
+{
+  "name": "mymd",
+  "version": "1.0.0",
+  "description": "轻量级 Markdown 桌面端阅读与编辑器",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "@codemirror/lang-markdown": "^6.5.0",
+    "@codemirror/language-data": "^6.5.2",
+    "@milkdown/kit": "^7.18.0",
+    "@milkdown/plugin-diagram": "^7.7.0",
+    "@milkdown/plugin-math": "^7.5.9",
+    "@milkdown/plugin-prism": "^7.18.0",
+    "@prosemirror-adapter/react": "^0.2.6",
+    "@uiw/react-codemirror": "^4.25.5",
+    "codemirror": "^6.0.2",
+    "katex": "^0.16.33",
+    "lucide-react": "^0.474.0",
+    "mdast-util-math": "^3.0.0",
+    "mermaid": "^11.12.3",
+    "postcss-import": "^16.1.1",
+    "prism-themes": "^1.9.0",
+    "prosemirror-search": "^1.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "refractor": "^5.0.0",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.24",
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0",
+    "electron-vite": "^3.0.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.0"
+  },
+  "build": {
+    "appId": "com.mymd.app",
+    "productName": "MYmd",
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "resources/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "fileAssociations": [
+      {
+        "ext": "md",
+        "name": "Markdown 文档",
+        "description": "Markdown 文档文件",
+        "role": "Editor"
+      }
+    ]
+  }
+}

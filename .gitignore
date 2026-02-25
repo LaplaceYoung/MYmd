@@ -1,0 +1,16 @@
+node_modules
+out
+release
+*.log
+.DS_Store
+.vscode
+.idea
+*.jpeg
+*.png
+*.jpg
+*.tmp
+dist
+build
+.env
+.env.*
+!.env.example

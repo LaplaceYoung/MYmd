@@ -1,0 +1,101 @@
+.save-confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: overlayFadeIn 0.2s ease-out;
+    backdrop-filter: blur(2px);
+}
+
+.save-confirm-dialog {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+    width: 440px;
+    max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    animation: dialogSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(10px);
+}
+
+.save-confirm-header {
+    padding: var(--space-4) var(--space-5);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.save-confirm-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.save-confirm-icon {
+    color: var(--accent);
+}
+
+.save-confirm-body {
+    padding: var(--space-4) var(--space-5);
+}
+
+.save-confirm-text {
+    font-size: var(--text-lg);
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.save-confirm-subtext {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+}
+
+.save-confirm-footer {
+    padding: var(--space-5);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    border-top: 1px solid var(--border-light);
+    background: var(--bg-surface);
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+}
+
+.save-confirm-footer .btn {
+    min-width: 80px;
+}
+
+/* Animations */
+@keyframes overlayFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes dialogSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

@@ -1,0 +1,653 @@
+/* ===================================================
+   编辑器区域样式
+   =================================================== */
+
+.editor-container {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    animation: editorFadeIn 200ms ease-out;
+}
+
+@keyframes editorFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* 外层灰色工作区 — block 布局，纸张用 margin:auto 居中 */
+.editor-workspace {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-hover);
+    padding: var(--space-8) 0;
+    transition: transform 150ms ease-out;
+}
+
+/* 核心编辑“纸张” — 高度由内容擑开，不设任何高度限制 */
+.editor-wysiwyg {
+    width: 800px;
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-paper);
+    border-radius: 2px;
+    padding: 72px 80px 96px;
+    margin: 0 auto;
+}
+
+/* 隐藏容器本身原本可能溢出的默认轮廓线以保留干净感 */
+.editor-wysiwyg:focus-within {
+    outline: none;
+}
+
+/* 编辑器内部文本渲染区 - 取消原来的 max-width 约束，直接放开填满虚拟纸张 */
+.editor-wysiwyg .milkdown {
+    width: 100%;
+    margin: 0;
+    font-family: var(--font-editor);
+    font-size: var(--text-lg);
+    line-height: 1.8;
+    color: var(--text-primary);
+    caret-color: var(--text-primary);
+}
+
+.editor-wysiwyg .milkdown .editor {
+    outline: none;
+    min-height: 900px;
+}
+
+/* 标题 */
+.editor-wysiwyg .milkdown h1 {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    margin: 1.5em 0 0.6em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.editor-wysiwyg .milkdown h2 {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    margin: 1.3em 0 0.5em;
+    padding-bottom: 0.25em;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary);
+    line-height: 1.35;
+}
+
+.editor-wysiwyg .milkdown h3 {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    margin: 1.2em 0 0.4em;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.editor-wysiwyg .milkdown h4 {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    margin: 1em 0 0.3em;
+    color: var(--text-primary);
+}
+
+.editor-wysiwyg .milkdown h5,
+.editor-wysiwyg .milkdown h6 {
+    font-size: var(--text-base);
+    font-weight: 600;
+    margin: 1em 0 0.3em;
+    color: var(--text-secondary);
+}
+
+/* 段落 */
+.editor-wysiwyg .milkdown p {
+    margin: 0.6em 0;
+}
+
+/* 强调 */
+.editor-wysiwyg .milkdown strong {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.editor-wysiwyg .milkdown em {
+    font-style: italic;
+    color: var(--text-primary);
+}
+
+.editor-wysiwyg .milkdown del {
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+/* 行内代码 */
+.editor-wysiwyg .milkdown code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--bg-elevated);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    color: #e0a0f0;
+}
+
+/* 代码块 */
+.editor-wysiwyg .milkdown pre {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin: 1em 0;
+    overflow-x: auto;
+}
+
+.editor-wysiwyg .milkdown pre code {
+    background: none;
+    padding: 0;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    /* color: var(--text-primary); 不要覆盖 prism 的颜色 */
+}
+
+/* 引用块 */
+.editor-wysiwyg .milkdown blockquote {
+    border-left: 4px solid var(--accent);
+    padding-left: var(--space-4);
+    margin: 1em 0;
+    color: var(--text-secondary);
+    background: var(--accent-muted);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: var(--space-3) var(--space-4);
+}
+
+/* 列表 */
+.editor-wysiwyg .milkdown ul,
+.editor-wysiwyg .milkdown ol {
+    padding-left: 1.5em;
+    margin: 0.5em 0;
+}
+
+.editor-wysiwyg .milkdown li {
+    margin: 0.25em 0;
+}
+
+.editor-wysiwyg .milkdown li>p {
+    margin: 0;
+}
+
+/* 任务列表 */
+.editor-wysiwyg .milkdown ul.task-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.editor-wysiwyg .milkdown .task-list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+}
+
+.editor-wysiwyg .milkdown .task-list-item input[type="checkbox"] {
+    margin-top: 0.35em;
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+/* 表格 */
+.editor-wysiwyg .milkdown table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+}
+
+.editor-wysiwyg .milkdown th,
+.editor-wysiwyg .milkdown td {
+    border: 1px solid var(--border);
+    padding: var(--space-2) var(--space-3);
+    text-align: left;
+}
+
+.editor-wysiwyg .milkdown th {
+    background: var(--bg-elevated);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.editor-wysiwyg .milkdown td {
+    background: var(--bg-surface);
+}
+
+.editor-wysiwyg .milkdown tr:hover td {
+    background: var(--bg-hover);
+}
+
+/* 分隔线 */
+.editor-wysiwyg .milkdown hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 2em 0;
+}
+
+/* 链接 */
+.editor-wysiwyg .milkdown a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--transition-fast);
+}
+
+.editor-wysiwyg .milkdown a:hover {
+    border-bottom-color: var(--accent);
+}
+
+/* 图片 */
+.editor-wysiwyg .milkdown img {
+    max-width: 100%;
+    border-radius: var(--radius-md);
+    margin: 1em 0;
+    box-shadow: var(--shadow-sm);
+}
+
+/* 分屏模式 */
+.editor-split {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    animation: editorFadeIn 200ms ease-out;
+}
+
+.editor-split__source {
+    flex: 1;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    animation: slideFromLeft 250ms ease-out;
+}
+
+@keyframes slideFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.editor-split__preview {
+    flex: 1;
+    overflow-y: auto;
+    animation: slideFromRight 250ms ease-out;
+}
+
+@keyframes slideFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.editor-split__divider {
+    width: 4px;
+    cursor: col-resize;
+    background: var(--border-light);
+    flex-shrink: 0;
+    transition: background var(--transition-fast);
+}
+
+.editor-split__divider:hover {
+    background: var(--accent);
+}
+
+/* 状态栏 */
+.statusbar {
+    display: flex;
+    align-items: center;
+    height: var(--statusbar-height);
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-light);
+    padding: 0 var(--space-3);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    flex-shrink: 0;
+    gap: var(--space-4);
+}
+
+.statusbar__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.statusbar__spacer {
+    flex: 1;
+}
+
+/* 欢迎页 (Word Start Page) */
+.welcome-word {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+    /* 防止子元素撑破容器导致无法滚动 */
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    animation: welcomeFadeIn 300ms ease-out;
+}
+
+@keyframes welcomeFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.welcome-word__sidebar {
+    width: 110px;
+    background: var(--bg-elevated);
+    display: flex;
+    flex-direction: column;
+    /* 去除容易导致计算错误的 space-between，改用 margin-top: auto 推挤 */
+    box-shadow: var(--shadow-2);
+    z-index: 2;
+    padding-bottom: var(--space-4);
+    overflow-y: auto;
+    /* 隐藏滚动条但保留功能 */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.welcome-word__sidebar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-6) 0 var(--space-8);
+}
+
+.welcome-word__sidebar-logo {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.welcome-word__sidebar-brand-name {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.welcome-word__sidebar-top {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.welcome-word__sidebar-bottom {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: auto;
+    /* 将底部组挤到下边缘 */
+}
+
+.welcome-word__sidebar-divider {
+    height: 1px;
+    background-color: var(--border);
+    margin: var(--space-4) var(--space-6);
+}
+
+.welcome-word__sidebar-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-4) 0;
+    border-radius: 0;
+    font-size: 13px;
+    /* 更小的辅助字体 */
+    font-weight: 400;
+    /* Regular weight */
+    color: var(--text-secondary);
+    /* 未选中时颜色较暗 */
+    transition: all var(--transition-fast);
+    background: transparent;
+    border: none;
+    position: relative;
+    width: 100%;
+}
+
+.welcome-word__sidebar-btn.text-only {
+    flex-direction: row;
+    padding: var(--space-3) 0;
+    font-size: var(--text-sm);
+}
+
+.welcome-word__sidebar-btn:hover {
+    background: var(--bg-hover);
+}
+
+/* 选中项的左侧高亮细条 */
+.welcome-word__sidebar-btn.active {
+    background: transparent;
+    color: var(--accent);
+    /* 选中时图标和文字变为强调色 */
+    font-weight: 600;
+}
+
+.welcome-word__sidebar-btn.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+    background-color: var(--accent);
+    border-radius: 0 4px 4px 0;
+}
+
+.welcome-word__main {
+    flex: 1;
+    min-height: 0;
+    /* 防止子元素撑破容器 */
+    padding: var(--space-8) var(--space-10);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    overflow-y: auto;
+    background: var(--bg-base);
+    /* 浅灰色或深色 */
+}
+
+.welcome-word__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.welcome-word__logo {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    object-fit: contain;
+    background: transparent;
+}
+
+.welcome-word__title {
+    font-size: var(--text-3xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+}
+
+.welcome-word__section-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-4);
+}
+
+.welcome-word__templates {
+    display: flex;
+    gap: var(--space-4);
+}
+
+.welcome-word__template-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    width: 160px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-2);
+}
+
+.welcome-word__template-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-4);
+    transform: translateY(-2px);
+}
+
+.welcome-word__template-name {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.welcome-word__recent-header {
+    display: flex;
+    gap: var(--space-6);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--space-5);
+}
+
+.welcome-word__recent-header .welcome-word__section-title {
+    margin-bottom: 0;
+    padding-bottom: var(--space-3);
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+
+.welcome-word__recent-header .welcome-word__section-title.active {
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+}
+
+.welcome-word__recent-list {
+    background: transparent;
+}
+
+/* 列表区采用流畅的多栏表格 */
+.welcome-word__recent-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.welcome-word__recent-table th {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: var(--text-sm);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.welcome-word__recent-table td {
+    padding: var(--space-3) 0;
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    border-bottom: 1px solid var(--border-light);
+}
+
+/* 最近文件行悬停效果 */
+.welcome-word__recent-row:hover td {
+    background: var(--bg-hover);
+    color: var(--accent);
+}
+
+.welcome-word__recent-row {
+    transition: background var(--transition-fast);
+}
+
+.welcome-word__recent-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-10) 0;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+}
+
+/* ===================================================
+   Typora 风格语法提示
+   =================================================== */
+
+/* 通用语法提示样式 */
+.syntax-hint {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-weight: 400;
+    user-select: none;
+    pointer-events: none;
+    opacity: 0.55;
+    animation: syntaxHintFadeIn 120ms ease-out;
+    font-size: 0.85em;
+    vertical-align: baseline;
+}
+
+/* 块级语法提示（# > 等） */
+.syntax-hint--block {
+    color: var(--accent);
+    opacity: 0.5;
+    margin-right: 2px;
+}
+
+/* 内联语法提示（** * ` ~~ 等） */
+.syntax-hint--inline {
+    color: var(--text-muted);
+    opacity: 0.45;
+    font-size: 0.8em;
+    letter-spacing: -0.5px;
+}
+
+@keyframes syntaxHintFadeIn {
+    from {
+        opacity: 0;
+        transform: scaleX(0.7);
+    }
+
+    to {
+        opacity: 0.55;
+        transform: scaleX(1);
+    }
+}

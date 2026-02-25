@@ -1,0 +1,152 @@
+.template-gallery {
+    margin-bottom: var(--space-8);
+}
+
+.template-gallery__title {
+    font-size: var(--text-base);
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--space-4);
+}
+
+/* 横向排列的 Flex 容器，支持水平滚动 */
+.template-gallery__grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--space-5);
+    overflow-x: auto;
+    padding-bottom: var(--space-4);
+    /* 为阴影和滚动条留出空间 */
+    padding-top: var(--space-2);
+    /* 隐藏现代浏览器的默认丑陋滚动条但保留功能，也可以自定义外观 */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+}
+
+.template-gallery__grid::-webkit-scrollbar {
+    height: 8px;
+}
+
+.template-gallery__grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.template-gallery__grid::-webkit-scrollbar-thumb {
+    background-color: var(--border-light);
+    border-radius: 4px;
+}
+
+/* 整个卡片容器 */
+.template-card {
+    flex-shrink: 0;
+    /* 防止宽度被挤压 */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    width: 140px;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 缩略图外观区 */
+.template-card__preview {
+    width: 140px;
+    height: 198px;
+    /* 严格符合 1:1.414 的 A4 比例 */
+    border-radius: var(--radius-md);
+    background-color: transparent;
+    border: 1px solid transparent;
+    /* 默认无显性边框，以纸张颜色区分 */
+    padding: var(--space-1);
+    /* 让纸张稍小一点，和系统焦点框分离开 */
+    transition: all 0.2s ease;
+}
+
+/* 内部真正的“纸张” */
+.template-card__paper {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-primary);
+    /* 深色模式下应偏深灰/接近白色的反相色，通常由主体颜色定义 */
+    border-radius: var(--radius-sm);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* 默认轻微投影 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border-light);
+}
+
+/* 悬停交互 (与 Word 行为一致) */
+.template-card:hover .template-card__preview {
+    border-color: var(--accent);
+}
+
+.template-card:hover .template-card__paper {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    /* 加深阴影营造浮起效果 */
+}
+
+.template-card:hover {
+    transform: translateY(-2px);
+}
+
+/* 空白图标居中 */
+.template-card__blank-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 用于模拟预置有内容文档的骨架屏线条 */
+.template-card__mock-lines {
+    position: absolute;
+    top: 12%;
+    left: 12%;
+    right: 12%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    opacity: 0.6;
+}
+
+.mock-title {
+    height: 4px;
+    width: 60%;
+    border-radius: 2px;
+    margin-bottom: 8px;
+}
+
+.mock-line {
+    height: 3px;
+    background-color: var(--text-muted);
+    width: 100%;
+    border-radius: 1px;
+    opacity: 0.5;
+}
+
+.mock-line.short {
+    width: 40%;
+}
+
+.mock-space {
+    height: 4px;
+}
+
+/* 底部标题信息 */
+.template-card__info {
+    padding: 0 var(--space-1);
+}
+
+.template-card__name {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}

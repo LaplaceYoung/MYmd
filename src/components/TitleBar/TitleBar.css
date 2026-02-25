@@ -1,0 +1,162 @@
+/* ===================================================
+   自定义标题栏样式 - Word Windows 11 风格
+   =================================================== */
+
+.titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--titlebar-height);
+    background: var(--accent);
+    color: var(--accent-text);
+    -webkit-app-region: drag;
+    flex-shrink: 0;
+    transition: background var(--transition-base);
+}
+
+.titlebar__left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding-left: var(--space-3);
+    flex: 1;
+}
+
+.titlebar__logo {
+    display: flex;
+    align-items: center;
+    -webkit-app-region: no-drag;
+}
+
+.titlebar__logo-icon-img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.titlebar__quick-access {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    -webkit-app-region: no-drag;
+}
+
+.titlebar__tool-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    color: var(--accent-text);
+    transition: background var(--transition-fast);
+}
+
+.titlebar__tool-btn:hover {
+    background: var(--accent-hover);
+}
+
+.titlebar__doc-title {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    margin-left: var(--space-2);
+    opacity: 0.9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.titlebar__center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.titlebar__search {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-4);
+    height: 32px;
+    width: 400px;
+    max-width: 50vw;
+    font-size: 13px;
+    color: var(--accent-text);
+    -webkit-app-region: no-drag;
+    cursor: text;
+    transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.titlebar__search:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.titlebar__search svg {
+    opacity: 0.8;
+}
+
+.titlebar__right {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.titlebar__profile {
+    display: flex;
+    align-items: center;
+    padding-right: var(--space-4);
+    -webkit-app-region: no-drag;
+}
+
+.titlebar__avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-text);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.titlebar__avatar:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.titlebar__controls {
+    display: flex;
+    -webkit-app-region: no-drag;
+    height: var(--titlebar-height);
+}
+
+.titlebar__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 100%;
+    color: var(--accent-text);
+    transition: background var(--transition-fast);
+    border-radius: 0;
+}
+
+.titlebar__btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.titlebar__btn--close:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.titlebar__btn svg {
+    width: 14px;
+    height: 14px;
+}

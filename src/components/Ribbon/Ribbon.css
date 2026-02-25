@@ -1,0 +1,179 @@
+/* ===================================================
+   Ribbon 导航菜单样式 (Fluent Design Word 风格)
+   =================================================== */
+
+.ribbon {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+}
+
+/* 顶层 Tabs 栏 */
+.ribbon__tabs {
+    display: flex;
+    height: var(--ribbon-tab-height);
+    /* 32px */
+    background: var(--accent);
+    /* Windows Word 模式下顶层 Tab 会带主题底色或沉降到云母 */
+    color: var(--accent-text);
+}
+
+.ribbon__tab {
+    padding: 0 var(--space-4);
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: inherit;
+    transition: background var(--transition-fast);
+}
+
+.ribbon__tab:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.ribbon__tab.active {
+    background: var(--bg-surface);
+    color: var(--accent);
+    /* 成为白色背景上的主色字 */
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+/* 下层工具面板区 */
+.ribbon__panels {
+    display: flex;
+    height: var(--ribbon-panel-height);
+    /* 96px */
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+.ribbon__panel {
+    display: flex;
+    align-items: stretch;
+    padding: var(--space-1) var(--space-2);
+    width: 100%;
+    animation: ribbonPanelIn 150ms ease-out;
+}
+
+@keyframes ribbonPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(-2px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 竖线分隔 */
+.ribbon-divider {
+    width: 1px;
+    background-color: var(--border-light);
+    margin: var(--space-2) var(--space-3) calc(var(--space-2) + 20px);
+}
+
+/* 工具组区块 */
+.ribbon-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    padding: 0 var(--space-2);
+}
+
+.ribbon-group__content {
+    display: flex;
+    gap: var(--space-1);
+    height: 100%;
+    align-items: flex-start;
+}
+
+.ribbon-group__title {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    width: 100%;
+    padding-bottom: 2px;
+}
+
+/* 按钮微型布局调整 */
+.ribbon-btn-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ribbon-btn-row {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.mt-1 {
+    margin-top: 4px;
+}
+
+.ribbon-spacer {
+    width: 8px;
+}
+
+/* 小微控制按钮 */
+.ribbon-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-1);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.ribbon-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-light);
+}
+
+.ribbon-btn.active {
+    background: var(--bg-active);
+    border-color: var(--border);
+}
+
+.ribbon-btn--large {
+    width: 48px;
+    height: 64px;
+}
+
+.ribbon-btn--large .ribbon-btn__label {
+    font-size: 11px;
+    margin-top: 4px;
+    color: var(--text-primary);
+}
+
+/* 字体选择下拉等控件 */
+.ribbon-select {
+    height: 22px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-size: 12px;
+    padding: 0 4px;
+}
+
+.ribbon-select.font-family {
+    width: 120px;
+}
+
+.ribbon-select.font-size {
+    width: 48px;
+}

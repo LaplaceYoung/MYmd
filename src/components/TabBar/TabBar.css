@@ -1,0 +1,113 @@
+/* ===================================================
+   标签栏样式 - Word Ribbon 风格
+   =================================================== */
+
+.tabbar {
+    display: flex;
+    align-items: stretch;
+    height: 44px;
+    /* Ribbon style is slightly taller */
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-light);
+    flex-shrink: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 var(--space-2);
+}
+
+.tabbar::-webkit-scrollbar {
+    height: 0;
+}
+
+.tabbar__tab {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 100%;
+    padding: 0 var(--space-4);
+    min-width: 80px;
+    max-width: 200px;
+    font-size: 13px;
+    color: var(--text-muted);
+    position: relative;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    flex-shrink: 0;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    margin-top: 4px;
+    border-bottom: 2px solid transparent;
+    /* 激活时加粗色带 */
+}
+
+.tabbar__tab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+    /* 轻度灰色 hover 效果 */
+}
+
+.tabbar__tab--active {
+    color: var(--accent);
+    /* Word active tab has accent text */
+    background: transparent;
+    font-weight: 600;
+    border-bottom: 2px solid var(--accent);
+    /* Ribbon style active line */
+}
+
+.tabbar__tab-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.tabbar__tab-dirty {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+}
+
+.tabbar__tab-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    opacity: 0;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.tabbar__tab:hover .tabbar__tab-close,
+.tabbar__tab--active .tabbar__tab-close {
+    opacity: 1;
+}
+
+.tabbar__tab-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.tabbar__add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: var(--text-muted);
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+    margin-top: 4px;
+    margin-left: 4px;
+    border-radius: var(--radius-sm);
+}
+
+.tabbar__add:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
