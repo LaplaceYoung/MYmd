@@ -11,6 +11,7 @@ import { replaceAll, callCommand } from '@milkdown/kit/utils'
 import { math } from '@milkdown/plugin-math'
 import { diagram } from '@milkdown/plugin-diagram'
 import { prism } from '@milkdown/plugin-prism'
+import { search as prosemirrorSearchPlugin, SearchQuery, setSearchState, findNext, findPrev, replaceNext, replaceAll as pmReplaceAll } from 'prosemirror-search'
 import { createSyntaxHintPlugin } from './plugins/syntaxHintPlugin'
 
 // commonmark 命令
@@ -139,7 +140,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef }: WysiwygEditorPro
 
                     // 通过 reconfigure 添加自定义 ProseMirror 插件
                     const newState = view.state.reconfigure({
-                        plugins: [...view.state.plugins, createSyntaxHintPlugin()]
+                        plugins: [...view.state.plugins, createSyntaxHintPlugin(), prosemirrorSearchPlugin()]
                     })
                     view.updateState(newState)
 
@@ -298,13 +299,49 @@ export function WysiwygEditor({ tabId, content, onCommandRef }: WysiwygEditorPro
                     break
 
                 // 搜索相关
-                case 'search':
-                case 'searchNext':
-                case 'searchPrev':
-                case 'replace':
-                case 'replaceAll':
-                    // ProseMirror 原生搜索需要额外插件，此处通过浏览器内置查找作为后备
+                case 'search': {
+                    editor.action(ctx => {
+                        const view = ctx.get(editorViewCtx)
+                        const queryStr = payload as string
+                        const query = new SearchQuery({ search: queryStr })
+                        view.dispatch(setSearchState(view.state.tr, query))
+                    })
                     break
+                }
+                case 'searchNext': {
+                    editor.action(ctx => {
+                        const view = ctx.get(editorViewCtx)
+                        findNext(view.state, view.dispatch)
+                    })
+                    break
+                }
+                case 'searchPrev': {
+                    editor.action(ctx => {
+                        const view = ctx.get(editorViewCtx)
+                        findPrev(view.state, view.dispatch)
+                    })
+                    break
+                }
+                case 'replace': {
+                    editor.action(ctx => {
+                        const view = ctx.get(editorViewCtx)
+                        const { search: q, replace: r } = payload as { search: string, replace: string }
+                        const query = new SearchQuery({ search: q, replace: r })
+                        view.dispatch(setSearchState(view.state.tr, query))
+                        replaceNext(view.state, view.dispatch)
+                    })
+                    break
+                }
+                case 'replaceAll': {
+                    editor.action(ctx => {
+                        const view = ctx.get(editorViewCtx)
+                        const { search: q, replace: r } = payload as { search: string, replace: string }
+                        const query = new SearchQuery({ search: q, replace: r })
+                        view.dispatch(setSearchState(view.state.tr, query))
+                        pmReplaceAll(view.state, view.dispatch)
+                    })
+                    break
+                }
 
                 default:
                     editor.action(ctx => {

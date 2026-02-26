@@ -31,11 +31,14 @@ export function SearchBar() {
     // 键盘快捷键
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            const isCodeMirrorTarget = (e.target as Element)?.closest?.('.cm-editor') !== null;
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+                if (isCodeMirrorTarget) return; // 让 CodeMirror 原生处理
                 e.preventDefault()
                 setSearchVisible(true)
             }
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'h') {
+                if (isCodeMirrorTarget) return; // 让 CodeMirror 原生处理
                 e.preventDefault()
                 setSearchVisible(true)
                 setShowReplace(true)

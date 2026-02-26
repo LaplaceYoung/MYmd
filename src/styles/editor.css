@@ -651,3 +651,14 @@
         transform: scaleX(1);
     }
 }
+/* ===================================================
+   搜索匹配高亮
+   =================================================== */
+.search-match {
+    background-color: rgba(255, 204, 0, 0.4);
+    border-radius: 2px;
+}
+.search-match-selected {
+    background-color: rgba(255, 150, 0, 0.6);
+    outline: 1px solid rgba(255, 100, 0, 0.8);
+}
