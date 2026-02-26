@@ -13,6 +13,7 @@ import { diagram } from '@milkdown/plugin-diagram'
 import { prism } from '@milkdown/plugin-prism'
 import { search as prosemirrorSearchPlugin, SearchQuery, setSearchState, findNext, findPrev, replaceNext, replaceAll as pmReplaceAll } from 'prosemirror-search'
 import { createSyntaxHintPlugin } from './plugins/syntaxHintPlugin'
+import { mathEditPlugin } from './plugins/mathEditPlugin'
 
 // commonmark 命令
 import {
@@ -131,6 +132,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef }: WysiwygEditorPro
                 .use(math)
                 .use(diagram)
                 .use(prism)
+                .use(mathEditPlugin)
                 .create()
 
             if (!destroyed) {
