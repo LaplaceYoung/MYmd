@@ -37,8 +37,8 @@ interface EditorState {
     zoom: number
     /** 最近打开的文件列表 */
     recentFiles: { path: string; title: string; time: number }[]
-    /** 编辑器命令执行器（由 WysiwygEditor 注入） */
-    editorCommand: CommandExecutor | null
+    /** 编辑器命令执行器集合（支持多实例如源码和预览模式同时响应） */
+    editorCommands: Record<string, CommandExecutor>
     /** 当前光标处激活的文本标记 */
     activeMarks: string[]
     /** 当前打开的插入弹窗类型 */
@@ -49,6 +49,10 @@ interface EditorState {
     themeMode: ThemeMode
     /** 编辑器字号 */
     editorFontSize: number
+    /** 是否开启拼写检查 */
+    spellcheck: boolean
+    /** 是否显示水印 */
+    watermark: boolean
 
     // 操作
     addTab: (filePath: string | null, content?: string) => string
@@ -60,12 +64,16 @@ interface EditorState {
     getActiveTab: () => Tab | null
     setZoom: (zoom: number) => void
     addRecentFile: (filePath: string, title: string) => void
-    setEditorCommand: (executor: CommandExecutor | null) => void
+    registerCommand: (id: string, executor: CommandExecutor) => void
+    unregisterCommand: (id: string) => void
+    executeCommand: (cmd: string, payload?: unknown) => void
     setActiveMarks: (marks: string[]) => void
     setInsertDialog: (type: InsertDialogType) => void
     setSearchVisible: (visible: boolean) => void
     setThemeMode: (mode: ThemeMode) => void
     setEditorFontSize: (size: number) => void
+    setSpellcheck: (enable: boolean) => void
+    setWatermark: (enable: boolean) => void
     /** 执行保存操作（保存当前活动标签） */
     saveActiveTab: () => Promise<void>
     /** 执行保存操作（保存指定标签） */
@@ -106,12 +114,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     viewMode: 'wysiwyg',
     zoom: 100,
     recentFiles: [],
-    editorCommand: null,
+    editorCommands: {},
     activeMarks: [],
     insertDialog: null,
     searchVisible: false,
     themeMode: 'system',
     editorFontSize: 16,
+    spellcheck: false,
+    watermark: false,
     pendingCloseAction: null,
     pendingCloseTabId: null,
 
@@ -204,7 +214,20 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         })
     },
 
-    setEditorCommand: (executor) => set({ editorCommand: executor }),
+    registerCommand: (id, executor) => set(state => ({
+        editorCommands: { ...state.editorCommands, [id]: executor }
+    })),
+
+    unregisterCommand: (id) => set(state => {
+        const newCmds = { ...state.editorCommands }
+        delete newCmds[id]
+        return { editorCommands: newCmds }
+    }),
+
+    executeCommand: (cmd, payload) => {
+        const { editorCommands } = get()
+        Object.values(editorCommands).forEach(executor => executor(cmd, payload))
+    },
 
     setActiveMarks: (marks) => set({ activeMarks: marks }),
 
@@ -215,6 +238,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     setThemeMode: (mode) => set({ themeMode: mode }),
 
     setEditorFontSize: (size) => set({ editorFontSize: Math.max(10, Math.min(32, size)) }),
+
+    setSpellcheck: (enable) => set({ spellcheck: enable }),
+
+    setWatermark: (enable) => set({ watermark: enable }),
 
     saveActiveTab: async () => {
         const tab = get().getActiveTab()

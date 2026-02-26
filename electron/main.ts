@@ -22,6 +22,7 @@ function createWindow(): void {
         height: 800,
         minWidth: 600,
         minHeight: 400,
+        icon: join(__dirname, '../../resources/icon.png'),
         frame: false, // 无边框窗口，使用自定义标题栏
         titleBarStyle: 'hidden',
         backgroundColor: '#1e1e2e',

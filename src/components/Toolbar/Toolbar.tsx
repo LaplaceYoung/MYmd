@@ -12,7 +12,7 @@ import './Toolbar.css'
 export function Toolbar() {
     const viewMode = useEditorStore(s => s.viewMode)
     const setViewMode = useEditorStore(s => s.setViewMode)
-    const editorCommand = useEditorStore(s => s.editorCommand)
+    const executeCommand = useEditorStore(s => s.executeCommand)
     const [showHeadingMenu, setShowHeadingMenu] = useState(false)
     const headingRef = useRef<HTMLDivElement>(null)
 
@@ -28,7 +28,7 @@ export function Toolbar() {
     }, [])
 
     const exec = (cmd: string, payload?: unknown) => {
-        editorCommand?.(cmd, payload)
+        executeCommand(cmd, payload)
     }
 
     return (

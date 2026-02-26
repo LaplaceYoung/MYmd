@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Minus, Square, X, Copy, Search, Save, Undo, Redo, User } from 'lucide-react'
 import logoSrc from '@/assets/logo.svg'
+import { TopSearchMenu } from './TopSearchMenu'
 import { useEditorStore } from '@/stores/editorStore'
 import './TitleBar.css'
 
@@ -44,8 +45,8 @@ export function TitleBar() {
 
     const activeTabId = useEditorStore(s => s.activeTabId)
     const tabs = useEditorStore(s => s.tabs)
-    const editorCommand = useEditorStore(s => s.editorCommand)
     const saveActiveTab = useEditorStore(s => s.saveActiveTab)
+    const executeCommand = useEditorStore(s => s.executeCommand)
     const requestCloseWindow = useEditorStore(s => s.requestCloseWindow)
 
     const activeTab = tabs.find(t => t.id === activeTabId)
@@ -58,12 +59,12 @@ export function TitleBar() {
 
     // 撤销
     const handleUndo = () => {
-        editorCommand?.('undo')
+        executeCommand('undo')
     }
 
     // 恢复
     const handleRedo = () => {
-        editorCommand?.('redo')
+        executeCommand('redo')
     }
 
     return (
@@ -88,8 +89,7 @@ export function TitleBar() {
 
             <div className="titlebar__center">
                 <div className="titlebar__search">
-                    <Search size={14} />
-                    <span>搜索 (Alt+Q)</span>
+                    <TopSearchMenu />
                 </div>
             </div>
 

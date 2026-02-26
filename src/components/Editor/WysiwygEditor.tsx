@@ -56,8 +56,10 @@ export function WysiwygEditor({ tabId, content, onCommandRef }: WysiwygEditorPro
     const containerRef = useRef<HTMLDivElement>(null)
     const editorRef = useRef<Editor | null>(null)
     const updateContent = useEditorStore(s => s.updateContent)
-    const setEditorCommand = useEditorStore(s => s.setEditorCommand)
+    const registerCommand = useEditorStore(s => s.registerCommand)
+    const unregisterCommand = useEditorStore(s => s.unregisterCommand)
     const setActiveMarks = useEditorStore(s => s.setActiveMarks)
+    const spellcheck = useEditorStore(s => s.spellcheck)
     // 追踪编辑器自身产生的最新 markdown，避免反向同步引起闪烁
     const lastEditorMarkdownRef = useRef(content)
     const isUpdatingRef = useRef(false)
@@ -343,6 +345,21 @@ export function WysiwygEditor({ tabId, content, onCommandRef }: WysiwygEditorPro
                     break
                 }
 
+                // 插入纯文本（用于 TOC 等）
+                case 'insertText': {
+                    editor.action(ctx => {
+                        const view = ctx.get(editorViewCtx)
+                        const { state, dispatch } = view
+                        const text = payload as string
+                        if (text) {
+                            const tr = state.tr.insertText(text, state.selection.from)
+                            dispatch(tr)
+                            view.focus()
+                        }
+                    })
+                    break
+                }
+
                 default:
                     editor.action(ctx => {
                         const view = ctx.get(editorViewCtx)
@@ -358,22 +375,24 @@ export function WysiwygEditor({ tabId, content, onCommandRef }: WysiwygEditorPro
         }
     }, [detectActiveMarks])
 
-    // 将命令执行器注册到 ref 和全局 store
     useEffect(() => {
         if (onCommandRef) {
             onCommandRef.current = executeCommand
         }
-        setEditorCommand(executeCommand)
+
+        const cmdId = `wysiwyg-${tabId}`
+        registerCommand(cmdId, executeCommand)
 
         return () => {
-            setEditorCommand(null)
+            unregisterCommand(cmdId)
         }
-    }, [executeCommand, onCommandRef, setEditorCommand])
+    }, [executeCommand, onCommandRef, registerCommand, unregisterCommand, tabId])
 
     return (
         <div
             ref={containerRef}
             className="editor-wysiwyg selectable"
+            spellCheck={spellcheck}
         />
     )
 }

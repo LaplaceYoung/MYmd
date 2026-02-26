@@ -54,7 +54,7 @@ export function Ribbon() {
     const [activeTab, setActiveTab] = useState('home')
     const viewMode = useEditorStore(s => s.viewMode)
     const setViewMode = useEditorStore(s => s.setViewMode)
-    const editorCommand = useEditorStore(s => s.editorCommand)
+    const executeCommand = useEditorStore(s => s.executeCommand)
     const saveActiveTab = useEditorStore(s => s.saveActiveTab)
     const addTab = useEditorStore(s => s.addTab)
     const activeMarks = useEditorStore(s => s.activeMarks)
@@ -78,8 +78,8 @@ export function Ribbon() {
 
     // 编辑器命令快捷调用
     const exec = useCallback((cmd: string, payload?: unknown) => {
-        editorCommand?.(cmd, payload)
-    }, [editorCommand])
+        executeCommand(cmd, payload)
+    }, [executeCommand])
 
     // 文件操作
     const handleNewFile = useCallback(() => {

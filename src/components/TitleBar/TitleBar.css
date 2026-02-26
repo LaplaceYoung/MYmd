@@ -77,27 +77,135 @@
 .titlebar__search {
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 60%;
+    max-width: 500px;
+    -webkit-app-region: no-drag;
+}
+
+/* ===================================================
+   顶部全能搜索栏 & 下拉面板 (Word 风格)
+   =================================================== */
+
+.top-search-menu {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.top-search-menu__input-wrapper {
+    display: flex;
+    align-items: center;
     gap: var(--space-2);
     background: rgba(255, 255, 255, 0.2);
     border-radius: var(--radius-sm);
     padding: 0 var(--space-4);
     height: 32px;
-    width: 400px;
-    max-width: 50vw;
-    font-size: 13px;
+    width: 100%;
     color: var(--accent-text);
-    -webkit-app-region: no-drag;
-    cursor: text;
     transition: background var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.titlebar__search:hover {
-    background: rgba(255, 255, 255, 0.3);
+.top-search-menu__input-wrapper:hover,
+.top-search-menu.is-focused .top-search-menu__input-wrapper {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-main);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.titlebar__search svg {
+.top-search-menu__input-wrapper:hover .top-search-menu__icon,
+.top-search-menu.is-focused .top-search-menu__icon {
+    color: var(--text-main);
+    opacity: 0.6;
+}
+
+.top-search-menu__icon {
     opacity: 0.8;
 }
+
+.top-search-menu__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.top-search-menu.is-focused .top-search-menu__input {
+    color: var(--text-main, #333);
+}
+
+.top-search-menu__input::placeholder {
+    color: inherit;
+    opacity: 0.7;
+}
+
+.top-search-menu.is-focused .top-search-menu__input::placeholder {
+    color: var(--text-muted, #767676);
+}
+
+.top-search-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    width: 100%;
+    background-color: var(--bg-main, #f3f3f3);
+    /* 灰色基调类似 office */
+    border: 1px solid var(--border-light, #d2d2d2);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    padding: 8px 0;
+    z-index: 9999;
+    color: var(--text-main, #333);
+}
+
+.top-search-dropdown__section {
+    padding: 4px 0;
+}
+
+.top-search-dropdown__section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted, #767676);
+    padding: 4px 12px;
+    margin-bottom: 2px;
+}
+
+.top-search-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    gap: 12px;
+    color: var(--text-main);
+}
+
+.top-search-item:hover {
+    background-color: var(--bg-hover, #e5e5e5);
+}
+
+.top-search-item__text {
+    flex: 1;
+}
+
+.top-search-item__arrow {
+    opacity: 0.5;
+}
+
+.top-search-item__icon-placeholder {
+    width: 16px;
+    height: 16px;
+}
+
+.top-search-dropdown__divider {
+    height: 1px;
+    background-color: var(--border-light, #d2d2d2);
+    margin: 4px 0;
+}
+
 
 .titlebar__right {
     display: flex;

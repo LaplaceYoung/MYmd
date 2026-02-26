@@ -25,6 +25,7 @@ export function EditorContainer() {
     const viewMode = useEditorStore(s => s.viewMode)
     const zoom = useEditorStore(s => s.zoom)
     const recentFiles = useEditorStore(s => s.recentFiles)
+    const watermark = useEditorStore(s => s.watermark)
     const commandRef = useRef<((cmd: string, payload?: unknown) => void) | null>(null)
 
     // 欢迎页侧栏状态
@@ -260,7 +261,7 @@ export function EditorContainer() {
     }
 
     return (
-        <div className="editor-container">
+        <div className={`editor-container ${watermark ? 'has-watermark' : ''}`}>
             <SearchBar />
             <InsertDialog />
             {viewMode === 'wysiwyg' ? (

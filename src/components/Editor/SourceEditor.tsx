@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
-import CodeMirror from '@uiw/react-codemirror'
+import { useEffect, useState, useRef, useCallback } from 'react'
+import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror'
+import { SearchQuery, setSearchQuery, findNext, findPrevious, replaceNext, replaceAll } from '@codemirror/search'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
 import { useEditorStore } from '@/stores/editorStore'
@@ -30,8 +31,57 @@ function useIsDark() {
 
 export function SourceEditor({ tabId, content }: SourceEditorProps) {
     const updateContent = useEditorStore(s => s.updateContent)
+    const registerCommand = useEditorStore(s => s.registerCommand)
+    const unregisterCommand = useEditorStore(s => s.unregisterCommand)
+
     const [val, setVal] = useState(content)
     const isDark = useIsDark()
+    const editorRef = useRef<ReactCodeMirrorRef>(null)
+
+    const executeCommand = useCallback((cmd: string, payload?: unknown) => {
+        const view = editorRef.current?.view;
+        if (!view) return;
+
+        switch (cmd) {
+            case 'search': {
+                const queryStr = payload as string;
+                view.dispatch({
+                    effects: setSearchQuery.of(new SearchQuery({ search: queryStr }))
+                });
+                break;
+            }
+            case 'searchNext': {
+                findNext(view);
+                break;
+            }
+            case 'searchPrev': {
+                findPrevious(view);
+                break;
+            }
+            case 'replace': {
+                const { search: q, replace: r } = payload as { search: string, replace: string }
+                view.dispatch({
+                    effects: setSearchQuery.of(new SearchQuery({ search: q, replace: r }))
+                });
+                replaceNext(view);
+                break;
+            }
+            case 'replaceAll': {
+                const { search: q, replace: r } = payload as { search: string, replace: string }
+                view.dispatch({
+                    effects: setSearchQuery.of(new SearchQuery({ search: q, replace: r }))
+                });
+                replaceAll(view);
+                break;
+            }
+        }
+    }, [])
+
+    useEffect(() => {
+        const cmdId = `source-${tabId}`
+        registerCommand(cmdId, executeCommand)
+        return () => unregisterCommand(cmdId)
+    }, [executeCommand, registerCommand, unregisterCommand, tabId])
 
     useEffect(() => {
         setVal(content)
@@ -44,6 +94,7 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
 
     return (
         <CodeMirror
+            ref={editorRef}
             value={val}
             height="100%"
             style={{
@@ -75,7 +126,7 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
                 highlightSelectionMatches: true,
                 closeBracketsKeymap: true,
                 defaultKeymap: true,
-                searchKeymap: true,
+                searchKeymap: false,
                 historyKeymap: true,
                 foldKeymap: true,
                 completionKeymap: true,

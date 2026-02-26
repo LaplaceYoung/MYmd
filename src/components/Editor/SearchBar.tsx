@@ -7,7 +7,7 @@ import './SearchBar.css'
 export function SearchBar() {
     const searchVisible = useEditorStore(s => s.searchVisible)
     const setSearchVisible = useEditorStore(s => s.setSearchVisible)
-    const editorCommand = useEditorStore(s => s.editorCommand)
+    const executeCommand = useEditorStore(s => s.executeCommand)
 
     const [query, setQuery] = useState('')
     const [replaceText, setReplaceText] = useState('')
@@ -31,14 +31,11 @@ export function SearchBar() {
     // 键盘快捷键
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            const isCodeMirrorTarget = (e.target as Element)?.closest?.('.cm-editor') !== null;
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
-                if (isCodeMirrorTarget) return; // 让 CodeMirror 原生处理
                 e.preventDefault()
                 setSearchVisible(true)
             }
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'h') {
-                if (isCodeMirrorTarget) return; // 让 CodeMirror 原生处理
                 e.preventDefault()
                 setSearchVisible(true)
                 setShowReplace(true)
@@ -58,8 +55,8 @@ export function SearchBar() {
             setCurrentMatch(0)
             return
         }
-        editorCommand?.('search', searchText)
-    }, [editorCommand])
+        executeCommand('search', searchText)
+    }, [executeCommand])
 
     const handleQueryChange = (value: string) => {
         setQuery(value)
@@ -67,21 +64,21 @@ export function SearchBar() {
     }
 
     const handleNext = () => {
-        editorCommand?.('searchNext')
+        executeCommand('searchNext')
         setCurrentMatch(c => Math.min(c + 1, matchCount))
     }
 
     const handlePrev = () => {
-        editorCommand?.('searchPrev')
+        executeCommand('searchPrev')
         setCurrentMatch(c => Math.max(c - 1, 1))
     }
 
     const handleReplace = () => {
-        editorCommand?.('replace', { search: query, replace: replaceText })
+        executeCommand('replace', { search: query, replace: replaceText })
     }
 
     const handleReplaceAll = () => {
-        editorCommand?.('replaceAll', { search: query, replace: replaceText })
+        executeCommand('replaceAll', { search: query, replace: replaceText })
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {

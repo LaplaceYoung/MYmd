@@ -10,7 +10,7 @@ const isElectron = typeof window !== 'undefined' && window.api !== undefined
 export function InsertDialog() {
     const dialogType = useEditorStore(s => s.insertDialog)
     const setInsertDialog = useEditorStore(s => s.setInsertDialog)
-    const editorCommand = useEditorStore(s => s.editorCommand)
+    const executeCommand = useEditorStore(s => s.executeCommand)
 
     const [url, setUrl] = useState('')
     const [text, setText] = useState('')
@@ -65,25 +65,25 @@ export function InsertDialog() {
                     const result = await window.api.file.insertImage(mdFilePath, localFile)
                     if (result.success && result.absoluteUrl) {
                         // 使用 local-file 协议 URL 以便渲染进程可以预览
-                        editorCommand?.('insertImage', { src: result.absoluteUrl, alt: text || '' })
+                        executeCommand('insertImage', { src: result.absoluteUrl, alt: text || '' })
                     }
                 } else {
                     // 文件未保存或非 Electron 环境，用 local-file 协议包装绝对路径
                     const src = isElectron
                         ? 'local-file:///' + localFile.replace(/\\/g, '/')
                         : localFile
-                    editorCommand?.('insertImage', { src, alt: text || '' })
+                    executeCommand('insertImage', { src, alt: text || '' })
                 }
             } else if (url.trim()) {
                 // URL 模式
-                editorCommand?.('insertImage', { src: url, alt: text || '' })
+                executeCommand('insertImage', { src: url, alt: text || '' })
             } else {
                 return
             }
         } else {
             // 链接模式
             if (!url.trim()) return
-            editorCommand?.('insertLink', { href: url, text: text || url })
+            executeCommand('insertLink', { href: url, text: text || url })
         }
         setInsertDialog(null)
     }

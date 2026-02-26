@@ -651,6 +651,7 @@
         transform: scaleX(1);
     }
 }
+
 /* ===================================================
    搜索匹配高亮
    =================================================== */
@@ -658,7 +659,58 @@
     background-color: rgba(255, 204, 0, 0.4);
     border-radius: 2px;
 }
+
 .search-match-selected {
     background-color: rgba(255, 150, 0, 0.6);
     outline: 1px solid rgba(255, 100, 0, 0.8);
+}
+
+/* ===================================================
+   应用印花 / 水印样式
+   =================================================== */
+.editor-container.has-watermark {
+    position: relative;
+    /* 由于内部编辑器都是 position static/relative ，伪元素可以盖住或垫底 */
+}
+
+.editor-container.has-watermark::before {
+    content: 'MYmd 高级正版授权';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 80px;
+    font-weight: 900;
+    color: rgba(120, 120, 120, 0.08);
+    /* 轻微的不透明度 */
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* ===================================================
+   数学公式交互修复
+   =================================================== */
+.editor-wysiwyg .milkdown .math-inline,
+.editor-wysiwyg .milkdown .math-block {
+    cursor: text;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-fast);
+}
+
+.editor-wysiwyg .milkdown .math-inline:hover,
+.editor-wysiwyg .milkdown .math-block:hover {
+    background-color: var(--bg-hover);
+}
+
+.editor-wysiwyg .milkdown .math-inline>.katex,
+.editor-wysiwyg .milkdown .math-block>.katex-display,
+.editor-wysiwyg .milkdown .math-block>.katex {
+    pointer-events: none;
+}
+
+.editor-wysiwyg .milkdown .math-inline.ProseMirror-selectednode,
+.editor-wysiwyg .milkdown .math-block.ProseMirror-selectednode {
+    outline: 2px solid var(--accent);
+    background-color: var(--bg-hover);
 }
