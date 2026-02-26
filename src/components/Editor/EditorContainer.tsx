@@ -31,6 +31,13 @@ export function EditorContainer() {
     // 欢迎页侧栏状态
     const [welcomeView, setWelcomeView] = useState<WelcomeView>('home')
 
+    // 分屏拖拽与同步相关
+    const [splitRatio, setSplitRatio] = useState(50) // 左右比例 (0-100)
+    const isDraggingRef = useRef(false)
+    const splitContainerRef = useRef<HTMLDivElement>(null)
+    const isSyncingLeftRef = useRef(false)
+    const isSyncingRightRef = useRef(false)
+
     // 处理文件打开
     const handleOpenFile = useCallback(async () => {
         if (!isElectron) {
@@ -79,6 +86,98 @@ export function EditorContainer() {
         })
         return () => { unsubscribe() }
     }, [addTab])
+
+    // 处理分屏拖拽
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isDraggingRef.current || !splitContainerRef.current) return
+            const containerRect = splitContainerRef.current.getBoundingClientRect()
+            const newRatio = ((e.clientX - containerRect.left) / containerRect.width) * 100
+            // 限制比例在 20% 到 80% 之间
+            setSplitRatio(Math.min(Math.max(newRatio, 20), 80))
+        }
+
+        const handleMouseUp = () => {
+            isDraggingRef.current = false
+            document.body.style.cursor = 'default'
+        }
+
+        window.addEventListener('mousemove', handleMouseMove)
+        window.addEventListener('mouseup', handleMouseUp)
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove)
+            window.removeEventListener('mouseup', handleMouseUp)
+        }
+    }, [])
+
+    // 处理双边同步滚动与点击点击同步
+    useEffect(() => {
+        if (viewMode !== 'split' || !splitContainerRef.current) return
+
+        let animFrameId: number
+
+        const syncScroll = () => {
+            const sourceEl = splitContainerRef.current?.querySelector('.cm-scroller') as HTMLElement
+            const previewEl = splitContainerRef.current?.querySelector('.editor-split__preview') as HTMLElement
+            if (!sourceEl || !previewEl) return
+
+            const onSourceScroll = () => {
+                if (isSyncingRightRef.current) return
+                isSyncingLeftRef.current = true
+
+                // 采用等比例滚动
+                const percentage = sourceEl.scrollTop / (sourceEl.scrollHeight - sourceEl.clientHeight)
+                if (!isNaN(percentage)) {
+                    previewEl.scrollTop = percentage * (previewEl.scrollHeight - previewEl.clientHeight)
+                }
+
+                cancelAnimationFrame(animFrameId)
+                animFrameId = requestAnimationFrame(() => {
+                    isSyncingLeftRef.current = false
+                })
+            }
+
+            const onPreviewScroll = () => {
+                if (isSyncingLeftRef.current) return
+                isSyncingRightRef.current = true
+
+                const percentage = previewEl.scrollTop / (previewEl.scrollHeight - previewEl.clientHeight)
+                if (!isNaN(percentage)) {
+                    sourceEl.scrollTop = percentage * (sourceEl.scrollHeight - sourceEl.clientHeight)
+                }
+
+                cancelAnimationFrame(animFrameId)
+                animFrameId = requestAnimationFrame(() => {
+                    isSyncingRightRef.current = false
+                })
+            }
+
+            const onContainerClick = () => {
+                // 点击后立刻触发一次全同步
+                if (document.activeElement?.closest('.cm-scroller')) {
+                    onSourceScroll()
+                } else if (document.activeElement?.closest('.editor-split__preview')) {
+                    onPreviewScroll()
+                }
+            }
+
+            sourceEl.addEventListener('scroll', onSourceScroll, { passive: true })
+            previewEl.addEventListener('scroll', onPreviewScroll, { passive: true })
+            splitContainerRef.current?.addEventListener('click', onContainerClick, { passive: true })
+
+            return () => {
+                sourceEl.removeEventListener('scroll', onSourceScroll)
+                previewEl.removeEventListener('scroll', onPreviewScroll)
+                splitContainerRef.current?.removeEventListener('click', onContainerClick)
+                cancelAnimationFrame(animFrameId)
+            }
+        }
+
+        // 短暂延迟确保子组件 (CodeMirror) 已经挂载 DOM
+        const timer = setTimeout(syncScroll, 100)
+        return () => clearTimeout(timer)
+    }, [viewMode, activeTabId])
 
     // 快捷键处理
     useEffect(() => {
@@ -274,18 +373,25 @@ export function EditorContainer() {
                     />
                 </div>
             ) : (
-                <div className="editor-split">
-                    <div className="editor-split__source">
+                <div className="editor-split" ref={splitContainerRef}>
+                    <div className="editor-split__source" style={{ flex: splitRatio }}>
                         <SourceEditor
-                            key={`source - ${activeTab.id} `}
+                            key={`source-${activeTab.id}`}
                             tabId={activeTab.id}
                             content={activeTab.content}
                         />
                     </div>
-                    <div className="editor-split__divider" />
-                    <div className="editor-split__preview editor-workspace" style={zoomStyle}>
+                    <div
+                        className="editor-split__divider"
+                        onMouseDown={(e) => {
+                            e.preventDefault()
+                            isDraggingRef.current = true
+                            document.body.style.cursor = 'col-resize'
+                        }}
+                    />
+                    <div className="editor-split__preview editor-workspace" style={{ ...zoomStyle, flex: 100 - splitRatio }}>
                         <WysiwygEditor
-                            key={`preview - ${activeTab.id} `}
+                            key={`preview-${activeTab.id}`}
                             tabId={activeTab.id}
                             content={activeTab.content}
                             onCommandRef={commandRef}
