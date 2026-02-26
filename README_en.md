@@ -1,6 +1,18 @@
-# MYmd
+<div align="center">
+  <img src="src/assets/logo.svg" height="120" alt="MYmd Logo" />
+  <h1>MYmd</h1>
+  <p>A lightweight Markdown desktop reader and editor</p>
 
-[阅读中文版](README.md)
+  <p>
+    <a href="https://github.com/LaplaceYoung/MYmd/releases"><img src="https://img.shields.io/github/v/release/LaplaceYoung/MYmd?color=blue&style=flat-square" alt="Release"></a>
+    <a href="https://github.com/LaplaceYoung/MYmd/stargazers"><img src="https://img.shields.io/github/stars/LaplaceYoung/MYmd?style=flat-square" alt="Stars"></a>
+    <a href="https://github.com/LaplaceYoung/MYmd/blob/main/LICENSE"><img src="https://img.shields.io/github/license/LaplaceYoung/MYmd?color=green&style=flat-square" alt="License"></a>
+  </p>
+</div>
+
+<br/>
+
+[Read in English](README_en.md) | [阅读中文版](README.md)
 
 MYmd is a lightweight Markdown desktop reader and editor built with Electron, React, and Vite. It provides a fluid WYSIWYG experience and a powerful source-split mode, designed for elegant and focused writing and reading.
 

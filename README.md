@@ -1,6 +1,18 @@
-# MYmd
+<div align="center">
+  <img src="src/assets/logo.svg" height="120" alt="MYmd Logo" />
+  <h1>MYmd</h1>
+  <p>轻量级 Markdown 桌面阅读与编辑器</p>
 
-[Read in English](README_en.md)
+  <p>
+    <a href="https://github.com/LaplaceYoung/MYmd/releases"><img src="https://img.shields.io/github/v/release/LaplaceYoung/MYmd?color=blue&style=flat-square" alt="Release"></a>
+    <a href="https://github.com/LaplaceYoung/MYmd/stargazers"><img src="https://img.shields.io/github/stars/LaplaceYoung/MYmd?style=flat-square" alt="Stars"></a>
+    <a href="https://github.com/LaplaceYoung/MYmd/blob/main/LICENSE"><img src="https://img.shields.io/github/license/LaplaceYoung/MYmd?color=green&style=flat-square" alt="License"></a>
+  </p>
+</div>
+
+<br/>
+
+[Read in English](README_en.md) | [阅读中文版](README.md)
 
 MYmd 是一款基于 Electron、React 和 Vite 构建的轻量级 Markdown 桌面阅读与编辑器。它提供了流畅的所见即所得体验和强大的源码分离模式，专为优雅、专注的写作和阅读而设计。
 
