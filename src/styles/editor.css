@@ -666,6 +666,28 @@
 }
 
 /* ===================================================
+   关联同步闪烁动画
+   =================================================== */
+@keyframes syncFlash {
+    0% {
+        background-color: transparent;
+    }
+
+    15% {
+        background-color: rgba(255, 204, 0, 0.6);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+.sync-flash {
+    animation: syncFlash 1.5s ease-out;
+    border-radius: var(--radius-sm);
+}
+
+/* ===================================================
    应用印花 / 水印样式
    =================================================== */
 .editor-container.has-watermark {

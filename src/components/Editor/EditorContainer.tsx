@@ -153,10 +153,41 @@ export function EditorContainer() {
                 })
             }
 
-            const onContainerClick = () => {
+            const onContainerClick = (e: MouseEvent) => {
                 // 点击后立刻触发一次全同步
                 if (document.activeElement?.closest('.cm-scroller')) {
                     onSourceScroll()
+
+                    // 同步亮闪逻辑：计算源码侧点击比例，找右侧最贴合的块级元素
+                    const sourceRect = sourceEl.getBoundingClientRect()
+                    const clickY = e.clientY - sourceRect.top + sourceEl.scrollTop
+                    const ratio = clickY / sourceEl.scrollHeight
+                    const targetY = ratio * previewEl.scrollHeight
+
+                    const editorContainer = previewEl.querySelector('.editor') as HTMLElement
+                    if (editorContainer) {
+                        const children = Array.from(editorContainer.children) as HTMLElement[]
+                        let targetBlock = children[0]
+                        let minDiff = Infinity
+
+                        for (const child of children) {
+                            // 计算子节点的中点与 targetY 的差距
+                            const childCenter = child.offsetTop + child.offsetHeight / 2
+                            const diff = Math.abs(childCenter - targetY)
+                            if (diff < minDiff) {
+                                minDiff = diff
+                                targetBlock = child
+                            }
+                        }
+
+                        if (targetBlock) {
+                            // 移除旧类以方便重新触发动画
+                            targetBlock.classList.remove('sync-flash')
+                            // 强制 Reflow
+                            void targetBlock.offsetWidth
+                            targetBlock.classList.add('sync-flash')
+                        }
+                    }
                 } else if (document.activeElement?.closest('.editor-split__preview')) {
                     onPreviewScroll()
                 }
