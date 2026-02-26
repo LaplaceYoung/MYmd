@@ -23,7 +23,7 @@
     "katex": "^0.16.33",
     "lucide-react": "^0.474.0",
     "mdast-util-math": "^3.0.0",
-    "mermaid": "^11.12.3",
+    "mermaid": "^10.9.0",
     "postcss-import": "^16.1.1",
     "prism-themes": "^1.9.0",
     "prosemirror-search": "^1.1.0",
@@ -33,6 +33,7 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",

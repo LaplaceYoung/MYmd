@@ -14,6 +14,7 @@ import { prism } from '@milkdown/plugin-prism'
 import { search as prosemirrorSearchPlugin, SearchQuery, setSearchState, findNext, findPrev, replaceNext, replaceAll as pmReplaceAll } from 'prosemirror-search'
 import { createSyntaxHintPlugin } from './plugins/syntaxHintPlugin'
 import { mathEditPlugin } from './plugins/mathEditPlugin'
+import { diagramViewPlugin } from './plugins/diagramPlugin'
 
 // commonmark 命令
 import {
@@ -51,9 +52,11 @@ interface WysiwygEditorProps {
     tabId: string
     content: string
     onCommandRef?: React.MutableRefObject<((cmd: string, payload?: unknown) => void) | null>
+    /** 只读模式（分屏预览侧使用） */
+    readOnly?: boolean
 }
 
-export function WysiwygEditor({ tabId, content, onCommandRef }: WysiwygEditorProps) {
+export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }: WysiwygEditorProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const editorRef = useRef<Editor | null>(null)
     const updateContent = useEditorStore(s => s.updateContent)
@@ -111,6 +114,12 @@ export function WysiwygEditor({ tabId, content, onCommandRef }: WysiwygEditorPro
             editor = await Editor.make()
                 .config(ctx => {
                     ctx.set(rootCtx, containerRef.current!)
+
+                    // 只读模式下禁用编辑
+                    if (readOnly) {
+                        // Milkdown 通过 ProseMirror editable 属性控制
+                        // 在 editor 创建后设置
+                    }
                     ctx.set(defaultValueCtx, content)
 
                     // 设置内容变更监听
@@ -131,6 +140,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef }: WysiwygEditorPro
                 .use(trailing)
                 .use(math)
                 .use(diagram)
+                .use(diagramViewPlugin)
                 .use(prism)
                 .use(mathEditPlugin)
                 .create()
@@ -148,10 +158,17 @@ export function WysiwygEditor({ tabId, content, onCommandRef }: WysiwygEditorPro
                     })
                     view.updateState(newState)
 
-                    // 监听选区变化以更新活跃 marks
-                    const dom = view.dom
-                    dom.addEventListener('mouseup', () => detectActiveMarks(editor!))
-                    dom.addEventListener('keyup', () => detectActiveMarks(editor!))
+                    // 只读模式：禁用编辑
+                    if (readOnly) {
+                        view.setProps({ editable: () => false })
+                    }
+
+                    // 监听选区变化以更新活跃 marks（仅非只读模式）
+                    if (!readOnly) {
+                        const dom = view.dom
+                        dom.addEventListener('mouseup', () => detectActiveMarks(editor!))
+                        dom.addEventListener('keyup', () => detectActiveMarks(editor!))
+                    }
                 })
             }
         }
@@ -378,6 +395,9 @@ export function WysiwygEditor({ tabId, content, onCommandRef }: WysiwygEditorPro
     }, [detectActiveMarks])
 
     useEffect(() => {
+        // 只读模式下不注册命令处理器
+        if (readOnly) return
+
         if (onCommandRef) {
             onCommandRef.current = executeCommand
         }
@@ -388,13 +408,15 @@ export function WysiwygEditor({ tabId, content, onCommandRef }: WysiwygEditorPro
         return () => {
             unregisterCommand(cmdId)
         }
-    }, [executeCommand, onCommandRef, registerCommand, unregisterCommand, tabId])
+    }, [executeCommand, onCommandRef, registerCommand, unregisterCommand, tabId, readOnly])
 
     return (
-        <div
-            ref={containerRef}
-            className="editor-wysiwyg selectable"
-            spellCheck={spellcheck}
-        />
+        <>
+            <div
+                ref={containerRef}
+                className={`editor-wysiwyg selectable${readOnly ? ' editor-wysiwyg--readonly' : ''}`}
+                spellCheck={readOnly ? false : spellcheck}
+            />
+        </>
     )
 }

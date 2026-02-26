@@ -25,9 +25,18 @@
     flex: 1;
     overflow-y: auto;
     background: var(--bg-hover);
+    /* padding 移出，由内部缩放容器处理 */
+}
+
+.editor-zoom-container {
     padding: var(--space-8) 0;
     transition: transform 150ms ease-out;
+    transform-origin: top center;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
 }
+
 
 /* 核心编辑“纸张” — 高度由内容擑开，不设任何高度限制 */
 .editor-wysiwyg {
@@ -711,23 +720,28 @@
 }
 
 /* ===================================================
-   数学公式交互修复
+   数学公式交互修复 (NodeView)
    =================================================== */
 .editor-wysiwyg .milkdown .math-inline,
 .editor-wysiwyg .milkdown .math-block {
     cursor: text;
     border-radius: var(--radius-sm);
-    transition: background-color var(--transition-fast);
+    transition: all var(--transition-fast);
+}
+
+.editor-wysiwyg .milkdown .math-block {
+    display: block;
+    padding: var(--space-1) 0;
 }
 
 .editor-wysiwyg .milkdown .math-inline:hover,
 .editor-wysiwyg .milkdown .math-block:hover {
     background-color: var(--bg-hover);
+    box-shadow: 0 0 0 2px var(--bg-hover);
 }
 
-.editor-wysiwyg .milkdown .math-inline>.katex,
-.editor-wysiwyg .milkdown .math-block>.katex-display,
-.editor-wysiwyg .milkdown .math-block>.katex {
+.editor-wysiwyg .milkdown .math-inline>.math-preview,
+.editor-wysiwyg .milkdown .math-block>.math-preview {
     pointer-events: none;
 }
 
@@ -735,4 +749,77 @@
 .editor-wysiwyg .milkdown .math-block.ProseMirror-selectednode {
     outline: 2px solid var(--accent);
     background-color: var(--bg-hover);
+}
+
+.math-edit-input {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    padding: 2px 6px;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+}
+
+.math-edit-input--block {
+    display: block;
+    width: 100%;
+    resize: vertical;
+    padding: var(--space-3);
+    margin: var(--space-2) 0;
+}
+
+.math-empty {
+    color: var(--text-muted);
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* Mermaid 图表插件样式 */
+.mermaid-node-view {
+    margin: var(--space-4) 0;
+}
+
+.mermaid-preview {
+    cursor: pointer;
+    min-height: 40px;
+}
+
+.mermaid-edit-container {
+    width: 100%;
+}
+
+.mermaid-edit-input {
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    padding: var(--space-3);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+    resize: vertical;
+}
+
+.mermaid-empty:hover {
+    background-color: var(--bg-hover);
+}
+
+
+/* 只读模式外观增强 */
+.editor-wysiwyg--readonly {
+    background-color: var(--bg-surface);
+    cursor: default;
+}
+
+.editor-wysiwyg--readonly .milkdown .editor {
+    caret-color: transparent;
+}
+
+.editor-wysiwyg--readonly .milkdown .editor *:focus {
+    outline: none;
 }

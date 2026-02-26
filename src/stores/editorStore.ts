@@ -122,6 +122,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     editorFontSize: 16,
     spellcheck: false,
     watermark: false,
+    mathEdit: null,
     pendingCloseAction: null,
     pendingCloseTabId: null,
 

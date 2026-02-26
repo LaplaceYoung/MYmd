@@ -1,67 +1,179 @@
-import { Plugin, PluginKey } from '@milkdown/prose/state'
-import { editorViewCtx } from '@milkdown/kit/core'
-import type { MilkdownPlugin } from '@milkdown/ctx'
+import { Plugin } from '@milkdown/prose/state'
+import type { Node as ProseNode } from '@milkdown/prose/model'
+import type { EditorView, NodeView } from '@milkdown/prose/view'
 import { $prose } from '@milkdown/utils'
+import katex from 'katex'
 
-export const mathEditPluginKey = new PluginKey('math-edit-plugin')
+/**
+ * 核心设计：自定义的数学公式 NodeView
+ * 使得公式在未选中时显示为 KaTeX，在点击时就地“变身”为输入框（支持直写源码）。
+ * 失焦或回车（部分情况）时自动提交变更并恢复 KaTeX 预览。
+ */
+class MathNodeView implements NodeView {
+    dom: HTMLElement
+    private previewElement: HTMLElement
+    private inputElement: HTMLTextAreaElement | HTMLInputElement | null = null
+    private isEditing = false
 
-export const mathEditPlugin: MilkdownPlugin = $prose((ctx) => {
-    return new Plugin({
-        key: mathEditPluginKey,
-        props: {
-            handleClick(view, pos, event) {
-                const target = event.target as HTMLElement
-                // 寻找被点击的元素是否在数学公式渲染块内
-                const mathElement = target.closest('.math-inline, .math-block') as HTMLElement
-                if (!mathElement) return false
+    constructor(
+        public node: ProseNode,
+        public view: EditorView,
+        public getPos: () => number | undefined,
+        public displayMode: boolean
+    ) {
+        this.dom = document.createElement('span')
+        // 添加通用的包裹类和选区识别支持
+        this.dom.className = displayMode ? 'math-block' : 'math-inline'
 
-                try {
-                    // 由于 KaTeX 复杂的 DOM 结构，浏览器返回的 pos 经常不准
-                    // 优先通过真实点击坐标反求节点位置
-                    const posObj = view.posAtCoords({ left: event.clientX, top: event.clientY })
+        this.previewElement = document.createElement('span')
+        this.previewElement.className = 'math-preview'
+        this.dom.appendChild(this.previewElement)
 
-                    let targetPos = pos
-                    let node = view.state.doc.nodeAt(pos)
+        this.renderKaTeX()
 
-                    if (posObj) {
-                        // inside 通常指向原子节点本身所在位置
-                        const testPos = posObj.inside >= 0 ? posObj.inside : posObj.pos
-                        const testNode = view.state.doc.nodeAt(testPos)
+        // 只有未在编辑状态时点击，才转入编辑
+        this.dom.addEventListener('mousedown', (e) => {
+            if (!this.isEditing) {
+                e.preventDefault()
+                this.startEditing()
+            }
+        })
+    }
 
-                        if (testNode && (testNode.type.name === 'math_inline' || testNode.type.name === 'math_block')) {
-                            targetPos = testPos
-                            node = testNode
-                        } else {
-                            // 尝试回退一步：有时光标会落在其后的空隙
-                            const $pos = view.state.doc.resolve(posObj.pos)
-                            if ($pos.nodeBefore && ($pos.nodeBefore.type.name === 'math_inline' || $pos.nodeBefore.type.name === 'math_block')) {
-                                targetPos = posObj.pos - $pos.nodeBefore.nodeSize
-                                node = $pos.nodeBefore
-                            }
-                        }
-                    }
+    getValue() {
+        return this.displayMode ? (this.node.attrs.value || '') : (this.node.textContent || '')
+    }
 
-                    if (node && (node.type.name === 'math_inline' || node.type.name === 'math_block')) {
-                        event.preventDefault()
-                        const currentValue = node.attrs.value || ''
-                        const newValue = window.prompt('编辑数学公式 (LaTeX):', currentValue)
+    startEditing() {
+        if (this.isEditing) return
+        this.isEditing = true
+        this.previewElement.style.display = 'none'
 
-                        if (newValue !== null && newValue !== currentValue) {
-                            view.dispatch(
-                                view.state.tr.setNodeMarkup(targetPos, undefined, {
-                                    ...node.attrs,
-                                    value: newValue
-                                })
-                            )
-                        }
-                        return true // 阻止默认的选中行为
-                    }
-                } catch (e) {
-                    console.error('Failed to handle math edit click:', e)
+        // 根据行内/块级决定使用 input 还是 textarea
+        if (this.displayMode) {
+            this.inputElement = document.createElement('textarea')
+            this.inputElement.className = 'math-edit-input math-edit-input--block'
+                ; (this.inputElement as HTMLTextAreaElement).rows = Math.max(3, (this.getValue()).split('\n').length)
+        } else {
+            this.inputElement = document.createElement('input')
+            this.inputElement.type = 'text'
+            this.inputElement.className = 'math-edit-input math-edit-input--inline'
+        }
+
+        const input = this.inputElement
+        input.value = this.getValue()
+
+        // 阻止编辑器的默认按键捕获，允许内部正常输入
+        input.addEventListener('keydown', (e) => {
+            const kEvent = e as KeyboardEvent
+            kEvent.stopPropagation()
+            if (kEvent.key === 'Escape') {
+                kEvent.preventDefault()
+                this.stopEditing(false)
+            } else if (kEvent.key === 'Enter') {
+                // 行内公式回车直接确认；块级公式如果按了 ctrl/meta，也确认
+                if (!this.displayMode || kEvent.ctrlKey || kEvent.metaKey) {
+                    kEvent.preventDefault()
+                    this.stopEditing(true)
                 }
+            }
+        })
 
-                return false
+        // 失去焦点时自动确认
+        input.addEventListener('blur', () => this.stopEditing(true))
+
+        this.dom.appendChild(input)
+
+        // 选中文本
+        setTimeout(() => {
+            input.focus()
+            input.select()
+        }, 10)
+    }
+
+    stopEditing(save: boolean) {
+        if (!this.isEditing || !this.inputElement) return
+        this.isEditing = false
+
+        const newValue = this.inputElement.value
+        this.inputElement.remove()
+        this.inputElement = null
+        this.previewElement.style.display = ''
+
+        const pos = typeof this.getPos === 'function' ? this.getPos() : undefined
+
+        if (save && typeof pos === 'number' && newValue !== this.getValue()) {
+            // 调度更新 transaction
+            let tr = this.view.state.tr
+            if (this.displayMode) {
+                tr = tr.setNodeMarkup(pos, undefined, {
+                    ...this.node.attrs,
+                    value: newValue
+                })
+            } else {
+                const mathInlineType = this.view.state.schema.nodes.math_inline
+                const newTextNode = newValue ? this.view.state.schema.text(newValue) : null
+                const newNode = mathInlineType.create(null, newTextNode)
+                tr = tr.replaceWith(pos, pos + this.node.nodeSize, newNode)
+            }
+            // 通过 setSelection 使光标留在原处（或跳出块），防止页面跳动
+            this.view.dispatch(tr)
+        } else {
+            // 只需重新渲染
+            this.renderKaTeX()
+        }
+    }
+
+    renderKaTeX() {
+        const value = this.getValue()
+        if (!value.trim()) {
+            this.previewElement.innerHTML = this.displayMode
+                ? '<div class="math-empty">点击填写块级公式</div>'
+                : '<span class="math-empty">点击填写内联公式</span>'
+            return
+        }
+        try {
+            katex.render(value, this.previewElement, {
+                displayMode: this.displayMode,
+                throwOnError: false
+            })
+        } catch (e) {
+            this.previewElement.innerText = (e as Error).message
+        }
+    }
+
+    update(node: ProseNode) {
+        if (node.type.name !== this.node.type.name) return false
+        this.node = node
+        if (!this.isEditing) {
+            this.renderKaTeX()
+        }
+        return true
+    }
+
+    ignoreMutation() {
+        // 忽略 DOM 突变，使得内部 input 怎么折腾都不会触发 ProseMirror 同步重绘
+        return true
+    }
+
+    destroy() {
+        if (this.inputElement) {
+            this.inputElement.remove()
+        }
+    }
+}
+
+/**
+ * 拦截 Milkdown 的 NodeView 渲染，注入自定义交互式的数学视图
+ */
+export const mathEditPlugin = $prose(() => {
+    return new Plugin({
+        props: {
+            nodeViews: {
+                math_inline: (node, view, getPos) => new MathNodeView(node, view, getPos, false),
+                math_block: (node, view, getPos) => new MathNodeView(node, view, getPos, true)
             }
         }
     })
 })
+

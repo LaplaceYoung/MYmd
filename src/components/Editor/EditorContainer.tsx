@@ -87,19 +87,36 @@ export function EditorContainer() {
         return () => { unsubscribe() }
     }, [addTab])
 
-    // 处理分屏拖拽
+    // 缩放样式 - 应用于内容容器而非滚动容器
+    const zoomStyle = {
+        zoom: zoom / 100,
+    } as React.CSSProperties
+
+    // 处理拖拽分割线调整比例
     useEffect(() => {
+        if (viewMode !== 'split') return
+
         const handleMouseMove = (e: MouseEvent) => {
-            if (!isDraggingRef.current || !splitContainerRef.current) return
-            const containerRect = splitContainerRef.current.getBoundingClientRect()
-            const newRatio = ((e.clientX - containerRect.left) / containerRect.width) * 100
-            // 限制比例在 20% 到 80% 之间
-            setSplitRatio(Math.min(Math.max(newRatio, 20), 80))
+            if (!isDraggingRef.current) return
+            const container = splitContainerRef.current
+            if (!container) return
+
+            const rect = container.getBoundingClientRect()
+            const x = e.clientX - rect.left
+            const newRatio = (x / rect.width) * 100
+
+            if (newRatio > 20 && newRatio < 80) {
+                setSplitRatio(newRatio)
+            }
         }
 
         const handleMouseUp = () => {
-            isDraggingRef.current = false
-            document.body.style.cursor = 'default'
+            if (isDraggingRef.current) {
+                isDraggingRef.current = false
+                document.body.style.cursor = 'default'
+                // 强制重新渲染以移除 transition: none
+                setSplitRatio(r => r)
+            }
         }
 
         window.addEventListener('mousemove', handleMouseMove)
@@ -109,9 +126,9 @@ export function EditorContainer() {
             window.removeEventListener('mousemove', handleMouseMove)
             window.removeEventListener('mouseup', handleMouseUp)
         }
-    }, [])
+    }, [viewMode])
 
-    // 处理双边同步滚动与点击点击同步
+    // 处理双边同步滚动与点击同步
     useEffect(() => {
         if (viewMode !== 'split' || !splitContainerRef.current) return
 
@@ -123,13 +140,28 @@ export function EditorContainer() {
             if (!sourceEl || !previewEl) return
 
             const onSourceScroll = () => {
-                if (isSyncingRightRef.current) return
+                if (isSyncingRightRef.current || isDraggingRef.current) return
                 isSyncingLeftRef.current = true
 
-                // 采用等比例滚动
-                const percentage = sourceEl.scrollTop / (sourceEl.scrollHeight - sourceEl.clientHeight)
-                if (!isNaN(percentage)) {
-                    previewEl.scrollTop = percentage * (previewEl.scrollHeight - previewEl.clientHeight)
+                // 获取预览侧真实排版的高度信息
+                const editorNode = previewEl.querySelector('.editor') as HTMLElement
+
+                // 纸张顶边到预览视口顶边的距离（包含了 margin 和 padding 甚至 zoom 后的物理偏差）
+                let offsetTop = 0
+                if (editorNode) {
+                    const previewRect = previewEl.getBoundingClientRect()
+                    const editorRect = editorNode.getBoundingClientRect()
+                    // 因为使用了 CSS zoom，布局尺寸就是真实尺寸，直接计算物理偏移即可
+                    offsetTop = editorRect.top - previewRect.top + previewEl.scrollTop
+                }
+
+                const sourceScrollable = sourceEl.scrollHeight - sourceEl.clientHeight
+                const targetScrollable = previewEl.scrollHeight - previewEl.clientHeight
+
+                if (sourceScrollable > 0) {
+                    const percentage = sourceEl.scrollTop / sourceScrollable
+                    const availableScroll = targetScrollable - offsetTop
+                    previewEl.scrollTop = offsetTop + percentage * availableScroll
                 }
 
                 cancelAnimationFrame(animFrameId)
@@ -142,9 +174,26 @@ export function EditorContainer() {
                 if (isSyncingLeftRef.current) return
                 isSyncingRightRef.current = true
 
-                const percentage = previewEl.scrollTop / (previewEl.scrollHeight - previewEl.clientHeight)
-                if (!isNaN(percentage)) {
-                    sourceEl.scrollTop = percentage * (sourceEl.scrollHeight - sourceEl.clientHeight)
+                const editorNode = previewEl.querySelector('.editor') as HTMLElement
+                let offsetTop = 0
+                if (editorNode) {
+                    const previewRect = previewEl.getBoundingClientRect()
+                    const editorRect = editorNode.getBoundingClientRect()
+                    offsetTop = editorRect.top - previewRect.top + previewEl.scrollTop
+                }
+
+                const sourceScrollable = sourceEl.scrollHeight - sourceEl.clientHeight
+                const targetScrollable = previewEl.scrollHeight - previewEl.clientHeight
+
+                if (sourceScrollable > 0 && targetScrollable > 0) {
+                    const availableScroll = targetScrollable - offsetTop
+
+                    if (availableScroll > 0) {
+                        // 小于 offsetTop 说明在顶部 padding 内，视同 0%
+                        const calcScrollTop = Math.max(0, previewEl.scrollTop - offsetTop)
+                        const percentage = Math.min(1, Math.max(0, calcScrollTop / availableScroll))
+                        sourceEl.scrollTop = percentage * sourceScrollable
+                    }
                 }
 
                 cancelAnimationFrame(animFrameId)
@@ -158,10 +207,12 @@ export function EditorContainer() {
                 if (document.activeElement?.closest('.cm-scroller')) {
                     onSourceScroll()
 
-                    // 同步亮闪逻辑：计算源码侧点击比例，找右侧最贴合的块级元素
+                    // 同步亮闪逻辑：计算源码侧点击比例
                     const sourceRect = sourceEl.getBoundingClientRect()
                     const clickY = e.clientY - sourceRect.top + sourceEl.scrollTop
                     const ratio = clickY / sourceEl.scrollHeight
+
+                    // 预览侧目标位置直接使用比例
                     const targetY = ratio * previewEl.scrollHeight
 
                     const editorContainer = previewEl.querySelector('.editor') as HTMLElement
@@ -267,12 +318,8 @@ export function EditorContainer() {
         return `${days} 天前`
     }
 
-    // 缩放样式
-    const zoomStyle = {
-        transform: `scale(${zoom / 100})`,
-        transformOrigin: 'top center',
-        width: zoom !== 100 ? `${10000 / zoom}% ` : '100%',
-    }
+    // 缩放样式 - 应用于内容容器而非滚动容器
+
 
     // 无标签时显示欢迎页
     if (!activeTab) {
@@ -395,17 +442,25 @@ export function EditorContainer() {
             <SearchBar />
             <InsertDialog />
             {viewMode === 'wysiwyg' ? (
-                <div className="editor-workspace" style={zoomStyle}>
-                    <WysiwygEditor
-                        key={activeTab.id}
-                        tabId={activeTab.id}
-                        content={activeTab.content}
-                        onCommandRef={commandRef}
-                    />
+                <div className="editor-workspace">
+                    <div className="editor-zoom-container" style={zoomStyle}>
+                        <WysiwygEditor
+                            key={activeTab.id}
+                            tabId={activeTab.id}
+                            content={activeTab.content}
+                            onCommandRef={commandRef}
+                        />
+                    </div>
                 </div>
             ) : (
                 <div className="editor-split" ref={splitContainerRef}>
-                    <div className="editor-split__source" style={{ flex: splitRatio }}>
+                    <div
+                        className="editor-split__source"
+                        style={{
+                            flex: splitRatio,
+                            transition: isDraggingRef.current ? 'none' : undefined
+                        }}
+                    >
                         <SourceEditor
                             key={`source-${activeTab.id}`}
                             tabId={activeTab.id}
@@ -418,15 +473,25 @@ export function EditorContainer() {
                             e.preventDefault()
                             isDraggingRef.current = true
                             document.body.style.cursor = 'col-resize'
+                            // 强制重新渲染以应用 transition: none
+                            setSplitRatio(r => r)
                         }}
                     />
-                    <div className="editor-split__preview editor-workspace" style={{ ...zoomStyle, flex: 100 - splitRatio }}>
-                        <WysiwygEditor
-                            key={`preview-${activeTab.id}`}
-                            tabId={activeTab.id}
-                            content={activeTab.content}
-                            onCommandRef={commandRef}
-                        />
+                    <div
+                        className="editor-split__preview editor-workspace"
+                        style={{
+                            flex: 100 - splitRatio,
+                            transition: isDraggingRef.current ? 'none' : undefined
+                        }}
+                    >
+                        <div className="editor-zoom-container" style={zoomStyle}>
+                            <WysiwygEditor
+                                key={`preview-${activeTab.id}`}
+                                tabId={activeTab.id}
+                                content={activeTab.content}
+                                readOnly
+                            />
+                        </div>
                     </div>
                 </div>
             )}
