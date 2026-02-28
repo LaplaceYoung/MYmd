@@ -1,25 +1,44 @@
-# MYmd 版本说明 - v1.1.0 (2026-02-26)
+# MYmd v1.1.0 (Tauri Edition) - Release Notes
 
-## ✨ 新特性与增强 (New Features & Improvements)
+## 🚀 重大更新：全面转向 Tauri 架构
+本次更新标志着 MYmd 从 Electron 框架正式迁移至 **Tauri v2**。这一转变带来了本质上的性能提升与体积优化。
 
-### 1. 仿 Word 风格右键上下文菜单
-我们为 WYSIWYG 编辑器引入了全新的右键菜单，极大地提升了操作效率。
-- **分组操作**：菜单项按功能分为剪贴板、字符格式、段落样式、列表、插入和历史记录六大分组。
-- **快捷格式化**：选中文本后右键，可快速应用加粗、斜体、标题等常用样式，无需移步顶部工具栏。
-- **智能插入**：支持在光标位置快速插入链接、本地图片或分隔线。
-- **快捷键映射**：菜单项中贴心地标注了对应功能的快捷键，方便您快速形成肌肉记忆。
+### 🏗️ 架构升级
+- **核心引擎**：从臃肿的 Chromium 运行时转向原生 Webview 加 Rust 后端。
+- **性能飞跃**：启动速度提升约 50%，内存占用显著降低。
+- **体积减小**：安装包体积大幅缩减，运行更加轻量化。
 
-### 2. 精美的视觉体验 (Visual Excellence)
-- **Fluent Design 主题**：菜单采用亚克力（Acrylic）模糊效果，完美契合 Windows 现代设计风格。
-- **动态交互**：鼠标悬停菜单项时，图标会自动转换为品牌色，提供清晰的视觉反馈。
-- **智能边界处理**：菜单会自动识别屏幕边缘，避免在窗口底部或右侧被遮挡。
-- **全系主题适配**：在浅色和深色模式下均拥有出色的表现力。
+### 🎨 界面与交互 (UI/UX)
+- **沉浸式设计**：采用了全新的无边框（Frameless）设计，去除了系统原生标题栏，外观更现代、简洁。
+- **自定义标题栏**：全新实现的自定义标题栏，支持平滑拖拽与窗口控制（最小化、最大化、关闭）。
+- **图标更新**：更新了应用图标，视觉更加统一。
 
-## 🛠️ 构建与稳定性修复 (Build & Stability)
-
-- **打包流程优化**：修复了因图标文件损坏导致的 `.exe` 构建失败问题，现在支持一键生成全量安装包。
-- **版本管理**：正式升级应用版本至 1.1.0。
-- **依赖优化**：精简了生产环境构建体积，安装包体积进一步缩减。
+### 🛠️ 功能优化与修复
+- **更稳健的交互逻辑**：
+  - 彻底重构了**窗口关闭生命周期**。现在关闭窗口时会智能检查未保存的文档，并提供保存确认。
+  - 引入了 Rust 后端原生退出指令，确保应用在关闭时能彻底结束相关进程。
+- **事件处理**：修复了自定义按钮点击可能导致的页面刷新或冒泡问题。
 
 ---
-感谢您对 **MYmd** 的支持！我们会持续努力提供“像 Word 一样好用”的 Markdown 体验。
+
+## 🚀 Major Updates: Migrating to Tauri Architecture
+This release marks MYmd's official transition from Electron to **Tauri v2**. This change brings fundamental improvements in performance and size optimization.
+
+### 🏗️ Architecture Upgrade
+- **Core Engine**: Switched from the heavy Chromium runtime to a native Webview with a Rust backend.
+- **Performance**: ~50% faster startup and significantly lower memory footprint.
+- **Lightweight**: Drastically reduced installer and installed app size.
+
+### 🎨 UI & UX Enhancements
+- **Immersive Design**: New frameless window design for a modern, clean aesthetics.
+- **Custom TitleBar**: Programmatically handled dragging and window controls.
+- **Refined Assets**: Updated branding and icons.
+
+### 🛠️ Fixes & Improvements
+- **Robust Window Lifecycle**: 
+  - Completely refactored the close flow to correctly handle unsaved changes with sequential confirmations.
+  - Native Rust-based application termination for a cleaner exit.
+- **Event Management**: Fixed bubbling issues that previously caused navigation resets on click.
+
+---
+**Enjoying MYmd?** Star us on GitHub: [LaplaceYoung/MYmd](https://github.com/LaplaceYoung/MYmd)

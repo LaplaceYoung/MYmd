@@ -14,3 +14,8 @@ build
 .env
 .env.*
 !.env.example
+
+# Agent & AI tools
+.agent
+.claude
+.gemini
