@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { Editor, rootCtx, defaultValueCtx, editorViewCtx } from '@milkdown/kit/core'
 import { commonmark } from '@milkdown/kit/preset/commonmark'
 import { gfm } from '@milkdown/kit/preset/gfm'
@@ -15,6 +15,7 @@ import { search as prosemirrorSearchPlugin, SearchQuery, setSearchState, findNex
 import { createSyntaxHintPlugin } from './plugins/syntaxHintPlugin'
 import { mathEditPlugin } from './plugins/mathEditPlugin'
 import { diagramViewPlugin } from './plugins/diagramPlugin'
+import { EditorContextMenu } from './EditorContextMenu'
 
 // commonmark 命令
 import {
@@ -67,6 +68,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
     // 追踪编辑器自身产生的最新 markdown，避免反向同步引起闪烁
     const lastEditorMarkdownRef = useRef(content)
     const isUpdatingRef = useRef(false)
+    const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null)
 
     // 检测当前选区的活跃 marks
     const detectActiveMarks = useCallback((editor: Editor) => {
@@ -416,7 +418,20 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                 ref={containerRef}
                 className={`editor-wysiwyg selectable${readOnly ? ' editor-wysiwyg--readonly' : ''}`}
                 spellCheck={readOnly ? false : spellcheck}
+                onContextMenu={(e) => {
+                    if (readOnly) return
+                    e.preventDefault()
+                    setContextMenu({ x: e.clientX, y: e.clientY })
+                }}
             />
+            {contextMenu && (
+                <EditorContextMenu
+                    x={contextMenu.x}
+                    y={contextMenu.y}
+                    onClose={() => setContextMenu(null)}
+                    onCommand={executeCommand}
+                />
+            )}
         </>
     )
 }

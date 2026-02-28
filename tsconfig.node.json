@@ -1,21 +1,13 @@
 {
     "compilerOptions": {
-        "target": "ES2022",
+        "composite": true,
+        "skipLibCheck": true,
         "module": "ESNext",
         "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
-        "composite": true,
-        "outDir": "./out",
-        "declaration": true,
-        "declarationMap": true,
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "strict": true,
-        "skipLibCheck": true,
-        "noEmit": true,
-        "isolatedModules": true
+        "allowSyntheticDefaultImports": true,
+        "strict": true
     },
     "include": [
-        "electron/**/*"
+        "vite.config.ts"
     ]
 }

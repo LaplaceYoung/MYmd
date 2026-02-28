@@ -384,8 +384,6 @@ export function EditorContainer() {
                         <div className="welcome-word__section">
                             <div className="welcome-word__recent-header">
                                 <h2 className="welcome-word__section-title active">最近</h2>
-                                <h2 className="welcome-word__section-title">已固定</h2>
-                                <h2 className="welcome-word__section-title">与我共享</h2>
                             </div>
                             <div className="welcome-word__recent-list">
                                 <table className="welcome-word__recent-table">

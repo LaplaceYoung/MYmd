@@ -1,0 +1,144 @@
+/* ===================================================
+   编辑器右键上下文菜单（仿 Word / Fluent Design 风格）
+   =================================================== */
+
+.editor-context-menu {
+    position: fixed;
+    z-index: 9999;
+    background-color: var(--bg-surface, #ffffff);
+    border: 1px solid var(--border, #e1dfdd);
+    border-radius: var(--radius-md, 8px);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.18),
+        0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 4px 0;
+    min-width: 220px;
+    max-width: 280px;
+    font-family: var(--font-sans, 'Segoe UI', system-ui, -apple-system, sans-serif);
+    color: var(--text-primary, #242424);
+    user-select: none;
+    animation: ctx-menu-appear 0.12s cubic-bezier(0, 0, 0, 1);
+    /* Fluent: 亚克力模糊效果 */
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+@keyframes ctx-menu-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ---- 分组 ---- */
+.editor-context-menu-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---- 分隔线 ---- */
+.editor-context-menu-separator {
+    height: 1px;
+    background-color: var(--border-light, #edebe9);
+    margin: 4px 10px;
+}
+
+/* ---- 菜单项 ---- */
+.editor-context-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 20px;
+    gap: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    width: 100%;
+    text-align: left;
+    border-radius: 0;
+    transition: background-color 0.08s ease;
+    font-family: inherit;
+    outline: none;
+}
+
+.editor-context-menu-item:hover:not(:disabled) {
+    background-color: var(--bg-hover, rgba(0, 0, 0, 0.04));
+}
+
+.editor-context-menu-item:active:not(:disabled) {
+    background-color: var(--bg-active, rgba(0, 0, 0, 0.08));
+}
+
+.editor-context-menu-item:disabled,
+.editor-context-menu-item.disabled {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* ---- 图标区 ---- */
+.editor-context-menu-item__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--text-secondary, #605e5c);
+}
+
+.editor-context-menu-item:hover:not(:disabled) .editor-context-menu-item__icon {
+    color: var(--accent, #2b579a);
+}
+
+/* ---- 文字标签 ---- */
+.editor-context-menu-item__label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---- 快捷键提示 ---- */
+.editor-context-menu-item__shortcut {
+    margin-left: 24px;
+    font-size: 11px;
+    color: var(--text-muted, #a19f9d);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* ===== 深色主题适配 ===== */
+[data-theme="dark"] .editor-context-menu {
+    background-color: rgba(50, 50, 50, 0.92);
+    border-color: var(--border, #444444);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.45),
+        0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .editor-context-menu-item:hover:not(:disabled) {
+    background-color: var(--bg-hover, rgba(255, 255, 255, 0.06));
+}
+
+[data-theme="dark"] .editor-context-menu-item:active:not(:disabled) {
+    background-color: var(--bg-active, rgba(255, 255, 255, 0.08));
+}
+
+/* 跟随系统深色模式 */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .editor-context-menu {
+        background-color: rgba(50, 50, 50, 0.92);
+        border-color: var(--border, #444444);
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.45),
+            0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+}

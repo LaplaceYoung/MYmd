@@ -1,5 +1,7 @@
 import { create } from 'zustand'
-
+import { writeTextFile } from '@tauri-apps/plugin-fs'
+import { save } from '@tauri-apps/plugin-dialog'
+import { invoke } from '@tauri-apps/api/core'
 // 单个标签页
 export interface Tab {
     /** 唯一标识 */
@@ -105,8 +107,8 @@ function getFileName(filePath: string): string {
     return filePath.split(/[\\/]/).pop() || '未命名'
 }
 
-// 检测 Electron 环境
-const isElectron = typeof window !== 'undefined' && window.api !== undefined
+// 检测 Tauri 环境
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 
 export const useEditorStore = create<EditorState>((set, get) => ({
     tabs: [],
@@ -252,27 +254,36 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     },
 
     saveTab: async (tabId: string) => {
-        if (!isElectron) return false
+        if (!isTauri) return false
 
         const tab = get().tabs.find(t => t.id === tabId)
         if (!tab) return false
 
-        if (!tab.filePath) {
-            // 另存为
-            const result = await window.api.file.saveAs(tab.content, undefined)
-            if (result.success && result.filePath) {
-                get().markSaved(tab.id, result.filePath)
-                get().addRecentFile(result.filePath, getFileName(result.filePath))
-                return true
+        try {
+            if (!tab.filePath) {
+                // 另存为
+                const filePath = await save({
+                    filters: [{
+                        name: 'Markdown',
+                        extensions: ['md']
+                    }]
+                });
+
+                if (filePath) {
+                    await writeTextFile(filePath, tab.content);
+                    get().markSaved(tab.id, filePath);
+                    get().addRecentFile(filePath, getFileName(filePath));
+                    return true;
+                }
+                return false;
+            } else {
+                await writeTextFile(tab.filePath, tab.content);
+                get().markSaved(tab.id);
+                return true;
             }
-            return false
-        } else {
-            const result = await window.api.file.save(tab.filePath, tab.content)
-            if (result.success) {
-                get().markSaved(tab.id)
-                return true
-            }
-            return false
+        } catch (e) {
+            console.error('Failed to save file:', e);
+            return false;
         }
     },
 
@@ -295,9 +306,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
             // 取第一个未保存的进行确认
             set({ pendingCloseAction: 'window', pendingCloseTabId: dirtyTabs[0].id })
         } else {
-            // 全部已保存，直接强制退出
-            if (isElectron) {
-                window.api.window.forceClose()
+            // 全部已保存，直接退出程序
+            set({ pendingCloseAction: null, pendingCloseTabId: null })
+            if (isTauri) {
+                invoke('exit_app')
             }
         }
     },
@@ -308,8 +320,18 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
         const saved = await get().saveTab(pendingCloseTabId)
         if (saved) {
-            // 保存成功后执行关闭逻辑
-            get().confirmDiscard()
+            if (pendingCloseAction === 'tab') {
+                // 保存后关闭标签页
+                get().removeTab(pendingCloseTabId)
+                set({ pendingCloseAction: null, pendingCloseTabId: null })
+            } else if (pendingCloseAction === 'window') {
+                // 将被保存的标签页从 dirty 状态中移除(移除此 tab 即可)
+                get().removeTab(pendingCloseTabId)
+                set({ pendingCloseAction: null, pendingCloseTabId: null })
+
+                // 检查是否还有其他未保存的标签页
+                get().requestCloseWindow()
+            }
         }
     },
 
@@ -318,15 +340,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         if (!pendingCloseTabId) return
 
         if (pendingCloseAction === 'tab') {
-            // 丢弃并关闭当前标签
+            // 丢弃并关闭当前标签页
             get().removeTab(pendingCloseTabId)
             set({ pendingCloseAction: null, pendingCloseTabId: null })
         } else if (pendingCloseAction === 'window') {
-            // 移除当前处理完的标签
+            // 丢弃并关闭当前标签页
             get().removeTab(pendingCloseTabId)
             set({ pendingCloseAction: null, pendingCloseTabId: null })
 
-            // 检查是否还有其他未保存的标签
+            // 检查是否还有其他未保存的标签页
             get().requestCloseWindow()
         }
     },

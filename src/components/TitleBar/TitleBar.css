@@ -3,13 +3,13 @@
    =================================================== */
 
 .titlebar {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    justify-content: space-between;
     height: var(--titlebar-height);
     background: var(--accent);
     color: var(--accent-text);
-    -webkit-app-region: drag;
+    user-select: none;
     flex-shrink: 0;
     transition: background var(--transition-base);
 }
@@ -19,13 +19,13 @@
     align-items: center;
     gap: var(--space-4);
     padding-left: var(--space-3);
-    flex: 1;
+    min-width: 100px;
+    overflow: hidden;
 }
 
 .titlebar__logo {
     display: flex;
     align-items: center;
-    -webkit-app-region: no-drag;
 }
 
 .titlebar__logo-icon-img {
@@ -38,7 +38,6 @@
     display: flex;
     align-items: center;
     gap: 2px;
-    -webkit-app-region: no-drag;
 }
 
 .titlebar__tool-btn {
@@ -50,6 +49,7 @@
     border-radius: var(--radius-sm);
     color: var(--accent-text);
     transition: background var(--transition-fast);
+    cursor: pointer;
 }
 
 .titlebar__tool-btn:hover {
@@ -60,27 +60,35 @@
     font-size: var(--text-sm);
     font-weight: 500;
     margin-left: var(--space-2);
+    margin-right: var(--space-2);
     opacity: 0.9;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 200px;
+    flex: 1 1 0%;
+    min-width: 0;
 }
 
 .titlebar__center {
-    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
+    min-width: 150px;
+    padding: 0 var(--space-4);
+    /* 整个中间区域都是拖拽区域，cursor 表示可拖拽 */
+    cursor: grab;
+}
+
+.titlebar__center:active {
+    cursor: grabbing;
 }
 
 .titlebar__search {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 60%;
-    max-width: 500px;
-    -webkit-app-region: no-drag;
+    width: 100%;
+    max-width: 400px;
 }
 
 /* ===================================================
@@ -131,6 +139,8 @@
     color: inherit;
     font-size: 13px;
     outline: none;
+    min-width: 0;
+    text-overflow: ellipsis;
 }
 
 .top-search-menu.is-focused .top-search-menu__input {
@@ -151,7 +161,6 @@
     top: calc(100% + 4px);
     width: 100%;
     background-color: var(--bg-main, #f3f3f3);
-    /* 灰色基调类似 office */
     border: 1px solid var(--border-light, #d2d2d2);
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-md);
@@ -210,7 +219,6 @@
 .titlebar__right {
     display: flex;
     align-items: center;
-    flex: 1;
     justify-content: flex-end;
 }
 
@@ -218,7 +226,6 @@
     display: flex;
     align-items: center;
     padding-right: var(--space-4);
-    -webkit-app-region: no-drag;
 }
 
 .titlebar__avatar {
@@ -240,7 +247,6 @@
 
 .titlebar__controls {
     display: flex;
-    -webkit-app-region: no-drag;
     height: var(--titlebar-height);
 }
 
@@ -253,6 +259,7 @@
     color: var(--accent-text);
     transition: background var(--transition-fast);
     border-radius: 0;
+    cursor: pointer;
 }
 
 .titlebar__btn:hover {
