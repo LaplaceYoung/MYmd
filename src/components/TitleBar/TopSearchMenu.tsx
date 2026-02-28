@@ -100,6 +100,24 @@ export function TopSearchMenu() {
         setIsFocused(false)
     }
 
+    const allActions = [
+        { id: 'search', text: '在当前文档中查找', icon: <ListOrdered size={16} />, action: invokeOriginalSearch, section: 'recent', arrow: true },
+        { id: 'toc', text: '目录', icon: <FileText size={16} />, action: handleInsertTOC, section: 'recent', arrow: true },
+        { id: 'signature', text: '签名服务和数字标识', icon: <div className="top-search-item__icon-placeholder"></div>, action: undefined, section: 'recent', arrow: false },
+        { id: 'watermark', text: watermark ? '取消水印' : '水印', icon: <span style={{ width: 16, display: 'flex', justifyContent: 'center' }}><Type size={16} color={watermark ? 'var(--accent)' : 'inherit'} /></span>, action: handleToggleWatermark, section: 'recent', arrow: false },
+        { id: 'spellcheck', text: spellcheck ? '关闭拼写和语法检查' : '开启拼写和语法', icon: <span style={{ width: 16, display: 'flex', justifyContent: 'center', color: spellcheck ? 'var(--success, #107c10)' : 'inherit' }}>{spellcheck ? 'A✓' : 'A...'}</span>, action: handleToggleSpellcheck, section: 'suggested', arrow: false },
+        { id: 'wordcount', text: '字数统计', icon: <span style={{ width: 16, display: 'flex', justifyContent: 'center', fontSize: 10, fontWeight: 'bold', letterSpacing: -1 }}>123</span>, action: handleWordCount, section: 'suggested', arrow: false },
+        { id: 'print', text: '打印', icon: <Printer size={16} color="var(--success, #107c10)" />, action: handlePrint, section: 'suggested', arrow: false }
+    ]
+
+    const query = inputValue.trim().toLowerCase()
+    const filteredActions = query
+        ? allActions.filter(a => a.text.toLowerCase().includes(query))
+        : allActions
+
+    const recentActions = filteredActions.filter(a => a.section === 'recent')
+    const suggestedActions = filteredActions.filter(a => a.section === 'suggested')
+
     return (
         <div className={`top-search-menu ${isFocused ? 'is-focused' : ''}`}>
             <div className="top-search-menu__input-wrapper">
@@ -118,56 +136,57 @@ export function TopSearchMenu() {
 
             {isFocused && (
                 <div className="top-search-dropdown" ref={dropdownRef}>
-                    {/* 最近使用过的操作 */}
-                    <div className="top-search-dropdown__section">
-                        <div className="top-search-dropdown__section-title">最近使用过的操作</div>
-                        <div className="top-search-item" onClick={invokeOriginalSearch}>
-                            <ListOrdered size={16} />
-                            <span className="top-search-item__text">在当前文档中查找</span>
-                            <ChevronRight size={14} className="top-search-item__arrow" />
+                    {filteredActions.length === 0 ? (
+                        <div className="top-search-item" style={{ justifyContent: 'center', color: 'var(--text-muted)' }}>
+                            无匹配项
                         </div>
-                        <div className="top-search-item" onClick={handleInsertTOC}>
-                            <FileText size={16} />
-                            <span className="top-search-item__text">目录</span>
-                            <ChevronRight size={14} className="top-search-item__arrow" />
-                        </div>
-                        <div className="top-search-item">
-                            {/* 留空作为图标对齐 */}
-                            <div className="top-search-item__icon-placeholder"></div>
-                            <span className="top-search-item__text">签名服务和数字标识</span>
-                        </div>
-                        <div className="top-search-item" onClick={handleToggleWatermark}>
-                            <span style={{ width: 16, display: 'flex', justifyContent: 'center' }}>
-                                <Type size={16} color={watermark ? 'var(--accent)' : 'inherit'} />
-                            </span>
-                            <span className="top-search-item__text">
-                                {watermark ? '取消水印' : '水印'}
-                            </span>
-                        </div>
-                    </div>
+                    ) : (
+                        <>
+                            {recentActions.length > 0 && (
+                                <div className="top-search-dropdown__section">
+                                    {query === '' && <div className="top-search-dropdown__section-title">最近使用过的操作</div>}
+                                    {recentActions.map(item => (
+                                        <div
+                                            key={item.id}
+                                            className="top-search-item"
+                                            onMouseDown={(e) => {
+                                                e.preventDefault()
+                                                if (item.action) item.action()
+                                            }}
+                                        >
+                                            {item.icon}
+                                            <span className="top-search-item__text">{item.text}</span>
+                                            {item.arrow && <ChevronRight size={14} className="top-search-item__arrow" />}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
 
-                    <div className="top-search-dropdown__divider"></div>
+                            {recentActions.length > 0 && suggestedActions.length > 0 && (
+                                <div className="top-search-dropdown__divider"></div>
+                            )}
 
-                    {/* 建议的操作 */}
-                    <div className="top-search-dropdown__section">
-                        <div className="top-search-dropdown__section-title">建议的操作</div>
-                        <div className="top-search-item" onClick={handleToggleSpellcheck}>
-                            <span style={{ width: 16, display: 'flex', justifyContent: 'center', color: spellcheck ? 'var(--success, #107c10)' : 'inherit' }}>
-                                {spellcheck ? 'A✓' : 'A...'}
-                            </span>
-                            <span className="top-search-item__text">
-                                {spellcheck ? '关闭拼写和语法检查' : '开启拼写和语法'}
-                            </span>
-                        </div>
-                        <div className="top-search-item" onClick={handleWordCount}>
-                            <span style={{ width: 16, display: 'flex', justifyContent: 'center', fontSize: 10, fontWeight: 'bold', letterSpacing: -1 }}>123</span>
-                            <span className="top-search-item__text">字数统计</span>
-                        </div>
-                        <div className="top-search-item" onClick={handlePrint}>
-                            <Printer size={16} color="var(--success, #107c10)" />
-                            <span className="top-search-item__text">打印</span>
-                        </div>
-                    </div>
+                            {suggestedActions.length > 0 && (
+                                <div className="top-search-dropdown__section">
+                                    {query === '' && <div className="top-search-dropdown__section-title">建议的操作</div>}
+                                    {suggestedActions.map(item => (
+                                        <div
+                                            key={item.id}
+                                            className="top-search-item"
+                                            onMouseDown={(e) => {
+                                                e.preventDefault()
+                                                if (item.action) item.action()
+                                            }}
+                                        >
+                                            {item.icon}
+                                            <span className="top-search-item__text">{item.text}</span>
+                                            {item.arrow && <ChevronRight size={14} className="top-search-item__arrow" />}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
             )}
         </div>

@@ -12,8 +12,12 @@ import { useEditorStore } from '@/stores/editorStore'
 import { TablePicker } from './TablePicker'
 import './Ribbon.css'
 
-// 检测 Electron 环境
-const isElectron = typeof window !== 'undefined' && window.api !== undefined
+// 导入 Tauri API
+import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog'
+import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
+
+// 检测 Tauri 环境
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 
 interface RibbonGroupProps {
     title: string;
@@ -87,29 +91,45 @@ export function Ribbon() {
     }, [addTab])
 
     const handleOpenFile = useCallback(async () => {
-        if (!isElectron) {
-            addTab(null, '# 浏览器模式\n\n在 Electron 环境中可以打开本地文件。\n')
+        if (!isTauri) {
+            addTab(null, '# 浏览器模式\n\n在 Tauri 环境中可以打开本地文件。\n')
             return
         }
-        const result = await window.api.file.openDialog()
-        if (result.success && result.filePaths) {
-            for (const filePath of result.filePaths) {
-                const readResult = await window.api.file.read(filePath)
-                if (readResult.success && readResult.content !== undefined) {
-                    const tabId = addTab(filePath, readResult.content)
+
+        const selected = await openDialog({
+            multiple: true,
+            filters: [{ name: 'Markdown', extensions: ['md', 'txt'] }]
+        })
+        if (selected) {
+            const filePaths = Array.isArray(selected) ? selected : [selected]
+            for (const filePath of filePaths) {
+                try {
+                    const content = await readTextFile(filePath)
+                    const tabId = addTab(filePath, content)
                     useEditorStore.getState().markSaved(tabId, filePath)
+                } catch (e) {
+                    console.error('Failed to read file:', e)
                 }
             }
         }
     }, [addTab])
 
     const handleSaveAs = useCallback(async () => {
-        if (!isElectron) return
+        if (!isTauri) return
         const tab = useEditorStore.getState().getActiveTab()
         if (!tab) return
-        const result = await window.api.file.saveAs(tab.content, tab.filePath ?? undefined)
-        if (result.success && result.filePath) {
-            useEditorStore.getState().markSaved(tab.id, result.filePath)
+
+        try {
+            const filePath = await saveDialog({
+                filters: [{ name: 'Markdown', extensions: ['md', 'txt'] }],
+                defaultPath: tab.filePath ?? undefined
+            })
+            if (filePath) {
+                await writeTextFile(filePath, tab.content)
+                useEditorStore.getState().markSaved(tab.id, filePath)
+            }
+        } catch (e) {
+            console.error('Save failed:', e)
         }
     }, [])
 

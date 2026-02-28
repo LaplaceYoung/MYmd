@@ -3,8 +3,11 @@ import { X, ExternalLink, ImagePlus, Upload } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
 import './InsertDialog.css'
 
-// 检测 Electron 环境
-const isElectron = typeof window !== 'undefined' && window.api !== undefined
+import { open as openDialog } from '@tauri-apps/plugin-dialog'
+import { convertFileSrc } from '@tauri-apps/api/core'
+
+// 检测 Tauri 环境
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 
 /** 通用插入弹窗：图片和链接两种模式 */
 export function InsertDialog() {
@@ -33,19 +36,18 @@ export function InsertDialog() {
     const isImage = dialogType === 'image'
     const title = isImage ? '插入图片' : '插入链接'
 
-    // 获取当前文件路径（用于 insertImage API）
-    const getCurrentFilePath = () => {
-        const tab = useEditorStore.getState().getActiveTab()
-        return tab?.filePath ?? null
-    }
+
 
     // 选择本地图片文件
     const handleBrowseImage = async () => {
-        if (!isElectron) return
+        if (!isTauri) return
 
-        const result = await window.api.file.openDialog()
-        if (result.success && result.filePaths && result.filePaths.length > 0) {
-            const filePath = result.filePaths[0]
+        const selected = await openDialog({
+            multiple: false,
+            filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'] }]
+        })
+        if (selected) {
+            const filePath = Array.isArray(selected) ? selected[0] : (selected as string)
             setLocalFile(filePath)
             setMode('local')
             // 显示文件名
@@ -59,21 +61,12 @@ export function InsertDialog() {
 
         if (isImage) {
             if (mode === 'local' && localFile) {
-                // 本地图片：通过 Electron API 复制到 assets 目录
-                const mdFilePath = getCurrentFilePath()
-                if (mdFilePath && isElectron) {
-                    const result = await window.api.file.insertImage(mdFilePath, localFile)
-                    if (result.success && result.absoluteUrl) {
-                        // 使用 local-file 协议 URL 以便渲染进程可以预览
-                        executeCommand('insertImage', { src: result.absoluteUrl, alt: text || '' })
-                    }
-                } else {
-                    // 文件未保存或非 Electron 环境，用 local-file 协议包装绝对路径
-                    const src = isElectron
-                        ? 'local-file:///' + localFile.replace(/\\/g, '/')
-                        : localFile
-                    executeCommand('insertImage', { src, alt: text || '' })
-                }
+                // Tauri 环境下，使用 convertFileSrc 处理本地图片路径以供渲染
+                // 建议在后续版本中加入图片复制到相对 asset 目录的功能
+                const src = isTauri
+                    ? convertFileSrc(localFile)
+                    : localFile
+                executeCommand('insertImage', { src, alt: text || '' })
             } else if (url.trim()) {
                 // URL 模式
                 executeCommand('insertImage', { src: url, alt: text || '' })

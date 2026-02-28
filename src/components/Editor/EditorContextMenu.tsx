@@ -1,12 +1,9 @@
 import { useEffect, useRef, useCallback } from 'react'
 import {
     Scissors, Copy, ClipboardPaste,
-    Bold, Italic, Strikethrough, Code,
-    List, ListOrdered, Quote,
-    Link, Image, Minus,
+    Bold, Italic,
+    Link, Image,
     Undo2, Redo2,
-    Heading1, Heading2, Heading3,
-    ChevronRight,
     type LucideIcon
 } from 'lucide-react'
 import './EditorContextMenu.css'
@@ -57,30 +54,12 @@ function buildMenuGroups(): ContextMenuGroup[] {
             items: [
                 { id: 'bold', label: '加粗', icon: Bold, shortcut: 'Ctrl+B', command: 'bold' },
                 { id: 'italic', label: '斜体', icon: Italic, shortcut: 'Ctrl+I', command: 'italic' },
-                { id: 'strikethrough', label: '删除线', icon: Strikethrough, command: 'strikethrough' },
-                { id: 'inlineCode', label: '行内代码', icon: Code, shortcut: 'Ctrl+`', command: 'code' },
-            ],
-        },
-        {
-            items: [
-                { id: 'h1', label: '标题 1', icon: Heading1, command: 'heading', payload: 1 },
-                { id: 'h2', label: '标题 2', icon: Heading2, command: 'heading', payload: 2 },
-                { id: 'h3', label: '标题 3', icon: Heading3, command: 'heading', payload: 3 },
-                { id: 'paragraph', label: '正文', command: 'paragraph' },
-            ],
-        },
-        {
-            items: [
-                { id: 'bulletList', label: '无序列表', icon: List, command: 'bulletList' },
-                { id: 'orderedList', label: '有序列表', icon: ListOrdered, command: 'orderedList' },
-                { id: 'blockquote', label: '引用', icon: Quote, command: 'blockquote' },
             ],
         },
         {
             items: [
                 { id: 'link', label: '插入链接…', icon: Link, command: 'link' },
                 { id: 'image', label: '插入图片…', icon: Image, command: 'image' },
-                { id: 'hr', label: '分隔线', icon: Minus, command: 'hr' },
             ],
         },
         {
