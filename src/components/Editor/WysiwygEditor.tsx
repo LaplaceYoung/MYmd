@@ -19,6 +19,7 @@ import { createActiveBlockPlugin } from './plugins/activeBlockPlugin'
 import { EditorContextMenu } from './EditorContextMenu'
 import { copyImageToLocalAssets } from '@/utils/fileUtils'
 import { convertFileSrc } from '@tauri-apps/api/core'
+import { dirname, join } from '@tauri-apps/api/path'
 
 // commonmark 命令
 import {
@@ -225,8 +226,50 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
 
         initEditor()
 
+        // 监听生成的 DOM，动态替换相对路径的图片以便在 Tauri 下合法显示
+        let observer: MutationObserver | null = null
+        if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
+            observer = new MutationObserver(async (mutations) => {
+                const state = useEditorStore.getState()
+                const t = state.tabs.find(x => x.id === tabId)
+                if (!t || !t.filePath) return
+
+                const baseDir = await dirname(t.filePath)
+
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                const element = node as HTMLElement
+                                // 查找新增节点及其子节点中的图片
+                                const images = element.tagName === 'IMG' ? [element as HTMLImageElement] : Array.from(element.querySelectorAll('img'))
+
+                                images.forEach(async (img) => {
+                                    const src = img.getAttribute('src')
+                                    // 仅处理相对路径（不以 http/https/data 开头，且不是通过资产协议的绝对路径）
+                                    if (src && !src.startsWith('http') && !src.startsWith('data:') && !src.startsWith('asset://')) {
+                                        try {
+                                            const absPath = await join(baseDir, src)
+                                            const localUrl = convertFileSrc(absPath)
+                                            // 替换用于显示的 src，但不要修改 Milkdown 内部的 ProseMirror 状态，从而保持原文档的纯粹的相对路径
+                                            img.src = localUrl
+                                        } catch (e) {
+                                            console.warn('Failed to resolve relative image path:', e)
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    }
+                }
+            })
+
+            observer.observe(containerRef.current, { childList: true, subtree: true })
+        }
+
         return () => {
             destroyed = true
+            observer?.disconnect()
             editor?.destroy()
             editorRef.current = null
         }

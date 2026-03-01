@@ -68,6 +68,8 @@ export function Ribbon() {
     const setFocusMode = useEditorStore(s => s.setFocusMode)
     const typewriterMode = useEditorStore(s => s.typewriterMode)
     const setTypewriterMode = useEditorStore(s => s.setTypewriterMode)
+    const fileExplorerVisible = useEditorStore(s => s.fileExplorerVisible)
+    const setFileExplorerVisible = useEditorStore(s => s.setFileExplorerVisible)
 
     // 表格选择器
     const [showTablePicker, setShowTablePicker] = useState(false)
@@ -340,11 +342,8 @@ export function Ribbon() {
                             <RibbonButton
                                 icon={FolderOpen}
                                 label="文件浏览"
-                                active={useEditorStore(s => s.fileExplorerVisible)}
-                                onClick={() => {
-                                    const store = useEditorStore.getState()
-                                    store.setFileExplorerVisible(!store.fileExplorerVisible)
-                                }}
+                                active={fileExplorerVisible}
+                                onClick={() => setFileExplorerVisible(!fileExplorerVisible)}
                                 large
                             />
                         </RibbonGroup>
