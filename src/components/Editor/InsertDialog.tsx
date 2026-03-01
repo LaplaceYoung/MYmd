@@ -5,6 +5,7 @@ import './InsertDialog.css'
 
 import { open as openDialog } from '@tauri-apps/plugin-dialog'
 import { convertFileSrc } from '@tauri-apps/api/core'
+import { copyImageToLocalAssets } from '@/utils/fileUtils'
 
 // 检测 Tauri 环境
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
@@ -61,12 +62,28 @@ export function InsertDialog() {
 
         if (isImage) {
             if (mode === 'local' && localFile) {
-                // Tauri 环境下，使用 convertFileSrc 处理本地图片路径以供渲染
-                // 建议在后续版本中加入图片复制到相对 asset 目录的功能
-                const src = isTauri
-                    ? convertFileSrc(localFile)
-                    : localFile
-                executeCommand('insertImage', { src, alt: text || '' })
+                const activeTab = useEditorStore.getState().getActiveTab()
+
+                // If the markdown file is already saved to disk, copy the image to relative assets
+                if (isTauri && activeTab && activeTab.filePath) {
+                    try {
+                        const relativePath = await copyImageToLocalAssets(localFile, activeTab.filePath)
+                        if (relativePath) {
+                            // Use physical relative path instead of Tauri dev asset URL so the exported markdown is portable
+                            executeCommand('insertImage', { src: relativePath, alt: text || '' })
+                        } else {
+                            throw new Error("Copy failed")
+                        }
+                    } catch (e) {
+                        console.warn("Falling back to absolute path due to error:", e)
+                        const src = convertFileSrc(localFile)
+                        executeCommand('insertImage', { src, alt: text || '' })
+                    }
+                } else {
+                    // Fallback to absolute system path if unsaved
+                    const src = isTauri ? convertFileSrc(localFile) : localFile
+                    executeCommand('insertImage', { src, alt: text || '' })
+                }
             } else if (url.trim()) {
                 // URL 模式
                 executeCommand('insertImage', { src: url, alt: text || '' })

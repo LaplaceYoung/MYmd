@@ -17,6 +17,8 @@ import { mathEditPlugin } from './plugins/mathEditPlugin'
 import { diagramViewPlugin } from './plugins/diagramPlugin'
 import { createActiveBlockPlugin } from './plugins/activeBlockPlugin'
 import { EditorContextMenu } from './EditorContextMenu'
+import { copyImageToLocalAssets } from '@/utils/fileUtils'
+import { convertFileSrc } from '@tauri-apps/api/core'
 
 // commonmark 命令
 import {
@@ -172,6 +174,50 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                         const dom = view.dom
                         dom.addEventListener('mouseup', () => detectActiveMarks(editor!))
                         dom.addEventListener('keyup', () => detectActiveMarks(editor!))
+
+                        // 处理文件拖拽和粘贴
+                        const handleFileEvent = async (e: Event, files: FileList | null) => {
+                            if (!files || files.length === 0) return
+
+                            const file = files[0]
+                            if (!file.type.startsWith('image/')) return
+
+                            // 在 Tauri 环境中, `file.path` 可以获得文件绝对路径 (如果是由原生丢进去的)
+                            const tauriFile = file as File & { path?: string }
+                            const sourcePath = tauriFile.path
+
+                            if (!sourcePath) return // Web API file drop doesn't expose system paths without Tauri specific handling, fallback to normal paste
+
+                            e.preventDefault()
+
+                            const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
+                            const state = useEditorStore.getState()
+                            const activeTab = state.getActiveTab()
+
+                            let finalUrl = ''
+
+                            if (isTauri && activeTab && activeTab.filePath) {
+                                try {
+                                    const relativePath = await copyImageToLocalAssets(sourcePath, activeTab.filePath)
+                                    finalUrl = relativePath || convertFileSrc(sourcePath)
+                                } catch (err) {
+                                    console.warn('Failed to copy image to assets:', err)
+                                    finalUrl = convertFileSrc(sourcePath)
+                                }
+                            } else {
+                                finalUrl = isTauri ? convertFileSrc(sourcePath) : sourcePath
+                            }
+
+                            if (finalUrl) {
+                                // Execute insert Image command
+                                editor?.action(callCommand(insertImageCommand.key, { src: finalUrl, alt: file.name }))
+                            }
+                        }
+
+                        dom.addEventListener('drop', (e) => handleFileEvent(e, (e as DragEvent).dataTransfer?.files || null))
+                        // We do not intercept paste right now because ProseMirror automatically tries to read the File APIs 
+                        // But Tauri's system clipboard for native paths requires special rust handling.
+                        // The user can use InsertDialog or drag and drop for now.
                     }
                 })
             }
