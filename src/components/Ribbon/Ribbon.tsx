@@ -9,6 +9,7 @@ import {
     type LucideIcon
 } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
+import { Eye, Focus } from 'lucide-react'
 import { TablePicker } from './TablePicker'
 import './Ribbon.css'
 
@@ -63,7 +64,10 @@ export function Ribbon() {
     const addTab = useEditorStore(s => s.addTab)
     const activeMarks = useEditorStore(s => s.activeMarks)
     const setInsertDialog = useEditorStore(s => s.setInsertDialog)
-    const setSearchVisible = useEditorStore(s => s.setSearchVisible)
+    const focusMode = useEditorStore(s => s.focusMode)
+    const setFocusMode = useEditorStore(s => s.setFocusMode)
+    const typewriterMode = useEditorStore(s => s.typewriterMode)
+    const setTypewriterMode = useEditorStore(s => s.setTypewriterMode)
 
     // 表格选择器
     const [showTablePicker, setShowTablePicker] = useState(false)
@@ -133,6 +137,46 @@ export function Ribbon() {
         }
     }, [])
 
+    const handleExportHTML = useCallback(async () => {
+        if (!isTauri) return
+        const tab = useEditorStore.getState().getActiveTab()
+        if (!tab) return
+
+        try {
+            const defaultName = tab.filePath ? tab.filePath.replace(/\.md$/i, '.html') : (tab.title.replace(/\.md$/i, '') + '.html')
+            const filePath = await saveDialog({
+                filters: [{ name: 'HTML Document', extensions: ['html'] }],
+                defaultPath: defaultName
+            })
+            if (filePath) {
+                const safeContent = tab.content.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')
+                const htmlTemplate = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>${tab.title}</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+    <style>
+        body { box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto; padding: 45px; }
+        @media (prefers-color-scheme: dark) { body { background-color: #0d1117; color: #c9d1d9; } }
+    </style>
+</head>
+<body class="markdown-body">
+    <div id="content"></div>
+    <script>
+        document.getElementById('content').innerHTML = marked.parse(\`${safeContent}\`);
+    </script>
+</body>
+</html>`
+                await writeTextFile(filePath, htmlTemplate)
+            }
+        } catch (e) {
+            console.error('Export failed:', e)
+        }
+    }, [])
+
+
     // 剪贴板操作
     const handleCopy = () => document.execCommand('copy')
     const handleCut = () => document.execCommand('cut')
@@ -187,6 +231,10 @@ export function Ribbon() {
                                 <RibbonButton icon={Save} label="保存" onClick={() => saveActiveTab()} />
                                 <RibbonButton icon={Download} label="另存为" onClick={handleSaveAs} />
                             </div>
+                        </RibbonGroup>
+                        <div className="ribbon-divider" />
+                        <RibbonGroup title="导出">
+                            <RibbonButton icon={FileText} label="导出 HTML" onClick={handleExportHTML} large />
                         </RibbonGroup>
                     </div>
                 )}
@@ -284,6 +332,23 @@ export function Ribbon() {
                                 label="源码 & 预览"
                                 active={viewMode === 'split'}
                                 onClick={() => setViewMode('split')}
+                                large
+                            />
+                        </RibbonGroup>
+                        <div className="ribbon-divider" />
+                        <RibbonGroup title="沉浸模式">
+                            <RibbonButton
+                                icon={Focus}
+                                label="专注模式"
+                                active={focusMode}
+                                onClick={() => setFocusMode(!focusMode)}
+                                large
+                            />
+                            <RibbonButton
+                                icon={Eye}
+                                label="打字机模式"
+                                active={typewriterMode}
+                                onClick={() => setTypewriterMode(!typewriterMode)}
                                 large
                             />
                         </RibbonGroup>

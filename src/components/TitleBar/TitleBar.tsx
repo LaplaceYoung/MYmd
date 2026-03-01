@@ -86,10 +86,9 @@ export function TitleBar() {
     const tabs = useEditorStore(s => s.tabs)
     const saveActiveTab = useEditorStore(s => s.saveActiveTab)
     const executeCommand = useEditorStore(s => s.executeCommand)
-    const requestCloseWindow = useEditorStore(s => s.requestCloseWindow)
 
     const activeTab = tabs.find(t => t.id === activeTabId)
-    const docTitle = activeTab?.title || '文档1'
+    const docTitle = (activeTab?.title || '文档1') + (activeTab?.isDirty ? ' *' : '')
 
     // 保存按钮点击
     const handleSave = () => {
