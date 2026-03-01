@@ -61,6 +61,10 @@ interface EditorState {
     typewriterMode: boolean
     /** 是否显示 TOC (大纲) 侧边栏 */
     tocVisible: boolean
+    /** 是否显示文件浏览侧边栏 */
+    fileExplorerVisible: boolean
+    /** 当前打开的文件夹路径 */
+    activeWorkspace: string | null
 
     // 操作
     addTab: (filePath: string | null, content?: string) => string
@@ -85,6 +89,8 @@ interface EditorState {
     setFocusMode: (enable: boolean) => void
     setTypewriterMode: (enable: boolean) => void
     setTocVisible: (visible: boolean) => void
+    setFileExplorerVisible: (visible: boolean) => void
+    setActiveWorkspace: (path: string | null) => void
     /** 执行保存操作（保存当前活动标签） */
     saveActiveTab: () => Promise<void>
     /** 执行保存操作（保存指定标签） */
@@ -136,6 +142,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     focusMode: false,
     typewriterMode: false,
     tocVisible: false,
+    fileExplorerVisible: true,
+    activeWorkspace: null,
     mathEdit: null,
     pendingCloseAction: null,
     pendingCloseTabId: null,
@@ -263,6 +271,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     setTypewriterMode: (enable) => set({ typewriterMode: enable }),
 
     setTocVisible: (enable) => set({ tocVisible: enable }),
+
+    setFileExplorerVisible: (enable) => set({ fileExplorerVisible: enable }),
+
+    setActiveWorkspace: (path) => set({ activeWorkspace: path }),
 
     saveActiveTab: async () => {
         const tab = get().getActiveTab()

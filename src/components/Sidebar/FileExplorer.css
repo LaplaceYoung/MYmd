@@ -1,0 +1,203 @@
+.file-explorer {
+    width: 260px;
+    height: 100%;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.file-explorer__header {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.file-explorer__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.file-explorer__actions {
+    display: flex;
+    gap: 4px;
+}
+
+.file-explorer__btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.file-explorer__btn:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.file-explorer__content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.file-explorer__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+    text-align: center;
+    gap: 16px;
+}
+
+.file-explorer__tree {
+    padding-bottom: 12px;
+}
+
+.file-explorer__workspace-name {
+    padding: 12px 16px 8px 16px;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.file-node-container {
+    width: 100%;
+}
+
+.file-node {
+    display: flex;
+    align-items: center;
+    padding: 4px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+}
+
+.file-node:hover {
+    background-color: var(--bg-hover);
+}
+
+.file-node__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.file-node__name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-node--level-0 {
+    padding-left: 16px;
+}
+
+.file-node--level-1 {
+    padding-left: 28px;
+}
+
+.file-node--level-2 {
+    padding-left: 40px;
+}
+
+.file-node--level-3 {
+    padding-left: 52px;
+}
+
+.file-node--level-4 {
+    padding-left: 64px;
+}
+
+.file-node--level-5 {
+    padding-left: 76px;
+}
+
+.file-explorer__footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+/* Button overrides for Sidebar */
+.btn-primary {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.btn-secondary:hover {
+    background-color: var(--border);
+}
+
+.btn-small {
+    padding: 4px 12px;
+    font-size: 12px;
+}

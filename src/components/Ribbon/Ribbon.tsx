@@ -336,6 +336,19 @@ export function Ribbon() {
                             />
                         </RibbonGroup>
                         <div className="ribbon-divider" />
+                        <RibbonGroup title="导航">
+                            <RibbonButton
+                                icon={FolderOpen}
+                                label="文件浏览"
+                                active={useEditorStore(s => s.fileExplorerVisible)}
+                                onClick={() => {
+                                    const store = useEditorStore.getState()
+                                    store.setFileExplorerVisible(!store.fileExplorerVisible)
+                                }}
+                                large
+                            />
+                        </RibbonGroup>
+                        <div className="ribbon-divider" />
                         <RibbonGroup title="沉浸模式">
                             <RibbonButton
                                 icon={Focus}

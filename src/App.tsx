@@ -10,6 +10,7 @@ import { useAutoSave } from './components/Editor/hooks/useAutoSave'
 import './styles/immersive.css'
 
 import { TOCPanel } from './components/Sidebar/TOCPanel'
+import { FileExplorer } from './components/Sidebar/FileExplorer'
 
 export default function App() {
     useAutoSave()
@@ -40,6 +41,7 @@ export default function App() {
                 </div>
             )}
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden', width: '100%' }}>
+                <FileExplorer />
                 <TOCPanel />
                 <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     <EditorContainer />
