@@ -59,6 +59,8 @@ interface EditorState {
     focusMode: boolean
     /** 是否开启打字机模式 (光标居中) */
     typewriterMode: boolean
+    /** 是否显示 TOC (大纲) 侧边栏 */
+    tocVisible: boolean
 
     // 操作
     addTab: (filePath: string | null, content?: string) => string
@@ -82,6 +84,7 @@ interface EditorState {
     setWatermark: (enable: boolean) => void
     setFocusMode: (enable: boolean) => void
     setTypewriterMode: (enable: boolean) => void
+    setTocVisible: (visible: boolean) => void
     /** 执行保存操作（保存当前活动标签） */
     saveActiveTab: () => Promise<void>
     /** 执行保存操作（保存指定标签） */
@@ -132,6 +135,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     watermark: false,
     focusMode: false,
     typewriterMode: false,
+    tocVisible: false,
     mathEdit: null,
     pendingCloseAction: null,
     pendingCloseTabId: null,
@@ -257,6 +261,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     setFocusMode: (enable) => set({ focusMode: enable }),
 
     setTypewriterMode: (enable) => set({ typewriterMode: enable }),
+
+    setTocVisible: (enable) => set({ tocVisible: enable }),
 
     saveActiveTab: async () => {
         const tab = get().getActiveTab()

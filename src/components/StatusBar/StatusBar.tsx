@@ -1,4 +1,4 @@
-import { BookOpen, AlignLeft, Globe, ZoomIn, ZoomOut, FileText } from 'lucide-react'
+import { BookOpen, AlignLeft, ZoomIn, ZoomOut, FileText, List } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
 import './StatusBar.css'
 
@@ -13,6 +13,8 @@ export function StatusBar() {
     const setZoom = useEditorStore(s => s.setZoom)
     const viewMode = useEditorStore(s => s.viewMode)
     const setViewMode = useEditorStore(s => s.setViewMode)
+    const tocVisible = useEditorStore(s => s.tocVisible)
+    const setTocVisible = useEditorStore(s => s.setTocVisible)
 
     if (!activeTab) return <div className="statusbar statusbar--fluent" />
 
@@ -41,6 +43,14 @@ export function StatusBar() {
 
             {/* 右侧控制区 (视图与缩放) */}
             <div className="statusbar__right">
+                <button
+                    className={`statusbar__icon-btn ${tocVisible ? 'active' : ''}`}
+                    title="文档大纲"
+                    onClick={() => setTocVisible(!tocVisible)}
+                >
+                    <List size={14} />
+                </button>
+                <div className="statusbar__divider" style={{ width: 1, height: 14, backgroundColor: 'var(--border)', margin: '0 4px' }} />
                 <button
                     className={`statusbar__icon-btn ${viewMode === 'wysiwyg' ? 'active' : ''}`}
                     title="所见即所得模式"

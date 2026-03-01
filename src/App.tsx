@@ -9,6 +9,8 @@ import { useEditorStore } from './stores/editorStore'
 import { useAutoSave } from './components/Editor/hooks/useAutoSave'
 import './styles/immersive.css'
 
+import { TOCPanel } from './components/Sidebar/TOCPanel'
+
 export default function App() {
     useAutoSave()
     const tabs = useEditorStore(s => s.tabs)
@@ -37,7 +39,12 @@ export default function App() {
                     <TabBar />
                 </div>
             )}
-            <EditorContainer />
+            <div style={{ display: 'flex', flex: 1, overflow: 'hidden', width: '100%' }}>
+                <TOCPanel />
+                <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <EditorContainer />
+                </div>
+            </div>
             <StatusBar />
             <SaveConfirmDialog />
         </>
