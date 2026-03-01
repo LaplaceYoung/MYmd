@@ -15,6 +15,7 @@ import { search as prosemirrorSearchPlugin, SearchQuery, setSearchState, findNex
 import { createSyntaxHintPlugin } from './plugins/syntaxHintPlugin'
 import { mathEditPlugin } from './plugins/mathEditPlugin'
 import { diagramViewPlugin } from './plugins/diagramPlugin'
+import { createActiveBlockPlugin } from './plugins/activeBlockPlugin'
 import { EditorContextMenu } from './EditorContextMenu'
 
 // commonmark 命令
@@ -65,6 +66,9 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
     const unregisterCommand = useEditorStore(s => s.unregisterCommand)
     const setActiveMarks = useEditorStore(s => s.setActiveMarks)
     const spellcheck = useEditorStore(s => s.spellcheck)
+    const focusMode = useEditorStore(s => s.focusMode)
+    const typewriterMode = useEditorStore(s => s.typewriterMode)
+
     // 追踪编辑器自身产生的最新 markdown，避免反向同步引起闪烁
     const lastEditorMarkdownRef = useRef(content)
     const isUpdatingRef = useRef(false)
@@ -76,10 +80,8 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
             editor.action(ctx => {
                 const view = ctx.get(editorViewCtx)
                 const { state } = view
-                const { from, $from } = state.selection
+                const { $from } = state.selection
                 const marks: string[] = []
-
-                // 检测光标位置的 storedMarks 或 当前位置的 marks
                 const storedMarks = state.storedMarks || $from.marks()
                 for (const mark of storedMarks) {
                     const markName = mark.type.name
@@ -156,7 +158,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
 
                     // 通过 reconfigure 添加自定义 ProseMirror 插件
                     const newState = view.state.reconfigure({
-                        plugins: [...view.state.plugins, createSyntaxHintPlugin(), prosemirrorSearchPlugin()]
+                        plugins: [...view.state.plugins, createSyntaxHintPlugin(), prosemirrorSearchPlugin(), createActiveBlockPlugin()]
                     })
                     view.updateState(newState)
 
@@ -416,7 +418,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
         <>
             <div
                 ref={containerRef}
-                className={`editor-wysiwyg selectable${readOnly ? ' editor-wysiwyg--readonly' : ''}`}
+                className={`editor-wysiwyg selectable${readOnly ? ' editor-wysiwyg--readonly' : ''}${focusMode ? ' focus-mode' : ''}${typewriterMode ? ' typewriter-mode' : ''}`}
                 spellCheck={readOnly ? false : spellcheck}
                 onContextMenu={(e) => {
                     if (readOnly) return

@@ -36,6 +36,8 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
 
     const [val, setVal] = useState(content)
     const isDark = useIsDark()
+    const focusMode = useEditorStore(s => s.focusMode)
+    const typewriterMode = useEditorStore(s => s.typewriterMode)
     const editorRef = useRef<ReactCodeMirrorRef>(null)
 
     const executeCommand = useCallback((cmd: string, payload?: unknown) => {
@@ -93,45 +95,47 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
     }
 
     return (
-        <CodeMirror
-            ref={editorRef}
-            value={val}
-            height="100%"
-            style={{
-                height: '100%',
-                fontSize: '16px',
-                fontFamily: 'var(--font-mono)',
-                lineHeight: '1.8',
-            }}
-            extensions={[markdown({ base: markdownLanguage, codeLanguages: languages })]}
-            onChange={onChange}
-            theme={isDark ? 'dark' : 'light'}
-            basicSetup={{
-                lineNumbers: true,
-                highlightActiveLineGutter: true,
-                highlightSpecialChars: true,
-                history: true,
-                foldGutter: true,
-                drawSelection: true,
-                dropCursor: true,
-                allowMultipleSelections: true,
-                indentOnInput: true,
-                syntaxHighlighting: true,
-                bracketMatching: true,
-                closeBrackets: true,
-                autocompletion: true,
-                rectangularSelection: true,
-                crosshairCursor: true,
-                highlightActiveLine: true,
-                highlightSelectionMatches: true,
-                closeBracketsKeymap: true,
-                defaultKeymap: true,
-                searchKeymap: false,
-                historyKeymap: true,
-                foldKeymap: true,
-                completionKeymap: true,
-                lintKeymap: true,
-            }}
-        />
+        <div className={`source-editor-container${focusMode ? ' focus-mode' : ''}${typewriterMode ? ' typewriter-mode' : ''}`} style={{ height: '100%' }}>
+            <CodeMirror
+                ref={editorRef}
+                value={val}
+                height="100%"
+                style={{
+                    height: '100%',
+                    fontSize: '16px',
+                    fontFamily: 'var(--font-mono)',
+                    lineHeight: '1.8',
+                }}
+                extensions={[markdown({ base: markdownLanguage, codeLanguages: languages })]}
+                onChange={onChange}
+                theme={isDark ? 'dark' : 'light'}
+                basicSetup={{
+                    lineNumbers: true,
+                    highlightActiveLineGutter: true,
+                    highlightSpecialChars: true,
+                    history: true,
+                    foldGutter: true,
+                    drawSelection: true,
+                    dropCursor: true,
+                    allowMultipleSelections: true,
+                    indentOnInput: true,
+                    syntaxHighlighting: true,
+                    bracketMatching: true,
+                    closeBrackets: true,
+                    autocompletion: true,
+                    rectangularSelection: true,
+                    crosshairCursor: true,
+                    highlightActiveLine: true,
+                    highlightSelectionMatches: true,
+                    closeBracketsKeymap: true,
+                    defaultKeymap: true,
+                    searchKeymap: false,
+                    historyKeymap: true,
+                    foldKeymap: true,
+                    completionKeymap: true,
+                    lintKeymap: true,
+                }}
+            />
+        </div>
     )
 }

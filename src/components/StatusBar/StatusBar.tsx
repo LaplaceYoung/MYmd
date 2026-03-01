@@ -19,13 +19,14 @@ export function StatusBar() {
     // 简单统计
     const charCount = activeTab.content.length
     const wordCount = activeTab.content.trim().split(/\s+/).filter(Boolean).length
+    const readingTime = Math.max(1, Math.ceil(charCount / 400)) // 中文阅读速度约 400字/分钟
 
     return (
         <div className="statusbar statusbar--fluent">
             {/* 左侧信息区 */}
             <div className="statusbar__left">
-                <div className="statusbar__btn tooltip" title={`字符数: ${charCount}\n非空白字符: ${activeTab.content.replace(/\s/g, '').length}`}>
-                    {wordCount} 个字
+                <div className="statusbar__btn tooltip" title={`字符总数: ${charCount}\n非空白字符: ${activeTab.content.replace(/\s/g, '').length}\n汉字/单词: ${wordCount}\n预计阅读时间: ${readingTime} 分钟`}>
+                    {wordCount} 词 | 约 {readingTime} 分钟阅读
                 </div>
                 <div className="statusbar__btn">
                     <FileText size={12} strokeWidth={1.5} style={{ marginRight: 4 }} />

@@ -1,0 +1,39 @@
+/* Immersive Authoring Styles */
+
+/* 1. Focus Mode */
+.editor-wysiwyg.focus-mode .editor>* {
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+}
+
+.editor-wysiwyg.focus-mode .editor>*.active-block,
+.editor-wysiwyg.focus-mode .editor>*:hover {
+    opacity: 1 !important;
+}
+
+.source-editor-container.focus-mode .cm-line {
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+}
+
+.source-editor-container.focus-mode .cm-activeLine,
+.source-editor-container.focus-mode .cm-line:hover {
+    opacity: 1 !important;
+    background-color: transparent !important;
+}
+
+.source-editor-container.focus-mode .cm-activeLineGutter {
+    background-color: transparent !important;
+}
+
+/* 2. Typewriter Mode (Simulated via padding so the user can easily scroll content to the center) */
+/* Real typewriter mode requires JS scroll tracking, but huge padding allows center-screen typing. */
+.editor-wysiwyg.typewriter-mode .editor {
+    padding-bottom: 60vh !important;
+    padding-top: 30vh !important;
+}
+
+.source-editor-container.typewriter-mode .cm-content {
+    padding-bottom: 60vh !important;
+    padding-top: 30vh !important;
+}

@@ -6,8 +6,11 @@ import { EditorContainer } from './components/Editor/EditorContainer'
 import { StatusBar } from './components/StatusBar/StatusBar'
 import { SaveConfirmDialog } from './components/Dialog/SaveConfirmDialog'
 import { useEditorStore } from './stores/editorStore'
+import { useAutoSave } from './components/Editor/hooks/useAutoSave'
+import './styles/immersive.css'
 
 export default function App() {
+    useAutoSave()
     const tabs = useEditorStore(s => s.tabs)
     const hasActiveTab = tabs.length > 0
     const themeMode = useEditorStore(s => s.themeMode)
