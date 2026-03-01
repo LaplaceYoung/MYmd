@@ -28,6 +28,9 @@ export type InsertDialogType = 'link' | 'image' | null
 // 主题类型
 export type ThemeMode = 'light' | 'dark' | 'system'
 
+// 配色方案
+export type ColorScheme = 'default' | 'aurora-green' | 'sunset-orange' | 'lavender' | 'sakura-pink' | 'ocean-cyan' | 'amber-gold' | 'graphite'
+
 interface EditorState {
     /** 所有标签页 */
     tabs: Tab[]
@@ -49,6 +52,8 @@ interface EditorState {
     searchVisible: boolean
     /** 主题模式 */
     themeMode: ThemeMode
+    /** 配色方案 */
+    colorScheme: ColorScheme
     /** 编辑器字号 */
     editorFontSize: number
     /** 是否开启拼写检查 */
@@ -83,6 +88,7 @@ interface EditorState {
     setInsertDialog: (type: InsertDialogType) => void
     setSearchVisible: (visible: boolean) => void
     setThemeMode: (mode: ThemeMode) => void
+    setColorScheme: (scheme: ColorScheme) => void
     setEditorFontSize: (size: number) => void
     setSpellcheck: (enable: boolean) => void
     setWatermark: (enable: boolean) => void
@@ -136,6 +142,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     insertDialog: null,
     searchVisible: false,
     themeMode: 'system',
+    colorScheme: 'default',
     editorFontSize: 16,
     spellcheck: false,
     watermark: false,
@@ -259,6 +266,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     setSearchVisible: (visible) => set({ searchVisible: visible }),
 
     setThemeMode: (mode) => set({ themeMode: mode }),
+
+    setColorScheme: (scheme) => set({ colorScheme: scheme }),
 
     setEditorFontSize: (size) => set({ editorFontSize: Math.max(10, Math.min(32, size)) }),
 

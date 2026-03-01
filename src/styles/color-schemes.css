@@ -1,0 +1,60 @@
+/* ===================================================
+   MYmd — 配色方案 (Color Schemes)
+   通过 data-color-scheme 属性热切换，与明暗模式正交组合
+   =================================================== */
+
+/* 极光绿 Aurora Green */
+[data-color-scheme="aurora-green"] {
+    --accent: #10b981;
+    --accent-hover: #059669;
+    --accent-muted: rgba(16, 185, 129, 0.1);
+    --accent-text: #ffffff;
+}
+
+/* 日落橘 Sunset Orange */
+[data-color-scheme="sunset-orange"] {
+    --accent: #f97316;
+    --accent-hover: #ea580c;
+    --accent-muted: rgba(249, 115, 22, 0.1);
+    --accent-text: #ffffff;
+}
+
+/* 薰衣草紫 Lavender */
+[data-color-scheme="lavender"] {
+    --accent: #8b5cf6;
+    --accent-hover: #7c3aed;
+    --accent-muted: rgba(139, 92, 246, 0.1);
+    --accent-text: #ffffff;
+}
+
+/* 樱花粉 Sakura Pink */
+[data-color-scheme="sakura-pink"] {
+    --accent: #ec4899;
+    --accent-hover: #db2777;
+    --accent-muted: rgba(236, 72, 153, 0.1);
+    --accent-text: #ffffff;
+}
+
+/* 深海青 Ocean Cyan */
+[data-color-scheme="ocean-cyan"] {
+    --accent: #06b6d4;
+    --accent-hover: #0891b2;
+    --accent-muted: rgba(6, 182, 212, 0.1);
+    --accent-text: #ffffff;
+}
+
+/* 琥珀金 Amber Gold */
+[data-color-scheme="amber-gold"] {
+    --accent: #d97706;
+    --accent-hover: #b45309;
+    --accent-muted: rgba(217, 119, 6, 0.1);
+    --accent-text: #ffffff;
+}
+
+/* 石墨灰 Graphite */
+[data-color-scheme="graphite"] {
+    --accent: #6b7280;
+    --accent-hover: #4b5563;
+    --accent-muted: rgba(107, 114, 128, 0.1);
+    --accent-text: #ffffff;
+}

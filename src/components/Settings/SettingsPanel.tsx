@@ -1,12 +1,26 @@
-import { Monitor, Moon, Sun, Type, Info } from 'lucide-react'
+import { Monitor, Moon, Sun, Type, Info, Palette } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
-import type { ThemeMode } from '@/stores/editorStore'
+import type { ThemeMode, ColorScheme } from '@/stores/editorStore'
 import './SettingsPanel.css'
 
-/** 设置面板：主题/字体等设置 */
+/** 配色方案定义 */
+const COLOR_SCHEMES: { id: ColorScheme; label: string; color: string }[] = [
+    { id: 'default', label: 'Word 蓝', color: '#2b579a' },
+    { id: 'aurora-green', label: '极光绿', color: '#10b981' },
+    { id: 'sunset-orange', label: '日落橘', color: '#f97316' },
+    { id: 'lavender', label: '薰衣草紫', color: '#8b5cf6' },
+    { id: 'sakura-pink', label: '樱花粉', color: '#ec4899' },
+    { id: 'ocean-cyan', label: '深海青', color: '#06b6d4' },
+    { id: 'amber-gold', label: '琥珀金', color: '#d97706' },
+    { id: 'graphite', label: '石墨灰', color: '#6b7280' },
+]
+
+/** 设置面板：主题/配色/字体等设置 */
 export function SettingsPanel() {
     const themeMode = useEditorStore(s => s.themeMode)
     const setThemeMode = useEditorStore(s => s.setThemeMode)
+    const colorScheme = useEditorStore(s => s.colorScheme)
+    const setColorScheme = useEditorStore(s => s.setColorScheme)
     const editorFontSize = useEditorStore(s => s.editorFontSize)
     const setEditorFontSize = useEditorStore(s => s.setEditorFontSize)
 
@@ -33,6 +47,28 @@ export function SettingsPanel() {
                             >
                                 <Icon size={20} strokeWidth={1.5} />
                                 <span>{label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="settings-panel__group">
+                    <label className="settings-panel__label">
+                        <Palette size={14} />
+                        配色方案
+                    </label>
+                    <div className="settings-panel__scheme-grid">
+                        {COLOR_SCHEMES.map(({ id, label, color }) => (
+                            <button
+                                key={id}
+                                className={`settings-panel__scheme-card ${colorScheme === id ? 'active' : ''}`}
+                                onClick={() => setColorScheme(id)}
+                            >
+                                <span
+                                    className="settings-panel__scheme-dot"
+                                    style={{ background: color }}
+                                />
+                                <span className="settings-panel__scheme-label">{label}</span>
                             </button>
                         ))}
                     </div>

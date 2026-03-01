@@ -7,6 +7,7 @@ import { StatusBar } from './components/StatusBar/StatusBar'
 import { SaveConfirmDialog } from './components/Dialog/SaveConfirmDialog'
 import { useEditorStore } from './stores/editorStore'
 import { useAutoSave } from './components/Editor/hooks/useAutoSave'
+import { useCliFileOpener } from './components/Editor/hooks/useCliFileOpener'
 import './styles/immersive.css'
 
 import { TOCPanel } from './components/Sidebar/TOCPanel'
@@ -14,9 +15,11 @@ import { FileExplorer } from './components/Sidebar/FileExplorer'
 
 export default function App() {
     useAutoSave()
+    useCliFileOpener()
     const tabs = useEditorStore(s => s.tabs)
     const hasActiveTab = tabs.length > 0
     const themeMode = useEditorStore(s => s.themeMode)
+    const colorScheme = useEditorStore(s => s.colorScheme)
 
     // 主题切换：将 data-theme 属性应用到 <html> 元素
     useEffect(() => {
@@ -30,6 +33,17 @@ export default function App() {
             root.setAttribute('data-theme', themeMode)
         }
     }, [themeMode])
+
+    // 配色方案切换：将 data-color-scheme 属性应用到 <html> 元素
+    useEffect(() => {
+        const root = document.documentElement
+
+        if (colorScheme === 'default') {
+            root.removeAttribute('data-color-scheme')
+        } else {
+            root.setAttribute('data-color-scheme', colorScheme)
+        }
+    }, [colorScheme])
 
     return (
         <>

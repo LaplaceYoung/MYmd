@@ -1,4 +1,9 @@
 #[tauri::command]
+fn get_cli_args() -> Vec<String> {
+    std::env::args().collect()
+}
+
+#[tauri::command]
 fn exit_app() {
     std::process::exit(0);
 }
@@ -18,7 +23,7 @@ pub fn run() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![exit_app])
+        .invoke_handler(tauri::generate_handler![exit_app, get_cli_args])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
