@@ -1,0 +1,9 @@
+# Core app architecture
+/src/components/ @LaplaceYoung
+/src/hooks/ @LaplaceYoung
+/src/store/ @LaplaceYoung
+/src/utils/ @LaplaceYoung
+
+# Desktop runtime and release workflow
+/src-tauri/ @LaplaceYoung
+/.github/workflows/ @LaplaceYoung
