@@ -95,6 +95,11 @@ npm run build
 npm run tauri build
 ```
 
+### 发布流程（自动化）
+
+- 推送 `v*` 标签会触发 GitHub Actions 自动打包并上传安装包到 Release。
+- 工作流文件：`.github/workflows/release-tag.yml`
+
 ## 安装包产物
 
 Tauri 构建后，Windows 产物位于：

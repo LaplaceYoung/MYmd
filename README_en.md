@@ -95,6 +95,11 @@ npm run build
 npm run tauri build
 ```
 
+### Release Automation
+
+- Pushing a `v*` tag triggers GitHub Actions to build and upload installers to GitHub Releases.
+- Workflow file: `.github/workflows/release-tag.yml`
+
 ## Installer Artifacts
 
 After a Tauri build on Windows, artifacts are generated in:

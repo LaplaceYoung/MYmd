@@ -1,0 +1,50 @@
+name: Release From Tag
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Windows installer
+        run: npm run tauri build -- --bundles nsis
+
+      - name: Collect release artifacts
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force release | Out-Null
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          $setup = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -Filter "*_x64-setup.exe" | Select-Object -First 1
+          if (-not $setup) { throw "NSIS setup artifact not found." }
+          Copy-Item -Force $setup.FullName "release/$($setup.Name)"
+          Copy-Item -Force "src-tauri/target/release/app.exe" "release/MYmd_${version}_x64.exe"
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*_x64-setup.exe
+            release/MYmd_*_x64.exe
+          generate_release_notes: true
