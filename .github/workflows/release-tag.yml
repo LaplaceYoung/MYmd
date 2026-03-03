@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (e.g. v1.2.3)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -28,6 +33,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Resolve release tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          if [[ ! "$TAG" =~ ^v[0-9]+(\.[0-9]+){1,2}([-.].+)?$ ]]; then
+            echo "Invalid release tag: $TAG"
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
       - name: Build Windows installer
         run: npm run tauri build -- --bundles nsis
 
@@ -35,7 +56,7 @@ jobs:
         shell: powershell
         run: |
           New-Item -ItemType Directory -Force release | Out-Null
-          $version = "${{ github.ref_name }}".TrimStart("v")
+          $version = "${{ steps.release_tag.outputs.version }}"
           $setup = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -Filter "*_x64-setup.exe" | Select-Object -First 1
           if (-not $setup) { throw "NSIS setup artifact not found." }
           Copy-Item -Force $setup.FullName "release/$($setup.Name)"
@@ -44,6 +65,8 @@ jobs:
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: ${{ steps.release_tag.outputs.tag }}
           files: |
             release/*_x64-setup.exe
             release/MYmd_*_x64.exe
