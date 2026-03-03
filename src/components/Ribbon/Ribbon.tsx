@@ -16,6 +16,7 @@ import './Ribbon.css'
 // 导入 Tauri API
 import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog'
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
+import { copyFromEditor, cutFromEditor, pasteToEditor } from '@/utils/editorClipboard'
 
 // 检测 Tauri 环境
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
@@ -180,14 +181,10 @@ export function Ribbon() {
 
 
     // 剪贴板操作
-    const handleCopy = () => document.execCommand('copy')
-    const handleCut = () => document.execCommand('cut')
+    const handleCopy = () => copyFromEditor()
+    const handleCut = () => cutFromEditor()
     const handlePaste = () => {
-        navigator.clipboard?.readText().then(text => {
-            document.execCommand('insertText', false, text)
-        }).catch(() => {
-            document.execCommand('paste')
-        })
+        void pasteToEditor()
     }
 
     // 检测 mark 是否激活

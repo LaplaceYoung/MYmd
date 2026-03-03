@@ -20,6 +20,7 @@ import { EditorContextMenu } from './EditorContextMenu'
 import { copyImageToLocalAssets } from '@/utils/fileUtils'
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { dirname, join } from '@tauri-apps/api/path'
+import { rememberEditableTarget } from '@/utils/editorClipboard'
 
 // commonmark 命令
 import {
@@ -512,6 +513,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                 onContextMenu={(e) => {
                     if (readOnly) return
                     e.preventDefault()
+                    rememberEditableTarget(e.target)
                     setContextMenu({ x: e.clientX, y: e.clientY })
                 }}
             />

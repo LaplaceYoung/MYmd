@@ -7,6 +7,7 @@ import {
     type LucideIcon
 } from 'lucide-react'
 import './EditorContextMenu.css'
+import { copyFromEditor, cutFromEditor, pasteToEditor } from '@/utils/editorClipboard'
 
 interface ContextMenuItemData {
     id: string
@@ -36,17 +37,11 @@ function buildMenuGroups(): ContextMenuGroup[] {
     return [
         {
             items: [
-                { id: 'cut', label: '剪切', icon: Scissors, shortcut: 'Ctrl+X', action: () => document.execCommand('cut') },
-                { id: 'copy', label: '复制', icon: Copy, shortcut: 'Ctrl+C', action: () => document.execCommand('copy') },
+                { id: 'cut', label: '剪切', icon: Scissors, shortcut: 'Ctrl+X', action: () => cutFromEditor() },
+                { id: 'copy', label: '复制', icon: Copy, shortcut: 'Ctrl+C', action: () => copyFromEditor() },
                 {
                     id: 'paste', label: '粘贴', icon: ClipboardPaste, shortcut: 'Ctrl+V',
-                    action: () => {
-                        navigator.clipboard?.readText().then(text => {
-                            document.execCommand('insertText', false, text)
-                        }).catch(() => {
-                            document.execCommand('paste')
-                        })
-                    }
+                    action: () => { void pasteToEditor() }
                 },
             ],
         },
