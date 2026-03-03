@@ -1,7 +1,7 @@
 <div align="center">
   <img src="src/assets/logo.svg" height="120" alt="MYmd Logo" />
   <h1>MYmd</h1>
-  <p>轻量级 Markdown 桌面阅读与编辑器</p>
+  <p>基于 Tauri 的本地优先 Markdown 桌面编辑器</p>
 
   <p>
     <a href="https://github.com/LaplaceYoung/MYmd/releases"><img src="https://img.shields.io/github/v/release/LaplaceYoung/MYmd?color=blue&style=flat-square" alt="Release"></a>
@@ -14,35 +14,109 @@
 
 [Read in English](README_en.md) | [阅读中文版](README.md)
 
-MYmd 是一款基于 Electron、React 和 Vite 构建的轻量级 Markdown 桌面阅读与编辑器。它提供了流畅的所见即所得体验和强大的源码分离模式，专为优雅、专注的写作和阅读而设计。
+MYmd 是一款基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编辑器，支持所见即所得、源码与分屏三种视图，适用于高频写作、知识整理和结构化内容创作。
 
-## 核心特性
+## 版本信息
 
-- 双编辑模式: 支持纯粹的所见即所得编辑器 (Wysiwyg) 与代码源码分屏模式，满足不同写作场景。
-- 完善的拓展支持: 内置 Mermaid 渲染、KaTeX 数学公式渲染以及 Prism 代码高亮功能。
-- 高级搜索与替换: 内嵌了全文查找和替换功能，支持全局高亮显示以及快速跳转。
-- 仿 Typora 语法提示: 动态 Markdown 伪元素提示，让所见即所得编辑更直观。
-- 账户与设置面板: 提供高度可配置的主题、透明度和缩放级别选项，并提供本地最近文件管理结构。
+- 当前版本：`v1.2.2`
+- 目标平台：`Windows x64`
+- 最新发布：<https://github.com/LaplaceYoung/MYmd/releases>
+
+## 功能总览
+
+### 编辑与写作体验
+
+- 多标签编辑，支持快速切换文档上下文。
+- 三种编辑视图：WYSIWYG、Source、Split。
+- 支持 Focus Mode / Typewriter Mode，提升连续写作沉浸感。
+- 未保存状态检测与关闭前确认，避免内容丢失。
+
+### 文件工作流
+
+- 支持新建、打开、保存、另存为、导出 HTML。
+- 全局自动保存（仅对已落盘文件生效）。
+- Workspace 文件树浏览与打开。
+- 支持 `.md` / `.markdown` 文件关联打开。
+
+### 内容增强能力
+
+- 内置 KaTeX 数学公式渲染。
+- 内置 Mermaid 图表渲染。
+- 代码语法高亮（Prism/Refractor）。
+- TOC 目录侧栏与全文 Search/Replace。
+
+### 桌面集成与交互
+
+- Tauri 原生窗口能力，自定义标题栏与窗口控制。
+- 单实例运行：二次启动时将文件参数转发给当前窗口。
+- 启动参数文件打开链路优化，避免“先欢迎页再打开文件”的闪跳。
+
+## v1.2.2 重点更新
+
+1. 引入 `tauri-plugin-single-instance`，修复二次启动传参丢失问题。
+2. 新增 Rust 命令 `read_text_file_from_path`，统一读取 CLI 传入文件。
+3. 重构 `useCliFileOpener`：
+   - 兼容 `file://` 参数与带引号路径。
+   - 过滤无效 flag 与重复参数。
+   - 同时监听主进程转发事件 `mymd://open-files`。
+4. `EditorContainer` 新增欢迎页抑制逻辑，减少启动视觉抖动。
+5. `tauri.conf.json` 增加 `fileAssociations`，提升系统层打开体验。
 
 ## 技术栈
 
-- 核心框架: React 19, TypeScript
-- 桌面端化: Electron, Electron-Vite
-- 编辑器引擎: Milkdown (WYSIWYG), Prosemirror, CodeMirror 6 (源码模式)
-- 样式系统: Tailwind CSS, PostCSS 及自定义原生 CSS
+| 层级 | 技术 |
+| --- | --- |
+| UI | React 19, TypeScript, Tailwind CSS |
+| Editor | Milkdown, ProseMirror, CodeMirror 6 |
+| State | Zustand |
+| Desktop Runtime | Tauri v2 |
+| Native Side | Rust |
+| Build | Vite, Tauri CLI |
 
-## 开始使用
+## 快速开始
 
-确保您已经安装了 Node.js。
+### 环境要求
 
-1. 克隆本项目：
-   git clone https://github.com/LaplaceYoung/MYmd.git
-2. 安装依赖：
-   npm install
-3. 启动开发服务器：
-   npm run dev
-4. 构建打包程序：
-   npm run build
+- Node.js 20+
+- Rust 1.77.2+
+- Windows 10/11（打包使用 NSIS）
+
+### 本地开发
+
+```bash
+git clone https://github.com/LaplaceYoung/MYmd.git
+cd MYmd
+npm install
+npm run dev
+```
+
+### 构建桌面应用
+
+```bash
+npm run build
+npm run tauri build
+```
+
+## 安装包产物
+
+Tauri 构建后，Windows 产物位于：
+
+- `src-tauri/target/release/bundle/nsis/MYmd_1.2.2_x64-setup.exe`
+- `src-tauri/target/release/bundle/nsis/MYmd_1.2.2_x64.exe`
+
+项目同时维护一个便于分发的 `release/` 目录（仅保留最新版本安装包）。
+
+## 目录结构
+
+```text
+MYmd/
+|- src/                 # React 前端
+|- src-tauri/           # Tauri + Rust 后端
+|- release/             # 发布产物目录（最新安装包）
+|- tests/               # 自动化与调试脚本
+|- README.md            # 中文说明
+`- README_en.md         # English README
+```
 
 ## 许可证
 

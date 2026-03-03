@@ -1,7 +1,7 @@
 <div align="center">
   <img src="src/assets/logo.svg" height="120" alt="MYmd Logo" />
   <h1>MYmd</h1>
-  <p>A lightweight Markdown desktop reader and editor</p>
+  <p>Local-first Markdown desktop editor built with Tauri</p>
 
   <p>
     <a href="https://github.com/LaplaceYoung/MYmd/releases"><img src="https://img.shields.io/github/v/release/LaplaceYoung/MYmd?color=blue&style=flat-square" alt="Release"></a>
@@ -14,35 +14,109 @@
 
 [Read in English](README_en.md) | [阅读中文版](README.md)
 
-MYmd is a lightweight Markdown desktop reader and editor built with Electron, React, and Vite. It provides a fluid WYSIWYG experience and a powerful source-split mode, designed for elegant and focused writing and reading.
+MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor with WYSIWYG, source, and split views, designed for high-frequency writing and structured content workflows.
 
-## Core Features
+## Version
 
-- Dual Editing Modes: Supports a pure WYSIWYG editor alongside a code-source split mode, catering to various writing scenarios.
-- Comprehensive Extensions: Built-in support for Mermaid diagrams, KaTeX mathematical formulas, and Prism code highlighting.
-- Advanced Search and Replace: Embedded full-text search and replace capabilities with global highlighting and quick navigation.
-- Typora-like Syntax Hints: Dynamic Markdown pseudo-element hints making WYSIWYG editing more intuitive.
-- Account and Settings Panels: Highly configurable options for themes, transparency, and zoom levels, along with local recent file management.
+- Current version: `v1.2.2`
+- Target platform: `Windows x64`
+- Latest releases: <https://github.com/LaplaceYoung/MYmd/releases>
+
+## Feature Overview
+
+### Editing Experience
+
+- Multi-tab editing for fast context switching.
+- Three editing views: WYSIWYG, Source, and Split.
+- Focus Mode and Typewriter Mode for distraction-reduced writing.
+- Unsaved-change detection with close confirmation.
+
+### File Workflow
+
+- New, open, save, save-as, and HTML export.
+- Global auto-save (only for files already persisted to disk).
+- Workspace file explorer for navigation and open actions.
+- File association support for `.md` and `.markdown`.
+
+### Content Capabilities
+
+- Built-in KaTeX math rendering.
+- Built-in Mermaid diagram rendering.
+- Syntax highlighting powered by Prism/Refractor.
+- TOC sidebar and global search/replace.
+
+### Desktop Integration
+
+- Native Tauri window runtime with custom title bar controls.
+- Single-instance behavior: file args from second launches are forwarded to the running window.
+- Startup open-file flow avoids welcome-page flicker before CLI file loading finishes.
+
+## v1.2.2 Highlights
+
+1. Added `tauri-plugin-single-instance` to fix lost file-arg handling on second launch.
+2. Added Rust command `read_text_file_from_path` for unified backend file loading.
+3. Refactored `useCliFileOpener`:
+   - Supports `file://` args and quoted paths.
+   - Filters non-file flags and duplicate paths.
+   - Listens to forwarded event `mymd://open-files`.
+4. Added welcome suppression state in `EditorContainer` to reduce startup visual jump.
+5. Added `fileAssociations` in `tauri.conf.json` for better OS-level open-with behavior.
 
 ## Tech Stack
 
-- Core Framework: React 19, TypeScript
-- Desktop Integration: Electron, Electron-Vite
-- Editor Engines: Milkdown (WYSIWYG), Prosemirror, CodeMirror 6 (Source Mode)
-- Styling: Tailwind CSS, PostCSS, and custom raw CSS
+| Layer | Technology |
+| --- | --- |
+| UI | React 19, TypeScript, Tailwind CSS |
+| Editor | Milkdown, ProseMirror, CodeMirror 6 |
+| State | Zustand |
+| Desktop Runtime | Tauri v2 |
+| Native Side | Rust |
+| Build | Vite, Tauri CLI |
 
-## Getting Started
+## Quick Start
 
-Ensure you have Node.js installed.
+### Requirements
 
-1. Clone the repository:
-   git clone https://github.com/LaplaceYoung/MYmd.git
-2. Install dependencies:
-   npm install
-3. Start the development server:
-   npm run dev
-4. Build the application:
-   npm run build
+- Node.js 20+
+- Rust 1.77.2+
+- Windows 10/11 (NSIS packaging)
+
+### Local Development
+
+```bash
+git clone https://github.com/LaplaceYoung/MYmd.git
+cd MYmd
+npm install
+npm run dev
+```
+
+### Desktop Build
+
+```bash
+npm run build
+npm run tauri build
+```
+
+## Installer Artifacts
+
+After a Tauri build on Windows, artifacts are generated in:
+
+- `src-tauri/target/release/bundle/nsis/MYmd_1.2.2_x64-setup.exe`
+- `src-tauri/target/release/bundle/nsis/MYmd_1.2.2_x64.exe`
+
+The repository also keeps a `release/` folder for latest distribution-ready installers.
+
+## Project Structure
+
+```text
+MYmd/
+|- src/                 # React frontend
+|- src-tauri/           # Tauri + Rust backend
+|- release/             # Release artifacts (latest installer only)
+|- tests/               # Automation and debug scripts
+|- README.md            # Chinese README
+`- README_en.md         # English README
+```
 
 ## License
 

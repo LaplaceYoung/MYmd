@@ -15,7 +15,7 @@ import { FileExplorer } from './components/Sidebar/FileExplorer'
 
 export default function App() {
     useAutoSave()
-    useCliFileOpener()
+    const isCliInitDone = useCliFileOpener()
     const tabs = useEditorStore(s => s.tabs)
     const hasActiveTab = tabs.length > 0
     const themeMode = useEditorStore(s => s.themeMode)
@@ -58,7 +58,7 @@ export default function App() {
                 <FileExplorer />
                 <TOCPanel />
                 <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                    <EditorContainer />
+                    <EditorContainer suppressWelcome={!isCliInitDone} />
                 </div>
             </div>
             <StatusBar />

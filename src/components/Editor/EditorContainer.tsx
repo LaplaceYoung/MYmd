@@ -11,8 +11,12 @@ import { useEditorShortcuts } from './hooks/useEditorShortcuts'
 import { useSplitPanes } from './hooks/useSplitPanes'
 import { useSyncScroll } from './hooks/useSyncScroll'
 
+interface EditorContainerProps {
+    suppressWelcome?: boolean
+}
+
 /** 编辑器容器：根据当前标签和视图模式渲染编辑器 */
-export function EditorContainer() {
+export function EditorContainer({ suppressWelcome = false }: EditorContainerProps) {
     const tabs = useEditorStore(s => s.tabs)
     const activeTabId = useEditorStore(s => s.activeTabId)
     const activeTab = tabs.find(t => t.id === activeTabId)
@@ -32,8 +36,12 @@ export function EditorContainer() {
     // Sync scroll
     useSyncScroll(viewMode, activeTabId, splitContainerRef, isDraggingRef)
 
-    // 无标签时显示欢迎页
+    // 无标签时显示欢迎页；但在启动参数解析阶段先抑制欢迎页，避免“先首页后打开文件”的闪跳
     if (!activeTab) {
+        if (suppressWelcome) {
+            return <div className={`editor-container ${watermark ? 'has-watermark' : ''}`} />
+        }
+
         return (
             <WelcomeView
                 handleNewFile={handleNewFile}
