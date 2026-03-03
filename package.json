@@ -4,7 +4,9 @@
   "description": "轻量级 Markdown 桌面端阅读与编辑器",
   "scripts": {
     "dev": "vite",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
     "build": "vite build",
+    "ci:check": "npm run build",
     "preview": "vite preview",
     "tauri": "tauri"
   },

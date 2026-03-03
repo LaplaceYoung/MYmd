@@ -21,6 +21,8 @@ MYmd 是一款基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 - 当前版本：`v1.2.2`
 - 目标平台：`Windows x64`
 - 最新发布：<https://github.com/LaplaceYoung/MYmd/releases>
+- 宣传页面：<https://laplaceyoung.github.io/MYmd/>
+- 上线方案（对标+推流+迭代）：[docs/benchmark-launch-plan-2026Q2.md](docs/benchmark-launch-plan-2026Q2.md)
 
 ## 功能总览
 

@@ -21,6 +21,8 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 - Current version: `v1.2.2`
 - Target platform: `Windows x64`
 - Latest releases: <https://github.com/LaplaceYoung/MYmd/releases>
+- Landing page: <https://laplaceyoung.github.io/MYmd/>
+- Launch strategy (benchmark + growth + roadmap): [docs/benchmark-launch-plan-2026Q2.md](docs/benchmark-launch-plan-2026Q2.md)
 
 ## Feature Overview
 

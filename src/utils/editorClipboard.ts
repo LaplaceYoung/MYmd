@@ -9,7 +9,7 @@ const EDITABLE_SELECTOR = [
 let lastEditableTarget: HTMLElement | null = null
 let trackingInitialized = false
 
-function isEditableElement(el: HTMLElement | null): el is HTMLElement {
+function isEditableElement(el: HTMLElement | null): boolean {
     if (!el) return false
 
     if (el instanceof HTMLTextAreaElement) {

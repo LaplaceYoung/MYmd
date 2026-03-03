@@ -1,0 +1,20 @@
+﻿changelog:
+  categories:
+    - title: Features
+      labels:
+        - feat
+        - enhancement
+    - title: Fixes
+      labels:
+        - fix
+        - bug
+    - title: Refactors & Chore
+      labels:
+        - refactor
+        - chore
+    - title: Documentation
+      labels:
+        - docs
+  exclude:
+    labels:
+      - skip-changelog

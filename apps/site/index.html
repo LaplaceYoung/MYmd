@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MYmd | Local-first Markdown Desktop Editor</title>
+    <meta
+      name="description"
+      content="MYmd 是基于 Tauri + React + TypeScript 的本地优先 Markdown 桌面编辑器，支持 WYSIWYG、源码分屏、Mermaid、KaTeX 和多标签工作流。"
+    />
+    <meta property="og:title" content="MYmd | Local-first Markdown Desktop Editor" />
+    <meta
+      property="og:description"
+      content="轻量、高性能、本地优先。为高频写作与结构化知识工作流打造。"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://laplaceyoung.github.io/MYmd/" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid"></div>
+    <header class="container topbar">
+      <a class="brand" href="https://github.com/LaplaceYoung/MYmd">
+        <span class="brand-dot"></span>
+        <span>MYmd</span>
+      </a>
+      <nav class="top-links">
+        <a href="#features">功能</a>
+        <a href="#roadmap">路线图</a>
+        <a href="https://github.com/LaplaceYoung/MYmd/releases">下载</a>
+        <a href="https://github.com/LaplaceYoung/MYmd">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <p class="kicker">LOCAL-FIRST · TAURI NATIVE · MARKDOWN WORKFLOW</p>
+        <h1>让 Markdown 成为可交付的生产工作流，而不只是一个文本文件。</h1>
+        <p class="subtitle">
+          MYmd 是面向高频写作、知识沉淀和产品文档协作的桌面编辑器。支持
+          WYSIWYG/源码分屏、多标签、文件树、Mermaid/KaTeX、自动保存与系统关联打开。
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://github.com/LaplaceYoung/MYmd/releases/tag/v1.2.2">
+            下载最新版本
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/LaplaceYoung/MYmd">
+            查看源码
+          </a>
+        </div>
+        <div class="hero-metrics">
+          <div class="metric">
+            <span class="metric-label">Latest Release</span>
+            <span id="latest-version" class="metric-value">v1.2.2</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Stars</span>
+            <span id="stars-count" class="metric-value">--</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Target</span>
+            <span class="metric-value">Windows x64</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="section">
+        <h2>核心能力</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>编辑与视图</h3>
+            <p>WYSIWYG / Source / Split 三视图切换，支持 Focus Mode 与 Typewriter Mode。</p>
+          </article>
+          <article class="card">
+            <h3>文件工作流</h3>
+            <p>多标签、新建/打开/保存/另存为/导出 HTML，Workspace 文件树与自动保存。</p>
+          </article>
+          <article class="card">
+            <h3>内容增强</h3>
+            <p>Mermaid、KaTeX、语法高亮、TOC 目录、全局 Search/Replace 全链路可用。</p>
+          </article>
+          <article class="card">
+            <h3>桌面集成</h3>
+            <p>单实例转发、文件关联打开（.md/.markdown）、自定义标题栏与窗口控制。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>为什么是 MYmd</h2>
+        <div class="compare">
+          <div class="compare-item">
+            <h3>轻量桌面性能</h3>
+            <p>基于 Tauri v2 + Rust 后端，启动与资源占用更克制，适合全天候常驻写作。</p>
+          </div>
+          <div class="compare-item">
+            <h3>本地优先与可控</h3>
+            <p>内容默认在本地文件系统，目录结构可迁移、可备份、可被任意 Markdown 工具继续使用。</p>
+          </div>
+          <div class="compare-item">
+            <h3>可演进架构</h3>
+            <p>以 Tauri + React + Zustand 为基础，天然适合后续接入 AI 辅助编辑与知识检索能力。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="roadmap" class="section">
+        <h2>上线优化路线图（2026 Q2）</h2>
+        <ol class="roadmap">
+          <li>
+            <strong>工程治理</strong>
+            <span>CI 门禁、Issue/PR 模板、版本化发布模板、回归脚本标准化。</span>
+          </li>
+          <li>
+            <strong>效率功能</strong>
+            <span>命令面板（Ctrl+K）、全局快速打开、模板中心、会话恢复。</span>
+          </li>
+          <li>
+            <strong>生态能力</strong>
+            <span>插件机制最小可用版、可选自动更新、公开 Roadmap 和社区投票机制。</span>
+          </li>
+        </ol>
+      </section>
+    </main>
+
+    <footer class="container footer">
+      <div>
+        <p>MYmd · Local-first Markdown Desktop Editor</p>
+        <p class="muted">© <span id="year"></span> MYmd. Built for serious writing workflows.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/LaplaceYoung/MYmd/releases">Releases</a>
+        <a href="https://github.com/LaplaceYoung/MYmd/issues">Issues</a>
+        <a href="https://github.com/LaplaceYoung/MYmd/discussions">Discussions</a>
+      </div>
+    </footer>
+
+    <script src="./main.js"></script>
+  </body>
+</html>
