@@ -18,7 +18,7 @@ MYmd 是一款基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 
 ## 版本信息
 
-- 当前版本：`v1.2.2`
+- 当前版本：`v1.2.3`
 - 目标平台：`Windows x64`
 - 最新发布：<https://github.com/LaplaceYoung/MYmd/releases>
 - 宣传页面：<https://laplaceyoung.github.io/MYmd/>
@@ -53,16 +53,12 @@ MYmd 是一款基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 - 单实例运行：二次启动时将文件参数转发给当前窗口。
 - 启动参数文件打开链路优化，避免“先欢迎页再打开文件”的闪跳。
 
-## v1.2.2 重点更新
+## v1.2.3 重点更新
 
-1. 引入 `tauri-plugin-single-instance`，修复二次启动传参丢失问题。
-2. 新增 Rust 命令 `read_text_file_from_path`，统一读取 CLI 传入文件。
-3. 重构 `useCliFileOpener`：
-   - 兼容 `file://` 参数与带引号路径。
-   - 过滤无效 flag 与重复参数。
-   - 同时监听主进程转发事件 `mymd://open-files`。
-4. `EditorContainer` 新增欢迎页抑制逻辑，减少启动视觉抖动。
-5. `tauri.conf.json` 增加 `fileAssociations`，提升系统层打开体验。
+1. 修复编辑器粘贴链路：右键菜单与菜单栏粘贴可正确写入编辑区（不再仅 `Ctrl+V` 有效）。
+2. 新增工程治理基线：CI、Issue/PR/Release 模板、Contributing 与 Security 文档。
+3. 新增 GitHub Pages 宣传站（`apps/site`），并自动展示仓库 Star 与最新版本。
+4. 新增同类项目对标与推流上线方案文档，明确 8 周执行路线。
 
 ## 技术栈
 
@@ -103,8 +99,8 @@ npm run tauri build
 
 Tauri 构建后，Windows 产物位于：
 
-- `src-tauri/target/release/bundle/nsis/MYmd_1.2.2_x64-setup.exe`
-- `src-tauri/target/release/bundle/nsis/MYmd_1.2.2_x64.exe`
+- `src-tauri/target/release/bundle/nsis/MYmd_1.2.3_x64-setup.exe`
+- `src-tauri/target/release/bundle/nsis/MYmd_1.2.3_x64.exe`
 
 项目同时维护一个便于分发的 `release/` 目录（仅保留最新版本安装包）。
 

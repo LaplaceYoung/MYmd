@@ -1,5 +1,37 @@
 # MYmd Release Notes
 
+## v1.2.3 (2026-03-03)
+
+### Highlights
+
+- Fixed editor paste behavior for context-menu paste and menu-bar paste.
+- Added GitHub governance baseline:
+  - CI workflow (`npm ci` + `npm run build`)
+  - Issue/PR/Release templates
+  - `CONTRIBUTING.md` and `SECURITY.md`
+- Added GitHub Pages landing site under `apps/site`.
+- Added benchmark and launch strategy document:
+  - `docs/benchmark-launch-plan-2026Q2.md`
+
+### Core Fixes
+
+- Updated clipboard target resolution and editable focus fallback in `src/utils/editorClipboard.ts`.
+- Ensured paste action works when focus comes from context menu or top menu actions.
+
+### Version Alignment
+
+- `package.json`: `1.2.3`
+- `package-lock.json`: `1.2.3`
+- `src-tauri/Cargo.toml`: `1.2.3`
+- `src-tauri/tauri.conf.json`: `1.2.3`
+
+### Build Outputs (Windows x64)
+
+- `MYmd_1.2.3_x64-setup.exe`
+- `MYmd_1.2.3_x64.exe`
+
+---
+
 ## v1.2.2 (2026-03-03)
 
 ### Highlights

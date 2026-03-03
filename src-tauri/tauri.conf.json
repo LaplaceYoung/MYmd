@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "MYmd",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "identifier": "com.mymd.app",
   "build": {
     "frontendDist": "../dist",

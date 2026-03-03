@@ -18,7 +18,7 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 
 ## Version
 
-- Current version: `v1.2.2`
+- Current version: `v1.2.3`
 - Target platform: `Windows x64`
 - Latest releases: <https://github.com/LaplaceYoung/MYmd/releases>
 - Landing page: <https://laplaceyoung.github.io/MYmd/>
@@ -53,16 +53,12 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 - Single-instance behavior: file args from second launches are forwarded to the running window.
 - Startup open-file flow avoids welcome-page flicker before CLI file loading finishes.
 
-## v1.2.2 Highlights
+## v1.2.3 Highlights
 
-1. Added `tauri-plugin-single-instance` to fix lost file-arg handling on second launch.
-2. Added Rust command `read_text_file_from_path` for unified backend file loading.
-3. Refactored `useCliFileOpener`:
-   - Supports `file://` args and quoted paths.
-   - Filters non-file flags and duplicate paths.
-   - Listens to forwarded event `mymd://open-files`.
-4. Added welcome suppression state in `EditorContainer` to reduce startup visual jump.
-5. Added `fileAssociations` in `tauri.conf.json` for better OS-level open-with behavior.
+1. Fixed editor paste flow: context-menu and menu-bar paste now work reliably (not only `Ctrl+V`).
+2. Added governance baseline: CI, Issue/PR/Release templates, Contributing, and Security docs.
+3. Added GitHub Pages landing site (`apps/site`) with dynamic Star and latest release metadata.
+4. Added benchmark + launch strategy document with an 8-week execution roadmap.
 
 ## Tech Stack
 
@@ -103,8 +99,8 @@ npm run tauri build
 
 After a Tauri build on Windows, artifacts are generated in:
 
-- `src-tauri/target/release/bundle/nsis/MYmd_1.2.2_x64-setup.exe`
-- `src-tauri/target/release/bundle/nsis/MYmd_1.2.2_x64.exe`
+- `src-tauri/target/release/bundle/nsis/MYmd_1.2.3_x64-setup.exe`
+- `src-tauri/target/release/bundle/nsis/MYmd_1.2.3_x64.exe`
 
 The repository also keeps a `release/` folder for latest distribution-ready installers.
 
