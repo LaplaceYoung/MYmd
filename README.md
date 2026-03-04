@@ -22,7 +22,6 @@ MYmd 是一款基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 - 目标平台：`Windows x64`
 - 最新发布：<https://github.com/LaplaceYoung/MYmd/releases>
 - 宣传页面：<https://laplaceyoung.github.io/MYmd/>
-- 上线方案（对标+推流+迭代）：[docs/benchmark-launch-plan-2026Q2.md](docs/benchmark-launch-plan-2026Q2.md)
 
 ## 功能总览
 
@@ -58,7 +57,6 @@ MYmd 是一款基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 1. 修复编辑器粘贴链路：右键菜单与菜单栏粘贴可正确写入编辑区（不再仅 `Ctrl+V` 有效）。
 2. 新增工程治理基线：CI、Issue/PR/Release 模板、Contributing 与 Security 文档。
 3. 新增 GitHub Pages 宣传站（`apps/site`），并自动展示仓库 Star 与最新版本。
-4. 新增同类项目对标与推流上线方案文档，明确 8 周执行路线。
 
 ## 技术栈
 
@@ -115,6 +113,8 @@ Tauri 构建后，Windows 产物位于：
 MYmd/
 |- src/                 # React 前端
 |- src-tauri/           # Tauri + Rust 后端
+|- docs/                # 产品与项目文档
+|- templates/           # 内置模板示例
 |- release/             # 发布产物目录（最新安装包）
 |- tests/               # 自动化与调试脚本
 |- README.md            # 中文说明

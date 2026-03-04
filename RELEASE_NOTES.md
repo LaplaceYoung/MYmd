@@ -10,8 +10,6 @@
   - Issue/PR/Release templates
   - `CONTRIBUTING.md` and `SECURITY.md`
 - Added GitHub Pages landing site under `apps/site`.
-- Added benchmark and launch strategy document:
-  - `docs/benchmark-launch-plan-2026Q2.md`
 
 ### Core Fixes
 

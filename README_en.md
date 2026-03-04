@@ -22,7 +22,6 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 - Target platform: `Windows x64`
 - Latest releases: <https://github.com/LaplaceYoung/MYmd/releases>
 - Landing page: <https://laplaceyoung.github.io/MYmd/>
-- Launch strategy (benchmark + growth + roadmap): [docs/benchmark-launch-plan-2026Q2.md](docs/benchmark-launch-plan-2026Q2.md)
 
 ## Feature Overview
 
@@ -58,7 +57,6 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 1. Fixed editor paste flow: context-menu and menu-bar paste now work reliably (not only `Ctrl+V`).
 2. Added governance baseline: CI, Issue/PR/Release templates, Contributing, and Security docs.
 3. Added GitHub Pages landing site (`apps/site`) with dynamic Star and latest release metadata.
-4. Added benchmark + launch strategy document with an 8-week execution roadmap.
 
 ## Tech Stack
 
@@ -115,6 +113,8 @@ The repository also keeps a `release/` folder for latest distribution-ready inst
 MYmd/
 |- src/                 # React frontend
 |- src-tauri/           # Tauri + Rust backend
+|- docs/                # Product and project docs
+|- templates/           # Built-in template examples
 |- release/             # Release artifacts (latest installer only)
 |- tests/               # Automation and debug scripts
 |- README.md            # Chinese README
