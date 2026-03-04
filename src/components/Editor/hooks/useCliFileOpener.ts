@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { useEditorStore } from '@/stores/editorStore'
 
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
+const SUPPORTED_FILE_EXTENSIONS = new Set(['.md', '.markdown', '.mdx', '.txt'])
 
 function trimQuotes(input: string): string {
     return input.replace(/^"|"$/g, '')
@@ -25,7 +26,6 @@ function normalizeFileArg(input: string): string {
         const url = new URL(trimmed)
         let path = decodeURIComponent(url.pathname)
 
-        // file:///C:/path -> C:/path (Windows)
         if (/^\/[a-zA-Z]:\//.test(path)) {
             path = path.slice(1)
         }
@@ -34,6 +34,14 @@ function normalizeFileArg(input: string): string {
     } catch {
         return trimmed
     }
+}
+
+function hasSupportedExtension(path: string): boolean {
+    const normalized = path.toLowerCase()
+    for (const ext of SUPPORTED_FILE_EXTENSIONS) {
+        if (normalized.endsWith(ext)) return true
+    }
+    return false
 }
 
 function collectCliFilePaths(args: string[]): string[] {
@@ -53,9 +61,13 @@ function collectCliFilePaths(args: string[]): string[] {
         if (arg.startsWith('-')) continue
 
         const filePath = normalizeFileArg(arg)
-        if (!filePath || seen.has(filePath)) continue
+        if (!filePath) continue
+        if (!hasSupportedExtension(filePath)) continue
 
-        seen.add(filePath)
+        const key = filePath.toLowerCase()
+        if (seen.has(key)) continue
+
+        seen.add(key)
         files.push(filePath)
     }
 
@@ -120,7 +132,7 @@ export function useCliFileOpener() {
             }
         }
 
-        initCliOpen()
+        void initCliOpen()
 
         return () => {
             mounted = false

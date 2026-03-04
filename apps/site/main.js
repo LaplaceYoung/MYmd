@@ -1,37 +1,35 @@
-const repo = "LaplaceYoung/MYmd";
-const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-const prefersReducedMotion = reducedMotionQuery.matches;
+﻿const repo = "LaplaceYoung/MYmd";
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const lowEndDevice = (navigator.hardwareConcurrency || 8) <= 4;
-const enableHighMotion = !prefersReducedMotion && !lowEndDevice;
+const enableMotion = !reducedMotion && !lowEndDevice;
 
 const highlightContent = {
   light: {
-    title: "轻量启动，快速进入写作状态",
-    desc: "打开即写，保留核心能力密度，避免重型软件带来的学习与切换负担。",
-    head: "启动路径",
-    list: ["打开文件或新建文档", "直接进入编辑区", "关键工具始终可达"]
+    title: "轻量启动，打开就写",
+    desc: "降低从“打开工具”到“进入写作状态”的切换损耗。",
+    list: ["本地文件直接打开", "首次上手路径短", "关键动作入口集中"]
   },
   flow: {
-    title: "写作到发布一条链路",
-    desc: "从编辑、保存到导出与下载页跳转，交付路径明确且可复用。",
-    head: "交付闭环",
-    list: ["编辑与预览同步", "保存与导出路径稳定", "版本发布入口直接可达"]
+    title: "写作到交付形成闭环",
+    desc: "编辑、审阅、导出、发布在同一套动作里完成。",
+    list: ["编辑和预览无缝切换", "导出动作可预测", "版本发布入口直达"]
   },
-  consistency: {
-    title: "统一交互降低学习成本",
-    desc: "工具栏、侧栏与状态反馈遵循同一节奏，减少认知跳转。",
-    head: "交互一致性",
-    list: ["按钮语义稳定", "反馈时机明确", "模式切换成本低"]
+  team: {
+    title: "一致交互降低协作成本",
+    desc: "清晰的信息分层让团队更快达成文档共识。",
+    list: ["模式切换语义统一", "状态反馈及时", "文档结构可追踪"]
   }
+};
+
+const demoModeMeta = {
+  wysiwyg: "WYSIWYG",
+  split: "Split",
+  source: "Source"
 };
 
 function setYear() {
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
-}
-
-function easeOutCubic(value) {
-  return 1 - Math.pow(1 - value, 3);
 }
 
 function animateNumber(element, target) {
@@ -40,35 +38,33 @@ function animateNumber(element, target) {
     return;
   }
 
-  if (!enableHighMotion) {
+  if (!enableMotion) {
     element.textContent = target.toLocaleString("en-US");
     return;
   }
 
-  const duration = 760;
-  const startTime = performance.now();
+  const duration = 720;
+  const start = performance.now();
 
-  function tick(now) {
-    const progress = Math.min((now - startTime) / duration, 1);
-    const value = Math.round(target * easeOutCubic(progress));
-    element.textContent = value.toLocaleString("en-US");
-    if (progress < 1) requestAnimationFrame(tick);
-  }
+  const frame = (now) => {
+    const ratio = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - ratio, 3);
+    element.textContent = Math.round(target * eased).toLocaleString("en-US");
+    if (ratio < 1) requestAnimationFrame(frame);
+  };
 
-  requestAnimationFrame(tick);
+  requestAnimationFrame(frame);
 }
 
 function initReveal() {
-  const items = Array.from(document.querySelectorAll(".reveal"));
-  if (items.length === 0) return;
-
-  items.forEach((item) => {
-    const delay = Number(item.getAttribute("data-delay") ?? 0);
-    item.style.setProperty("--delay", `${delay}ms`);
+  const nodes = Array.from(document.querySelectorAll(".reveal"));
+  nodes.forEach((node) => {
+    const delay = Number(node.getAttribute("data-delay") || 0);
+    node.style.setProperty("--delay", `${delay}ms`);
   });
 
-  if (!enableHighMotion || typeof IntersectionObserver === "undefined") {
-    items.forEach((item) => item.classList.add("is-visible"));
+  if (!enableMotion || typeof IntersectionObserver === "undefined") {
+    nodes.forEach((node) => node.classList.add("is-visible"));
     return;
   }
 
@@ -81,12 +77,12 @@ function initReveal() {
       });
     },
     {
-      threshold: 0.18,
+      threshold: 0.15,
       rootMargin: "0px 0px -8% 0px"
     }
   );
 
-  items.forEach((item) => observer.observe(item));
+  nodes.forEach((node) => observer.observe(node));
 }
 
 function initScrollProgress() {
@@ -95,45 +91,63 @@ function initScrollProgress() {
 
   let ticking = false;
 
-  function update() {
-    const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-    const percent = Math.min(100, Math.max(0, (scrollTop / maxScroll) * 100));
-    bar.style.transform = `scaleX(${percent / 100})`;
+  const update = () => {
+    const top = window.scrollY || document.documentElement.scrollTop || 0;
+    const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const ratio = Math.min(1, Math.max(0, top / max));
+    bar.style.transform = `scaleX(${ratio})`;
     ticking = false;
-  }
+  };
 
-  function onScroll() {
+  const onScroll = () => {
     if (ticking) return;
     ticking = true;
     requestAnimationFrame(update);
-  }
+  };
 
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll);
   update();
 }
 
+function initMobileNav() {
+  const toggle = document.getElementById("nav-toggle");
+  const nav = document.getElementById("site-nav");
+  if (!(toggle instanceof HTMLButtonElement) || !(nav instanceof HTMLElement)) return;
+
+  toggle.addEventListener("click", () => {
+    const nextOpen = !nav.classList.contains("is-open");
+    nav.classList.toggle("is-open", nextOpen);
+    toggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+  });
+
+  nav.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      nav.classList.remove("is-open");
+      toggle.setAttribute("aria-expanded", "false");
+    });
+  });
+}
+
 function initSectionSpy() {
-  const sectionIds = ["hero", "features", "highlights", "release"];
+  const sectionIds = ["hero", "workflow", "features", "proof", "release"];
   const navLinks = Array.from(document.querySelectorAll("[data-nav-target]"));
 
-  function activate(target) {
+  const activate = (id) => {
     navLinks.forEach((link) => {
-      const isCurrent = link.getAttribute("data-nav-target") === target;
-      link.classList.toggle("is-current", isCurrent);
+      link.classList.toggle("is-current", link.getAttribute("data-nav-target") === id);
     });
-  }
+  };
 
   navLinks.forEach((link) => {
     const target = link.getAttribute("data-nav-target");
     if (!target) return;
 
     link.addEventListener("click", (event) => {
-      const anchor = document.getElementById(target);
-      if (!anchor) return;
+      const section = document.getElementById(target);
+      if (!section) return;
       event.preventDefault();
-      anchor.scrollIntoView({ behavior: enableHighMotion ? "smooth" : "auto", block: "start" });
+      section.scrollIntoView({ behavior: enableMotion ? "smooth" : "auto", block: "start" });
       activate(target);
     });
   });
@@ -143,28 +157,20 @@ function initSectionSpy() {
     return;
   }
 
-  const sections = sectionIds
-    .map((id) => document.getElementById(id))
-    .filter(Boolean);
-
-  if (sections.length === 0) return;
+  const sections = sectionIds.map((id) => document.getElementById(id)).filter(Boolean);
 
   const observer = new IntersectionObserver(
     (entries) => {
       let best = null;
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
-        if (!best || entry.intersectionRatio > best.intersectionRatio) {
-          best = entry;
-        }
+        if (!best || entry.intersectionRatio > best.intersectionRatio) best = entry;
       });
-
-      if (!best || !best.target?.id) return;
-      activate(best.target.id);
+      if (best?.target?.id) activate(best.target.id);
     },
     {
       threshold: [0.2, 0.4, 0.6],
-      rootMargin: "-16% 0px -55% 0px"
+      rootMargin: "-12% 0px -58% 0px"
     }
   );
 
@@ -173,117 +179,102 @@ function initSectionSpy() {
 }
 
 function initHighlightSwitch() {
-  const buttons = Array.from(document.querySelectorAll(".highlight-btn"));
-  const titleEl = document.getElementById("highlight-title");
-  const descEl = document.getElementById("highlight-desc");
-  const headEl = document.getElementById("proof-head");
+  const tabs = Array.from(document.querySelectorAll(".proof-tab"));
+  const titleEl = document.getElementById("proof-title");
+  const descEl = document.getElementById("proof-desc");
   const listEl = document.getElementById("proof-list");
-  const panelEl = document.getElementById("highlight-panel");
 
-  if (!titleEl || !descEl || !headEl || !listEl || !panelEl || buttons.length === 0) return;
+  if (!titleEl || !descEl || !listEl || tabs.length === 0) return;
 
-  function render(key) {
-    const data = highlightContent[key];
-    if (!data) return;
+  const render = (key) => {
+    const content = highlightContent[key];
+    if (!content) return;
+    titleEl.textContent = content.title;
+    descEl.textContent = content.desc;
+    listEl.innerHTML = content.list.map((item) => `<li>${item}</li>`).join("");
+  };
 
-    panelEl.classList.add("is-swapping");
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach((item) => item.classList.remove("is-active"));
+      tab.classList.add("is-active");
+      render(tab.dataset.highlight || "light");
+    });
+  });
+}
 
-    const commit = () => {
-      titleEl.textContent = data.title;
-      descEl.textContent = data.desc;
-      headEl.textContent = data.head;
-      listEl.innerHTML = data.list.map((item) => `<li>${item}</li>`).join("");
-      panelEl.classList.remove("is-swapping");
-    };
+function initHeroModes() {
+  const bodyEl = document.getElementById("demo-body");
+  const badgeEl = document.getElementById("window-badge");
+  const buttons = Array.from(document.querySelectorAll("[data-demo-mode]"));
+  if (!bodyEl || !badgeEl || buttons.length === 0) return;
 
-    if (!enableHighMotion) {
-      commit();
-      return;
-    }
+  const order = ["wysiwyg", "split", "source"];
+  let index = 0;
+  let timer = null;
 
-    window.setTimeout(commit, 120);
-  }
+  const apply = (mode) => {
+    if (!demoModeMeta[mode]) return;
+    bodyEl.setAttribute("data-mode", mode);
+    badgeEl.textContent = demoModeMeta[mode];
+    buttons.forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.demoMode === mode);
+    });
+  };
+
+  const next = () => {
+    index = (index + 1) % order.length;
+    apply(order[index]);
+  };
 
   buttons.forEach((button) => {
     button.addEventListener("click", () => {
-      buttons.forEach((node) => node.classList.remove("is-active"));
-      button.classList.add("is-active");
-      render(button.dataset.highlight || "light");
+      const mode = button.dataset.demoMode || "wysiwyg";
+      const modeIndex = order.indexOf(mode);
+      index = modeIndex >= 0 ? modeIndex : 0;
+      apply(order[index]);
+      if (timer) {
+        window.clearInterval(timer);
+        timer = window.setInterval(next, 2600);
+      }
     });
   });
+
+  apply(order[index]);
+  if (enableMotion) timer = window.setInterval(next, 2600);
 }
 
-function initTiltCards() {
-  if (!enableHighMotion) return;
+function initCelebrateBurst() {
+  const button = document.getElementById("celebrate-btn");
+  const layer = document.getElementById("burst-layer");
+  if (!(button instanceof HTMLButtonElement) || !layer) return;
 
-  const cards = Array.from(document.querySelectorAll(".tilt-card"));
+  const palette = ["#14b8a6", "#0f766e", "#22d3ee", "#34d399", "#99f6e4"];
 
-  cards.forEach((card) => {
-    card.addEventListener("mousemove", (event) => {
-      const rect = card.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / rect.width;
-      const y = (event.clientY - rect.top) / rect.height;
-      const rotateX = (0.5 - y) * 2.6;
-      const rotateY = (x - 0.5) * 2.6;
-      card.style.transform = `perspective(980px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-    });
+  button.addEventListener("click", (event) => {
+    const rect = button.getBoundingClientRect();
+    const baseX = rect.left + rect.width / 2;
+    const baseY = rect.top + rect.height / 2;
 
-    card.addEventListener("mouseleave", () => {
-      card.style.transform = "";
-    });
-  });
-}
+    for (let i = 0; i < 24; i += 1) {
+      const burst = document.createElement("span");
+      const angle = (Math.PI * 2 * i) / 24;
+      const distance = 60 + Math.random() * 80;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance;
+      burst.className = "burst";
+      burst.style.left = `${baseX}px`;
+      burst.style.top = `${baseY}px`;
+      burst.style.background = palette[i % palette.length];
+      burst.style.setProperty("--tx", `${tx}px`);
+      burst.style.setProperty("--ty", `${ty}px`);
+      layer.appendChild(burst);
+      window.setTimeout(() => burst.remove(), 980);
+    }
 
-function initParallax() {
-  if (!enableHighMotion) return;
-
-  const targets = Array.from(document.querySelectorAll("[data-parallax]"));
-  if (targets.length === 0) return;
-
-  let ticking = false;
-
-  function updateParallax() {
-    const vh = window.innerHeight || 1;
-
-    targets.forEach((el) => {
-      const intensity = Number(el.getAttribute("data-parallax") ?? 0);
-      const rect = el.getBoundingClientRect();
-      const center = rect.top + rect.height / 2;
-      const normalized = (center - vh / 2) / vh;
-      const offset = Math.max(-14, Math.min(14, -normalized * intensity));
-      el.style.setProperty("--parallax-y", `${offset.toFixed(2)}px`);
-    });
-
-    ticking = false;
-  }
-
-  function onScroll() {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(updateParallax);
-  }
-
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onScroll);
-  updateParallax();
-}
-
-function initMagneticButtons() {
-  if (!enableHighMotion) return;
-
-  const buttons = Array.from(document.querySelectorAll(".magnetic"));
-
-  buttons.forEach((button) => {
-    button.addEventListener("mousemove", (event) => {
-      const rect = button.getBoundingClientRect();
-      const x = event.clientX - (rect.left + rect.width / 2);
-      const y = event.clientY - (rect.top + rect.height / 2);
-      button.style.transform = `translate(${x * 0.05}px, ${y * 0.05}px)`;
-    });
-
-    button.addEventListener("mouseleave", () => {
-      button.style.transform = "";
-    });
+    if (event.currentTarget instanceof HTMLButtonElement) {
+      event.currentTarget.blur();
+    }
   });
 }
 
@@ -309,13 +300,8 @@ async function loadRepoStats() {
     const starsWrap = document.getElementById("stars-wrap");
     const starsEl = document.getElementById("stars-count");
 
-    if (starsWrap && stars < 100) {
-      starsWrap.style.display = "none";
-    }
-
-    if (starsEl) {
-      animateNumber(starsEl, stars);
-    }
+    if (starsWrap && stars < 100) starsWrap.style.display = "none";
+    if (starsEl) animateNumber(starsEl, stars);
   } catch {
     const starsWrap = document.getElementById("stars-wrap");
     if (starsWrap) starsWrap.style.display = "none";
@@ -325,27 +311,25 @@ async function loadRepoStats() {
 async function loadLatestRelease() {
   try {
     const data = await fetchJson(`https://api.github.com/repos/${repo}/releases/latest`);
-
-    const latestVersionEls = [
+    const nodes = [
       document.getElementById("latest-version"),
       document.getElementById("release-version-inline")
     ].filter(Boolean);
 
-    const releaseCtaEl = document.getElementById("release-cta");
-    const releaseLinkEl = document.getElementById("release-link");
-
     if (data.tag_name) {
-      latestVersionEls.forEach((node) => {
+      nodes.forEach((node) => {
         node.textContent = data.tag_name;
       });
     }
 
     if (data.html_url) {
-      if (releaseCtaEl) releaseCtaEl.setAttribute("href", data.html_url);
-      if (releaseLinkEl) releaseLinkEl.setAttribute("href", data.html_url);
+      const cta = document.getElementById("release-cta");
+      const link = document.getElementById("release-link");
+      if (cta) cta.setAttribute("href", data.html_url);
+      if (link) link.setAttribute("href", data.html_url);
     }
   } catch {
-    // keep fallback
+    // keep fallback values
   }
 }
 
@@ -353,11 +337,11 @@ async function bootstrap() {
   setYear();
   initReveal();
   initScrollProgress();
+  initMobileNav();
   initSectionSpy();
   initHighlightSwitch();
-  initTiltCards();
-  initParallax();
-  initMagneticButtons();
+  initHeroModes();
+  initCelebrateBurst();
 
   await Promise.allSettled([loadRepoStats(), loadLatestRelease()]);
 }

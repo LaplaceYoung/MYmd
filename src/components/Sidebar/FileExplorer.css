@@ -1,4 +1,4 @@
-.file-explorer {
+﻿.file-explorer {
     width: 260px;
     height: 100%;
     background-color: var(--bg-secondary);
@@ -93,6 +93,19 @@
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.file-explorer__error {
+    margin: 0 16px 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(240, 97, 82, 0.32);
+    background: rgba(240, 97, 82, 0.1);
+    color: var(--danger, #d13438);
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .file-node-container {
