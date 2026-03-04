@@ -3,144 +3,270 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MYmd | Local-first Markdown Desktop Editor</title>
+    <title>MYmd | 本地优先的 Markdown 桌面编辑器</title>
     <meta
       name="description"
-      content="MYmd 是基于 Tauri + React + TypeScript 的本地优先 Markdown 桌面编辑器，支持 WYSIWYG、源码分屏、Mermaid、KaTeX 和多标签工作流。"
+      content="MYmd 是基于 Tauri + React + TypeScript 的本地优先 Markdown 桌面编辑器，支持 WYSIWYG、源码分屏、Mermaid、KaTeX、多标签与自动保存。"
     />
-    <meta property="og:title" content="MYmd | Local-first Markdown Desktop Editor" />
+    <meta property="og:title" content="MYmd | 本地优先的 Markdown 桌面编辑器" />
     <meta
       property="og:description"
-      content="轻量、高性能、本地优先。为高频写作与结构化知识工作流打造。"
+      content="让 Markdown 从记录工具升级为可交付的产品工作流。"
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://laplaceyoung.github.io/MYmd/" />
+    <meta name="theme-color" content="#081121" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Syne:wght@500;700;800&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div class="bg-grid"></div>
-    <header class="container topbar">
-      <a class="brand" href="https://github.com/LaplaceYoung/MYmd">
-        <span class="brand-dot"></span>
-        <span>MYmd</span>
+    <div class="site-bg" aria-hidden="true">
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+      <div class="orb orb-c"></div>
+      <div class="grid-layer"></div>
+    </div>
+
+    <header class="shell topbar">
+      <a class="brand" href="#top" aria-label="MYmd 首页">
+        <span class="brand-mark"></span>
+        <span class="brand-text">MYmd</span>
       </a>
-      <nav class="top-links">
-        <a href="#features">功能</a>
+      <nav class="nav-links">
+        <a href="#features">核心能力</a>
+        <a href="#workflow">工作流</a>
         <a href="#roadmap">路线图</a>
-        <a href="https://github.com/LaplaceYoung/MYmd/releases">下载</a>
         <a href="https://github.com/LaplaceYoung/MYmd">GitHub</a>
       </nav>
     </header>
 
-    <main class="container">
+    <main id="top" class="shell">
       <section class="hero">
-        <p class="kicker">LOCAL-FIRST · TAURI NATIVE · MARKDOWN WORKFLOW</p>
-        <h1>让 Markdown 成为可交付的生产工作流，而不只是一个文本文件。</h1>
-        <p class="subtitle">
-          MYmd 是面向高频写作、知识沉淀和产品文档协作的桌面编辑器。支持
-          WYSIWYG/源码分屏、多标签、文件树、Mermaid/KaTeX、自动保存与系统关联打开。
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="https://github.com/LaplaceYoung/MYmd/releases/tag/v1.2.3">
-            下载最新版本
-          </a>
-          <a class="btn btn-ghost" href="https://github.com/LaplaceYoung/MYmd">
-            查看源码
-          </a>
+        <div class="hero-copy" data-aos="fade-up" data-aos-duration="700">
+          <p class="eyebrow">LOCAL-FIRST • TAURI NATIVE • MARKDOWN DELIVERY FLOW</p>
+          <h1>让 Markdown 从“笔记”升级为“交付链路”。</h1>
+          <p class="lead">
+            MYmd 面向高频写作与产品文档协作场景：在 WYSIWYG 与源码之间自由切换，分屏校对结构，
+            内建 Mermaid/KaTeX，并以桌面原生性能完成从草稿到发布的闭环。
+          </p>
+          <div class="hero-actions">
+            <a
+              id="release-cta"
+              class="btn btn-primary"
+              href="https://github.com/LaplaceYoung/MYmd/releases/latest"
+            >
+              下载最新版本
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LaplaceYoung/MYmd">查看源码</a>
+          </div>
+          <div class="stat-grid">
+            <article class="stat-card" data-aos="fade-up" data-aos-delay="50">
+              <span class="stat-label">Latest Release</span>
+              <strong id="latest-version" class="stat-value">v1.2.3</strong>
+            </article>
+            <article class="stat-card" data-aos="fade-up" data-aos-delay="120">
+              <span class="stat-label">GitHub Stars</span>
+              <strong id="stars-count" class="stat-value">--</strong>
+            </article>
+            <article class="stat-card" data-aos="fade-up" data-aos-delay="190">
+              <span class="stat-label">Forks</span>
+              <strong id="forks-count" class="stat-value">--</strong>
+            </article>
+            <article class="stat-card" data-aos="fade-up" data-aos-delay="260">
+              <span class="stat-label">Open Issues</span>
+              <strong id="issues-count" class="stat-value">--</strong>
+            </article>
+          </div>
         </div>
-        <div class="hero-metrics">
-          <div class="metric">
-            <span class="metric-label">Latest Release</span>
-            <span id="latest-version" class="metric-value">v1.2.3</span>
+
+        <div class="hero-visual tilt-card" data-aos="fade-left" data-aos-duration="800">
+          <div class="window-chrome">
+            <span></span><span></span><span></span>
+            <p>workspace / release-note.md</p>
           </div>
-          <div class="metric">
-            <span class="metric-label">Stars</span>
-            <span id="stars-count" class="metric-value">--</span>
+          <div class="window-body">
+            <div class="line"><span class="token token-key">#</span> MYmd v1.2.3 发布清单</div>
+            <div class="line"><span class="token token-ok">✓</span> 核对版本说明</div>
+            <div class="line"><span class="token token-ok">✓</span> 文档导出 HTML 预览</div>
+            <div class="line"><span class="token token-ok">✓</span> Mermaid/KaTeX 渲染检查</div>
+            <div class="line"><span class="token token-run">→</span> 推送 <code>apps/site</code> 并触发部署</div>
+            <div class="line line-muted">Tip: Ctrl + K 命令面板已纳入路线图。</div>
           </div>
-          <div class="metric">
-            <span class="metric-label">Target</span>
-            <span class="metric-value">Windows x64</span>
+          <div class="float-chip chip-a">
+            <i data-lucide="sparkles"></i>
+            <span>专注模式</span>
+          </div>
+          <div class="float-chip chip-b">
+            <i data-lucide="split-square-horizontal"></i>
+            <span>分屏编辑</span>
+          </div>
+          <div class="float-chip chip-c">
+            <i data-lucide="save-all"></i>
+            <span>自动保存</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="trust" data-aos="fade-up">
+        <p>
+          页面结构灵感参考热门开源项目宣传站：
+          <a href="https://vite.dev/">Vite</a>、
+          <a href="https://tailwindcss.com/">Tailwind CSS</a>、
+          <a href="https://nextjs.org/">Next.js</a>。
+        </p>
+        <div class="ticker" aria-hidden="true">
+          <div class="ticker-track">
+            TAURI v2 • REACT 19 • TYPESCRIPT • MARKDOWN • MERMAID • KATEX • LOCAL-FIRST • DESKTOP NATIVE • TAURI
+            v2 • REACT 19 • TYPESCRIPT • MARKDOWN • MERMAID • KATEX • LOCAL-FIRST • DESKTOP NATIVE
           </div>
         </div>
       </section>
 
       <section id="features" class="section">
-        <h2>核心能力</h2>
-        <div class="grid">
-          <article class="card">
-            <h3>编辑与视图</h3>
-            <p>WYSIWYG / Source / Split 三视图切换，支持 Focus Mode 与 Typewriter Mode。</p>
+        <header class="section-head" data-aos="fade-up">
+          <p class="eyebrow">PRODUCT CAPABILITIES</p>
+          <h2>不是“写字板”，而是可落地的文档工作台。</h2>
+        </header>
+        <div class="feature-grid">
+          <article class="feature" data-aos="fade-up" data-aos-delay="40">
+            <i data-lucide="layout-panel-top"></i>
+            <h3>多视图编辑</h3>
+            <p>WYSIWYG / Source / Split 三视图切换，兼顾速度与结构精度。</p>
           </article>
-          <article class="card">
-            <h3>文件工作流</h3>
-            <p>多标签、新建/打开/保存/另存为/导出 HTML，Workspace 文件树与自动保存。</p>
+          <article class="feature" data-aos="fade-up" data-aos-delay="90">
+            <i data-lucide="tree-pine"></i>
+            <h3>工作区文件树</h3>
+            <p>多标签与目录协同，让大型文档项目也能保持稳定节奏。</p>
           </article>
-          <article class="card">
-            <h3>内容增强</h3>
-            <p>Mermaid、KaTeX、语法高亮、TOC 目录、全局 Search/Replace 全链路可用。</p>
+          <article class="feature" data-aos="fade-up" data-aos-delay="140">
+            <i data-lucide="git-branch-plus"></i>
+            <h3>图表与公式</h3>
+            <p>Mermaid + KaTeX 内建支持，技术文档和方案文档一步到位。</p>
           </article>
-          <article class="card">
-            <h3>桌面集成</h3>
-            <p>单实例转发、文件关联打开（.md/.markdown）、自定义标题栏与窗口控制。</p>
+          <article class="feature" data-aos="fade-up" data-aos-delay="190">
+            <i data-lucide="search-code"></i>
+            <h3>全局检索替换</h3>
+            <p>面向长文档与知识库场景，快速定位并批量维护内容。</p>
+          </article>
+          <article class="feature" data-aos="fade-up" data-aos-delay="240">
+            <i data-lucide="shield-check"></i>
+            <h3>本地优先</h3>
+            <p>默认存于本地文件系统，目录透明、可迁移、可备份。</p>
+          </article>
+          <article class="feature" data-aos="fade-up" data-aos-delay="290">
+            <i data-lucide="rocket"></i>
+            <h3>轻量原生性能</h3>
+            <p>Tauri + Rust 后端，启动更快、资源占用更低。</p>
           </article>
         </div>
       </section>
 
-      <section class="section">
-        <h2>为什么是 MYmd</h2>
-        <div class="compare">
-          <div class="compare-item">
-            <h3>轻量桌面性能</h3>
-            <p>基于 Tauri v2 + Rust 后端，启动与资源占用更克制，适合全天候常驻写作。</p>
-          </div>
-          <div class="compare-item">
-            <h3>本地优先与可控</h3>
-            <p>内容默认在本地文件系统，目录结构可迁移、可备份、可被任意 Markdown 工具继续使用。</p>
-          </div>
-          <div class="compare-item">
-            <h3>可演进架构</h3>
-            <p>以 Tauri + React + Zustand 为基础，天然适合后续接入 AI 辅助编辑与知识检索能力。</p>
-          </div>
+      <section id="workflow" class="section workflow">
+        <div class="workflow-copy" data-aos="fade-right">
+          <p class="eyebrow">TEAM FLOW</p>
+          <h2>围绕“高频交付”设计的写作闭环。</h2>
+          <ul class="workflow-list">
+            <li>
+              <span>01</span>
+              使用模板快速起稿，先结构后内容，避免文档扩张失控。
+            </li>
+            <li>
+              <span>02</span>
+              分屏校对 + 图表公式联调，提前完成可读性与准确性检查。
+            </li>
+            <li>
+              <span>03</span>
+              导出、提交、发布，与代码仓库版本节奏保持一致。
+            </li>
+          </ul>
         </div>
+        <aside class="workflow-panel tilt-card" data-aos="fade-left">
+          <div class="panel-head">
+            <i data-lucide="terminal-square"></i>
+            <p>Pipeline Snapshot</p>
+          </div>
+          <div class="panel-line">
+            <span class="panel-k">Editor Modes</span>
+            <span class="panel-v">WYSIWYG / Source / Split</span>
+          </div>
+          <div class="panel-line">
+            <span class="panel-k">Auto Save</span>
+            <span class="panel-v">Dirty tab guard</span>
+          </div>
+          <div class="panel-line">
+            <span class="panel-k">GitHub Pages</span>
+            <span class="panel-v">/apps/site artifact</span>
+          </div>
+          <div class="panel-line">
+            <span class="panel-k">Roadmap</span>
+            <span class="panel-v">Command palette + plugins</span>
+          </div>
+        </aside>
       </section>
 
       <section id="roadmap" class="section">
-        <h2>上线优化路线图（2026 Q2）</h2>
-        <ol class="roadmap">
-          <li>
-            <strong>工程治理</strong>
-            <span>CI 门禁、Issue/PR 模板、版本化发布模板、回归脚本标准化。</span>
-          </li>
-          <li>
-            <strong>效率功能</strong>
-            <span>命令面板（Ctrl+K）、全局快速打开、模板中心、会话恢复。</span>
-          </li>
-          <li>
-            <strong>生态能力</strong>
-            <span>插件机制最小可用版、可选自动更新、公开 Roadmap 和社区投票机制。</span>
-          </li>
-        </ol>
+        <header class="section-head" data-aos="fade-up">
+          <p class="eyebrow">2026 Q2 ROADMAP</p>
+          <h2>先工程稳定，再效率功能，最后生态扩展。</h2>
+        </header>
+        <div class="roadmap-grid">
+          <article class="roadmap-item" data-aos="zoom-in" data-aos-delay="40">
+            <h3>工程治理</h3>
+            <p>CI 质量门禁、Issue/PR 模板、版本发布与回归脚本标准化。</p>
+          </article>
+          <article class="roadmap-item" data-aos="zoom-in" data-aos-delay="120">
+            <h3>效率层</h3>
+            <p>命令面板（Ctrl + K）、快速打开、模板中心、会话恢复。</p>
+          </article>
+          <article class="roadmap-item" data-aos="zoom-in" data-aos-delay="200">
+            <h3>生态层</h3>
+            <p>最小可用插件机制、可选自动更新通道、公开 Roadmap 投票。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="launch-cta" data-aos="fade-up">
+        <div class="launch-copy">
+          <p class="eyebrow">RELEASE MOTION</p>
+          <h2>每一次推送，都能自动更新宣传页。</h2>
+          <p>
+            当前站点通过 GitHub Pages 从 <code>apps/site</code> 目录发布。
+            更新内容并推送到 <code>main</code> 后，会自动触发部署流程。
+          </p>
+        </div>
+        <div class="launch-actions">
+          <a id="release-link" class="btn btn-primary" href="https://github.com/LaplaceYoung/MYmd/releases/latest">
+            打开最新发布
+          </a>
+          <button id="celebrate-btn" class="btn btn-ghost" type="button">预览发布动效</button>
+        </div>
+        <div id="particle-stage" aria-hidden="true"></div>
       </section>
     </main>
 
-    <footer class="container footer">
+    <footer class="shell footer">
       <div>
-        <p>MYmd · Local-first Markdown Desktop Editor</p>
-        <p class="muted">© <span id="year"></span> MYmd. Built for serious writing workflows.</p>
+        <p class="footer-title">MYmd • Local-first Markdown Desktop Editor</p>
+        <p class="footer-subtle">© <span id="year"></span> MYmd. Built for serious writing workflows.</p>
       </div>
       <div class="footer-links">
         <a href="https://github.com/LaplaceYoung/MYmd/releases">Releases</a>
         <a href="https://github.com/LaplaceYoung/MYmd/issues">Issues</a>
         <a href="https://github.com/LaplaceYoung/MYmd/discussions">Discussions</a>
       </div>
+      <p class="resource-note">
+        资源来源：AOS 滚动动效、Lucide 图标、Hero Patterns 风格纹理、Haikei 风格 SVG 背景层。
+      </p>
     </footer>
 
-    <script src="./main.js"></script>
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js" defer></script>
+    <script src="https://unpkg.com/lucide@0.474.0/dist/umd/lucide.min.js" defer></script>
+    <script src="./main.js" defer></script>
   </body>
 </html>
