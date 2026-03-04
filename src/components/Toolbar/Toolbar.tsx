@@ -6,7 +6,6 @@ import {
     Columns2, PenTool, ChevronDown
 } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
-import type { ViewMode } from '@/stores/editorStore'
 import './Toolbar.css'
 
 export function Toolbar() {

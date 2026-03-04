@@ -31,6 +31,22 @@ export type ThemeMode = 'light' | 'dark' | 'system'
 // 配色方案
 export type ColorScheme = 'default' | 'aurora-green' | 'sunset-orange' | 'lavender' | 'sakura-pink' | 'ocean-cyan' | 'amber-gold' | 'graphite'
 
+// 数学公式编辑浮层定位信息
+export interface MathEditRect {
+    left: number
+    top: number
+    width: number
+    height: number
+}
+
+// 数学公式编辑上下文
+export interface MathEditState {
+    rect: MathEditRect
+    targetPos: number
+    value: string
+    nodeType: 'math_inline' | 'math_block'
+}
+
 interface EditorState {
     /** 所有标签页 */
     tabs: Tab[]
@@ -70,6 +86,8 @@ interface EditorState {
     fileExplorerVisible: boolean
     /** 当前打开的文件夹路径 */
     activeWorkspace: string | null
+    /** 当前数学公式编辑浮层 */
+    mathEdit: MathEditState | null
 
     // 操作
     addTab: (filePath: string | null, content?: string) => string
@@ -97,6 +115,8 @@ interface EditorState {
     setTocVisible: (visible: boolean) => void
     setFileExplorerVisible: (visible: boolean) => void
     setActiveWorkspace: (path: string | null) => void
+    openMathEdit: (state: MathEditState) => void
+    closeMathEdit: () => void
     /** 执行保存操作（保存当前活动标签） */
     saveActiveTab: () => Promise<void>
     /** 执行保存操作（保存指定标签） */
@@ -284,6 +304,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     setFileExplorerVisible: (enable) => set({ fileExplorerVisible: enable }),
 
     setActiveWorkspace: (path) => set({ activeWorkspace: path }),
+
+    openMathEdit: (state) => set({ mathEdit: state }),
+
+    closeMathEdit: () => set({ mathEdit: null }),
 
     saveActiveTab: async () => {
         const tab = get().getActiveTab()

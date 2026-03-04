@@ -1,4 +1,4 @@
-import { AlertTriangle, X } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
 import './SaveConfirmDialog.css'
 

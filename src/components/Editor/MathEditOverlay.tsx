@@ -18,7 +18,6 @@ interface MathEditOverlayProps {
 export function MathEditOverlay({ editorRef }: MathEditOverlayProps) {
     const mathEdit = useEditorStore(s => s.mathEdit)
     const closeMathEdit = useEditorStore(s => s.closeMathEdit)
-    const zoom = useEditorStore(s => s.zoom)
 
     const [latex, setLatex] = useState('')
     const [renderedHtml, setRenderedHtml] = useState('')
