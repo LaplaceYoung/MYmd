@@ -1,4 +1,5 @@
 const repo = "LaplaceYoung/MYmd";
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function setYear() {
   const yearEl = document.getElementById("year");
@@ -7,28 +8,35 @@ function setYear() {
   }
 }
 
+function easeOutCubic(value) {
+  return 1 - Math.pow(1 - value, 3);
+}
+
 function animateNumber(element, target) {
   if (!Number.isFinite(target)) {
     element.textContent = "--";
     return;
   }
 
-  const duration = 900;
-  const startTime = performance.now();
-  const startValue = 0;
+  if (prefersReducedMotion) {
+    element.textContent = target.toLocaleString("en-US");
+    return;
+  }
 
-  function step(now) {
+  const duration = 920;
+  const startTime = performance.now();
+
+  function tick(now) {
     const progress = Math.min((now - startTime) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    const value = Math.round(startValue + (target - startValue) * eased);
+    const value = Math.round(target * easeOutCubic(progress));
     element.textContent = value.toLocaleString("en-US");
 
     if (progress < 1) {
-      requestAnimationFrame(step);
+      requestAnimationFrame(tick);
     }
   }
 
-  requestAnimationFrame(step);
+  requestAnimationFrame(tick);
 }
 
 async function fetchJson(url) {
@@ -93,53 +101,114 @@ async function loadLatestRelease() {
   }
 }
 
-function initAos() {
-  if (window.AOS && typeof window.AOS.init === "function") {
-    window.AOS.init({
-      duration: 700,
-      once: true,
-      offset: 56,
-      easing: "ease-out-cubic"
-    });
+function initReveal() {
+  const items = Array.from(document.querySelectorAll(".reveal"));
+  if (items.length === 0) {
+    return;
   }
+
+  items.forEach((item) => {
+    const delay = Number(item.getAttribute("data-delay") ?? 0);
+    item.style.setProperty("--delay", `${delay}ms`);
+  });
+
+  if (prefersReducedMotion || typeof IntersectionObserver === "undefined") {
+    items.forEach((item) => item.classList.add("is-visible"));
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    {
+      threshold: 0.16,
+      rootMargin: "0px 0px -8% 0px"
+    }
+  );
+
+  items.forEach((item) => observer.observe(item));
 }
 
-function initIcons() {
-  if (window.lucide && typeof window.lucide.createIcons === "function") {
-    window.lucide.createIcons();
+function initMeshParallax() {
+  if (prefersReducedMotion) {
+    return;
   }
+
+  const layer = document.querySelector(".bg-mesh");
+  if (!(layer instanceof HTMLElement)) {
+    return;
+  }
+
+  const blobs = Array.from(layer.querySelectorAll(".blob"));
+  if (blobs.length === 0) {
+    return;
+  }
+
+  let rafId = 0;
+
+  function update(clientX, clientY) {
+    const x = clientX / window.innerWidth - 0.5;
+    const y = clientY / window.innerHeight - 0.5;
+
+    blobs.forEach((blob, index) => {
+      const depth = (index + 1) * 12;
+      const tx = x * depth;
+      const ty = y * depth;
+      blob.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+    });
+  }
+
+  window.addEventListener("pointermove", (event) => {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+    }
+    rafId = requestAnimationFrame(() => {
+      update(event.clientX, event.clientY);
+    });
+  });
 }
 
 function initTiltCards() {
-  const cards = document.querySelectorAll(".tilt-card");
+  if (prefersReducedMotion) {
+    return;
+  }
+
+  const cards = document.querySelectorAll(".tiltable");
 
   cards.forEach((card) => {
     card.addEventListener("pointermove", (event) => {
       const rect = card.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
-      const rotateY = ((x / rect.width) - 0.5) * 6;
-      const rotateX = (0.5 - (y / rect.height)) * 6;
-      card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      const rx = (0.5 - y / rect.height) * 5;
+      const ry = (x / rect.width - 0.5) * 5;
+      card.style.transform = `perspective(920px) rotateX(${rx}deg) rotateY(${ry}deg)`;
     });
 
     card.addEventListener("pointerleave", () => {
-      card.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
+      card.style.transform = "perspective(920px) rotateX(0deg) rotateY(0deg)";
     });
   });
 }
 
 function burstParticles(origin, stage) {
-  const colors = ["#4ef5c6", "#78b7ff", "#ffd76c", "#ff8ea8", "#d8f4ff"];
+  const colors = ["#ff6a2f", "#ffb56f", "#0f8f88", "#6bc7c1", "#365f93"];
 
   for (let i = 0; i < 34; i += 1) {
     const particle = document.createElement("span");
-    particle.className = "particle";
+    particle.className = "burst";
 
     const angle = (Math.PI * 2 * i) / 34;
-    const speed = 28 + Math.random() * 96;
-    const dx = Math.cos(angle) * speed;
-    const dy = Math.sin(angle) * speed;
+    const spread = 28 + Math.random() * 88;
+    const dx = Math.cos(angle) * spread;
+    const dy = Math.sin(angle) * spread;
 
     particle.style.left = `${origin.x}px`;
     particle.style.top = `${origin.y}px`;
@@ -150,13 +219,13 @@ function burstParticles(origin, stage) {
     stage.appendChild(particle);
     setTimeout(() => {
       particle.remove();
-    }, 800);
+    }, 820);
   }
 }
 
-function initLaunchButton() {
+function initCelebrateButton() {
   const button = document.getElementById("celebrate-btn");
-  const stage = document.getElementById("particle-stage");
+  const stage = document.getElementById("burst-layer");
 
   if (!(button instanceof HTMLButtonElement) || !(stage instanceof HTMLDivElement)) {
     return;
@@ -168,12 +237,12 @@ function initLaunchButton() {
       return;
     }
 
-    const rect = target.getBoundingClientRect();
+    const buttonRect = target.getBoundingClientRect();
     const stageRect = stage.getBoundingClientRect();
     burstParticles(
       {
-        x: rect.left + rect.width / 2 - stageRect.left,
-        y: rect.top + rect.height / 2 - stageRect.top
+        x: buttonRect.left + buttonRect.width / 2 - stageRect.left,
+        y: buttonRect.top + buttonRect.height / 2 - stageRect.top
       },
       stage
     );
@@ -182,10 +251,10 @@ function initLaunchButton() {
 
 async function bootstrap() {
   setYear();
-  initAos();
-  initIcons();
+  initReveal();
+  initMeshParallax();
   initTiltCards();
-  initLaunchButton();
+  initCelebrateButton();
 
   await Promise.allSettled([loadRepoStats(), loadLatestRelease()]);
 }
