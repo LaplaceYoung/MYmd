@@ -3,238 +3,144 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MYmd | Local-first Markdown Desktop Editor</title>
+    <title>MYmd | 轻量化 Windows 风 Markdown 编辑器</title>
     <meta
       name="description"
-      content="MYmd 是本地优先的 Markdown 桌面编辑器。围绕高频文档交付构建，支持 WYSIWYG、源码分屏、多标签、Mermaid、KaTeX 与自动保存。"
+      content="MYmd 是一款轻量化、本地优先、Windows 风格的 Markdown 编辑器，支持所见即所得与源码分屏。"
     />
-    <meta property="og:title" content="MYmd | Local-first Markdown Desktop Editor" />
-    <meta property="og:description" content="让 Markdown 成为可交付的生产工作流，而不是孤立文本文件。" />
+    <meta property="og:title" content="MYmd | 轻量化 Windows 风 Markdown 编辑器" />
+    <meta
+      property="og:description"
+      content="聚焦写作与阅读，不做无关功能堆叠。"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://laplaceyoung.github.io/MYmd/" />
-    <meta name="theme-color" content="#f6f1e6" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=IBM+Plex+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <meta name="theme-color" content="#185abd" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div class="bg-mesh" aria-hidden="true">
-      <span class="blob blob-a"></span>
-      <span class="blob blob-b"></span>
-      <span class="blob blob-c"></span>
-      <span class="grain"></span>
+    <div class="page-shell">
+      <header class="window-bar reveal" data-delay="0">
+        <a class="brand" href="#top" aria-label="MYmd 首页">
+          <img src="./assets/mymd-logo.jpeg" alt="MYmd Logo" class="brand-logo" />
+          <span class="brand-text">MYmd</span>
+        </a>
+        <nav class="window-nav" aria-label="主导航">
+          <a href="#features">核心能力</a>
+          <a href="#release">最新发布</a>
+          <a href="https://github.com/LaplaceYoung/MYmd" target="_blank" rel="noreferrer">GitHub</a>
+        </nav>
+        <a
+          id="release-cta"
+          class="btn btn-primary"
+          href="https://github.com/LaplaceYoung/MYmd/releases/latest"
+          target="_blank"
+          rel="noreferrer"
+          >下载 Windows 版本</a
+        >
+      </header>
+
+      <div class="ribbon-bar reveal" data-delay="60" aria-hidden="true">
+        <span class="ribbon-tab is-active">开始</span>
+        <span class="ribbon-tab">插入</span>
+        <span class="ribbon-tab">视图</span>
+        <span class="ribbon-tab">设置</span>
+      </div>
+
+      <main id="top" class="workspace">
+        <section class="hero reveal" data-delay="120">
+          <div class="hero-copy">
+            <p class="hero-kicker">LOCAL-FIRST · LIGHTWEIGHT · WINDOWS-LIKE</p>
+            <h1>轻量化 Markdown 编辑器，
+              只做高频写作与阅读必需能力</h1>
+            <p class="hero-lead">
+              MYmd 以 Windows 原生交互为参考，提供清晰稳定的文档体验：多标签、所见即所得、源码分屏、文件打开保存与自动保存。
+            </p>
+            <div class="hero-actions">
+              <a
+                id="release-link"
+                class="btn btn-primary"
+                href="https://github.com/LaplaceYoung/MYmd/releases/latest"
+                target="_blank"
+                rel="noreferrer"
+                >立即下载</a
+              >
+              <a
+                class="btn btn-secondary"
+                href="https://github.com/LaplaceYoung/MYmd"
+                target="_blank"
+                rel="noreferrer"
+                >查看源码</a
+              >
+            </div>
+          </div>
+
+          <aside class="hero-stage" aria-label="编辑器预览">
+            <div class="stage-titlebar">
+              <span class="stage-dot"></span>
+              <span class="stage-dot"></span>
+              <span class="stage-dot"></span>
+              <strong>MYmd - 文档 1.md</strong>
+            </div>
+            <div class="stage-ribbon">
+              <span>文件</span>
+              <span>开始</span>
+              <span>插入</span>
+              <span>视图</span>
+            </div>
+            <div class="stage-canvas">
+              <article class="paper">
+                <h2>项目周报</h2>
+                <p>- 迭代功能：搜索替换、文件树、自动保存</p>
+                <p>- 质量结果：build 通过，发布链路稳定</p>
+                <p>- 下一步：优化加载速度与启动体验</p>
+              </article>
+            </div>
+          </aside>
+        </section>
+
+        <section id="features" class="features reveal" data-delay="180">
+          <h2>核心能力</h2>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <h3>双编辑视图</h3>
+              <p>WYSIWYG 与源码分屏，面向高频 Markdown 场景。</p>
+            </article>
+            <article class="feature-card">
+              <h3>本地文件优先</h3>
+              <p>打开、保存、另存为、导出 HTML，路径透明可控。</p>
+            </article>
+            <article class="feature-card">
+              <h3>轻量但完整</h3>
+              <p>多标签、自动保存、未保存提醒、快捷键与状态反馈。</p>
+            </article>
+            <article class="feature-card">
+              <h3>Windows 风交互</h3>
+              <p>参考 Word 的信息层级与布局节奏，减少学习成本。</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="release" class="release reveal" data-delay="220">
+          <h2>最新发布</h2>
+          <div class="release-panel">
+            <p class="release-version">当前版本：<strong id="latest-version">v1.2.3</strong></p>
+            <p>发布产物为 Windows 安装包，支持从 GitHub Releases 直接下载安装。</p>
+            <a
+              class="btn btn-secondary"
+              href="https://github.com/LaplaceYoung/MYmd/releases/latest"
+              target="_blank"
+              rel="noreferrer"
+              >打开 Release 页面</a
+            >
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer reveal" data-delay="260">
+        <p>© <span id="year"></span> MYmd · Lightweight Markdown Editor for Windows</p>
+      </footer>
     </div>
-
-    <header class="shell topbar reveal" data-delay="0">
-      <a class="brand" href="#top" aria-label="MYmd 首页">
-        <span class="brand-dot"></span>
-        <span class="brand-text">MYmd</span>
-      </a>
-      <nav class="nav-links">
-        <a href="#features">核心能力</a>
-        <a href="#workflow">工作流</a>
-        <a href="#roadmap">路线图</a>
-        <a href="https://github.com/LaplaceYoung/MYmd">GitHub</a>
-      </nav>
-      <a class="nav-cta" href="https://github.com/LaplaceYoung/MYmd/releases/latest">立即下载</a>
-    </header>
-
-    <main id="top" class="shell">
-      <section class="hero">
-        <div class="hero-copy reveal" data-delay="80">
-          <p class="kicker">LOCAL-FIRST · DESKTOP NATIVE · DELIVERY-ORIENTED EDITING</p>
-          <h1>把 Markdown 升级成可交付的产品生产线。</h1>
-          <p class="lead">
-            从草稿、评审到发布，MYmd 为高频文档交付场景打造。你可以在 WYSIWYG 与源码分屏之间快速切换，实时校验 Mermaid / KaTeX，
-            并通过本地优先文件系统保持内容可控。
-          </p>
-          <div class="hero-actions">
-            <a id="release-cta" class="btn btn-primary" href="https://github.com/LaplaceYoung/MYmd/releases/latest">
-              下载最新版本
-            </a>
-            <a class="btn btn-outline" href="https://github.com/LaplaceYoung/MYmd">查看源码</a>
-          </div>
-          <ul class="metrics" aria-label="Repository Stats">
-            <li class="metric reveal" data-delay="120">
-              <span class="metric-label">Latest Release</span>
-              <strong id="latest-version" class="metric-value">v1.2.3</strong>
-            </li>
-            <li class="metric reveal" data-delay="170">
-              <span class="metric-label">GitHub Stars</span>
-              <strong id="stars-count" class="metric-value">--</strong>
-            </li>
-            <li class="metric reveal" data-delay="220">
-              <span class="metric-label">Forks</span>
-              <strong id="forks-count" class="metric-value">--</strong>
-            </li>
-            <li class="metric reveal" data-delay="270">
-              <span class="metric-label">Open Issues</span>
-              <strong id="issues-count" class="metric-value">--</strong>
-            </li>
-          </ul>
-        </div>
-
-        <aside class="hero-stage reveal tiltable" data-delay="140" aria-label="MYmd workflow preview">
-          <div class="stage-head">
-            <span></span><span></span><span></span>
-            <p>release-notes.md</p>
-          </div>
-          <div class="stage-body">
-            <p><i>#</i> MYmd v1.2.3 发布检查清单</p>
-            <p><i>+</i> 右键粘贴与菜单栏粘贴修复</p>
-            <p><i>+</i> GitHub Pages 推广页升级</p>
-            <p><i>+</i> CI / Release 自动化闭环</p>
-            <p><i>+</i> 对标文档与 roadmap 同步</p>
-            <p class="muted">target: Windows x64 installer</p>
-          </div>
-          <div class="float-tag tag-a">WYSIWYG</div>
-          <div class="float-tag tag-b">Split View</div>
-          <div class="float-tag tag-c">Auto Save</div>
-        </aside>
-      </section>
-
-      <section class="playbook reveal" data-delay="60">
-        <p>
-          视觉与结构策略借鉴热门开源仓库宣传页方法：
-          <a href="https://vite.dev/">Vite</a>、
-          <a href="https://supabase.com/">Supabase</a>、
-          <a href="https://nextjs.org/">Next.js</a>。
-          MYmd 聚焦“桌面 Markdown 交付链路”的垂直定位。
-        </p>
-        <div class="marquee" aria-hidden="true">
-          <div class="marquee-track">
-            TAURI V2 · REACT 19 · TYPESCRIPT · MILKDOWN · CODEMIRROR · LOCAL-FIRST · DESKTOP WORKFLOW · TAURI V2 · REACT 19 · TYPESCRIPT · MILKDOWN · CODEMIRROR · LOCAL-FIRST · DESKTOP WORKFLOW
-          </div>
-        </div>
-      </section>
-
-      <section id="features" class="section">
-        <header class="section-head reveal" data-delay="60">
-          <p class="kicker">PRODUCT CAPABILITIES</p>
-          <h2>不是“写字板”，是你团队的文档交付中台。</h2>
-        </header>
-        <div class="bento">
-          <article class="panel panel-large reveal" data-delay="80">
-            <h3>多视图编辑能力</h3>
-            <p>WYSIWYG / Source / Split 无缝切换，满足从快速记录到结构校验的完整路径。</p>
-            <ul>
-              <li>Focus Mode 与 Typewriter Mode</li>
-              <li>多标签与未保存状态保护</li>
-              <li>右键与菜单栏操作一致性</li>
-            </ul>
-          </article>
-
-          <article class="panel reveal" data-delay="130">
-            <h3>本地文件工作流</h3>
-            <p>支持打开、保存、另存为、导出 HTML。目录结构透明，可迁移、可备份、可长期维护。</p>
-          </article>
-
-          <article class="panel reveal" data-delay="180">
-            <h3>技术文档增强</h3>
-            <p>原生内置 Mermaid 与 KaTeX，搭配语法高亮与 TOC，让方案文档可读、可审、可复用。</p>
-          </article>
-
-          <article class="panel panel-dark reveal" data-delay="230">
-            <h3>工程化发布闭环</h3>
-            <p>CI、Pages、Release 同步推进。每次迭代都能形成“功能更新 + 对外传播 + 安装分发”一体化链路。</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="workflow" class="section workflow">
-        <div class="workflow-left reveal" data-delay="80">
-          <p class="kicker">TEAM DELIVERY FLOW</p>
-          <h2>围绕“高频发布”的写作流程设计。</h2>
-          <ol class="flow-list">
-            <li>
-              <span>01</span>
-              <div>
-                <h4>模板起稿</h4>
-                <p>通过模板快速统一结构，减少文档风格漂移。</p>
-              </div>
-            </li>
-            <li>
-              <span>02</span>
-              <div>
-                <h4>分屏校审</h4>
-                <p>边写边校验图表、公式、目录与引用关系。</p>
-              </div>
-            </li>
-            <li>
-              <span>03</span>
-              <div>
-                <h4>版本发布</h4>
-                <p>导出、提交、打 tag、自动产出安装包并更新推广页。</p>
-              </div>
-            </li>
-          </ol>
-        </div>
-
-        <aside class="workflow-right reveal tiltable" data-delay="140">
-          <h3>Release Pulse</h3>
-          <div class="pulse-line"><span></span></div>
-          <dl>
-            <div><dt>Clipboard</dt><dd>Menu + Context Paste Fixed</dd></div>
-            <div><dt>Site</dt><dd>High-aesthetic Pages 2.0</dd></div>
-            <div><dt>CI</dt><dd>Web Build / Pages Deploy</dd></div>
-            <div><dt>Release</dt><dd>Tag-driven Windows Bundle</dd></div>
-          </dl>
-        </aside>
-      </section>
-
-      <section id="roadmap" class="section">
-        <header class="section-head reveal" data-delay="60">
-          <p class="kicker">2026 Q2 ROADMAP</p>
-          <h2>先稳工程，再提效率，再做生态扩展。</h2>
-        </header>
-        <div class="roadmap-grid">
-          <article class="road-card reveal" data-delay="100">
-            <h3>工程治理</h3>
-            <p>分支策略、质量门禁、自动化发布流程和回归脚本标准化。</p>
-          </article>
-          <article class="road-card reveal" data-delay="160">
-            <h3>效率增强</h3>
-            <p>命令面板、快速打开、会话恢复、模板中心全链路上线。</p>
-          </article>
-          <article class="road-card reveal" data-delay="220">
-            <h3>生态能力</h3>
-            <p>插件机制 MVP、可选自动更新、社区 roadmap 共建与投票。</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="launch reveal" data-delay="90">
-        <div>
-          <p class="kicker">SHIP IT</p>
-          <h2>每次推送，都应该成为一次公开增长机会。</h2>
-          <p>
-            MYmd 当前通过 GitHub Pages 托管推广页，并与 Release 节奏联动。
-            更新 `apps/site` 后推送到 `main`，自动部署与传播同步进行。
-          </p>
-        </div>
-        <div class="launch-actions">
-          <a id="release-link" class="btn btn-primary" href="https://github.com/LaplaceYoung/MYmd/releases/latest">打开最新发布</a>
-          <button id="celebrate-btn" class="btn btn-outline" type="button">预览动效</button>
-        </div>
-        <div id="burst-layer" aria-hidden="true"></div>
-      </section>
-    </main>
-
-    <footer class="shell footer reveal" data-delay="40">
-      <div>
-        <p class="footer-title">MYmd · Local-first Markdown Desktop Editor</p>
-        <p class="footer-sub">© <span id="year"></span> MYmd. Built for serious writing workflows.</p>
-      </div>
-      <div class="footer-links">
-        <a href="https://github.com/LaplaceYoung/MYmd/releases">Releases</a>
-        <a href="https://github.com/LaplaceYoung/MYmd/issues">Issues</a>
-        <a href="https://github.com/LaplaceYoung/MYmd/discussions">Discussions</a>
-      </div>
-    </footer>
 
     <script src="./main.js" defer></script>
   </body>

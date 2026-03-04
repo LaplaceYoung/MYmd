@@ -8,6 +8,7 @@ release
 *.jpeg
 *.png
 *.jpg
+!apps/site/assets/mymd-logo.jpeg
 *.tmp
 dist
 build
