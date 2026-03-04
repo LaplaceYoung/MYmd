@@ -1,17 +1,17 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MYmd | 轻量化 Windows 风 Markdown 编辑器</title>
+    <title>MYmd | Local-First Markdown Desktop Editor</title>
     <meta
       name="description"
-      content="MYmd 是一款轻量化、本地优先、Windows 风格的 Markdown 编辑器，支持所见即所得与源码分屏。"
+      content="MYmd is a local-first Markdown desktop editor focused on fast writing flow, stable file workflows, and production-ready delivery."
     />
-    <meta property="og:title" content="MYmd | 轻量化 Windows 风 Markdown 编辑器" />
+    <meta property="og:title" content="MYmd | Local-First Markdown Desktop Editor" />
     <meta
       property="og:description"
-      content="聚焦写作与阅读，不做无关功能堆叠。"
+      content="Focused writing experience, reliable document workflows, and desktop-grade delivery in one workspace."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://laplaceyoung.github.io/MYmd/" />
@@ -21,124 +21,180 @@
   <body>
     <div class="page-shell">
       <header class="window-bar reveal" data-delay="0">
-        <a class="brand" href="#top" aria-label="MYmd 首页">
+        <a class="brand" href="#top" aria-label="MYmd home">
           <img src="./assets/mymd-logo.jpeg" alt="MYmd Logo" class="brand-logo" />
           <span class="brand-text">MYmd</span>
         </a>
-        <nav class="window-nav" aria-label="主导航">
-          <a href="#features">核心能力</a>
-          <a href="#release">最新发布</a>
+
+        <nav class="window-nav" aria-label="Main navigation">
+          <a href="#features">Capabilities</a>
+          <a href="#highlights">Highlights</a>
+          <a href="#release">Release</a>
           <a href="https://github.com/LaplaceYoung/MYmd" target="_blank" rel="noreferrer">GitHub</a>
         </nav>
+
         <a
           id="release-cta"
-          class="btn btn-primary"
+          class="btn btn-primary magnetic"
           href="https://github.com/LaplaceYoung/MYmd/releases/latest"
           target="_blank"
           rel="noreferrer"
-          >下载 Windows 版本</a
+          >Download for Windows</a
         >
       </header>
 
-      <div class="ribbon-bar reveal" data-delay="60" aria-hidden="true">
-        <span class="ribbon-tab is-active">开始</span>
-        <span class="ribbon-tab">插入</span>
-        <span class="ribbon-tab">视图</span>
-        <span class="ribbon-tab">设置</span>
+      <div class="ribbon-bar reveal" data-delay="60" role="tablist" aria-label="Product areas">
+        <button class="ribbon-tab is-active" type="button" data-ribbon-tab>Write</button>
+        <button class="ribbon-tab" type="button" data-ribbon-tab>Structure</button>
+        <button class="ribbon-tab" type="button" data-ribbon-tab>Review</button>
+        <button class="ribbon-tab" type="button" data-ribbon-tab>Deliver</button>
       </div>
 
       <main id="top" class="workspace">
         <section class="hero reveal" data-delay="120">
-          <div class="hero-copy">
-            <p class="hero-kicker">LOCAL-FIRST · LIGHTWEIGHT · WINDOWS-LIKE</p>
-            <h1>轻量化 Markdown 编辑器，
-              只做高频写作与阅读必需能力</h1>
+          <div class="hero-copy" data-parallax="8">
+            <p class="hero-kicker">LOCAL-FIRST · LIGHTWEIGHT · DESKTOP-READY</p>
+            <h1>Markdown workflow,
+focused on shipping</h1>
             <p class="hero-lead">
-              MYmd 以 Windows 原生交互为参考，提供清晰稳定的文档体验：多标签、所见即所得、源码分屏、文件打开保存与自动保存。
+              MYmd gives you a stable writing workspace from draft to release:
+              WYSIWYG + split view editing, reliable save flow, and practical
+              output for technical documents.
             </p>
+
             <div class="hero-actions">
               <a
                 id="release-link"
-                class="btn btn-primary"
+                class="btn btn-primary magnetic"
                 href="https://github.com/LaplaceYoung/MYmd/releases/latest"
                 target="_blank"
                 rel="noreferrer"
-                >立即下载</a
+                >Get latest release</a
               >
               <a
-                class="btn btn-secondary"
+                class="btn btn-secondary magnetic"
                 href="https://github.com/LaplaceYoung/MYmd"
                 target="_blank"
                 rel="noreferrer"
-                >查看源码</a
+                >View source</a
               >
+            </div>
+
+            <div class="metric-row" aria-label="Core signals">
+              <article class="metric-card tilt-card" data-motion="float">
+                <p>Latest Release</p>
+                <strong id="latest-version">v1.2.3</strong>
+              </article>
+              <article class="metric-card tilt-card" data-motion="float" data-delay="70">
+                <p>GitHub Stars</p>
+                <strong id="stars-count">--</strong>
+              </article>
+              <article class="metric-card tilt-card" data-motion="float" data-delay="110">
+                <p>Workflow Focus</p>
+                <strong>&lt; 3 clicks to edit</strong>
+              </article>
             </div>
           </div>
 
-          <aside class="hero-stage" aria-label="编辑器预览">
+          <aside class="hero-stage tilt-card" aria-label="Product interaction demo" data-parallax="14">
+            <div class="stage-glow" aria-hidden="true"></div>
             <div class="stage-titlebar">
               <span class="stage-dot"></span>
               <span class="stage-dot"></span>
               <span class="stage-dot"></span>
-              <strong>MYmd - 文档 1.md</strong>
+              <strong>MYmd · Live Editing Flow</strong>
             </div>
-            <div class="stage-ribbon">
-              <span>文件</span>
-              <span>开始</span>
-              <span>插入</span>
-              <span>视图</span>
+
+            <div class="stage-mode-switch" role="tablist" aria-label="Demo mode">
+              <button class="mode-btn is-active" type="button" data-mode="wysiwyg">WYSIWYG</button>
+              <button class="mode-btn" type="button" data-mode="split">Split</button>
+              <button class="mode-btn" type="button" data-mode="source">Source</button>
             </div>
-            <div class="stage-canvas">
-              <article class="paper">
-                <h2>项目周报</h2>
-                <p>- 迭代功能：搜索替换、文件树、自动保存</p>
-                <p>- 质量结果：build 通过，发布链路稳定</p>
-                <p>- 下一步：优化加载速度与启动体验</p>
-              </article>
+
+            <div class="stage-canvas" id="stage-canvas">
+              <h3 id="stage-mode-title">Write and format in one flow</h3>
+              <ul id="stage-mode-list">
+                <li>Fast input with live visual feedback</li>
+                <li>Instant word stats and reading estimate</li>
+                <li>Keyboard and context menu stay consistent</li>
+              </ul>
             </div>
           </aside>
         </section>
 
-        <section id="features" class="features reveal" data-delay="180">
-          <h2>核心能力</h2>
+        <section id="features" class="features reveal" data-delay="160" data-parallax="6">
+          <h2>Core capabilities</h2>
           <div class="feature-grid">
-            <article class="feature-card">
-              <h3>双编辑视图</h3>
-              <p>WYSIWYG 与源码分屏，面向高频 Markdown 场景。</p>
+            <article class="feature-card tilt-card">
+              <h3>Dual editing modes</h3>
+              <p>Switch between WYSIWYG and split source-preview without breaking your writing rhythm.</p>
             </article>
-            <article class="feature-card">
-              <h3>本地文件优先</h3>
-              <p>打开、保存、另存为、导出 HTML，路径透明可控。</p>
+            <article class="feature-card tilt-card">
+              <h3>Local file workflow</h3>
+              <p>Open, save, save-as, and export HTML with transparent file path control.</p>
             </article>
-            <article class="feature-card">
-              <h3>轻量但完整</h3>
-              <p>多标签、自动保存、未保存提醒、快捷键与状态反馈。</p>
+            <article class="feature-card tilt-card">
+              <h3>Reliable session behavior</h3>
+              <p>Multi-tab, autosave, unsaved-change confirmation, and safer close actions.</p>
             </article>
-            <article class="feature-card">
-              <h3>Windows 风交互</h3>
-              <p>参考 Word 的信息层级与布局节奏，减少学习成本。</p>
+            <article class="feature-card tilt-card">
+              <h3>Technical document ready</h3>
+              <p>KaTeX, Mermaid, syntax highlighting, and TOC for structured technical writing.</p>
             </article>
           </div>
         </section>
 
-        <section id="release" class="release reveal" data-delay="220">
-          <h2>最新发布</h2>
-          <div class="release-panel">
-            <p class="release-version">当前版本：<strong id="latest-version">v1.2.3</strong></p>
-            <p>发布产物为 Windows 安装包，支持从 GitHub Releases 直接下载安装。</p>
+        <section id="highlights" class="highlights reveal" data-delay="210" data-parallax="8">
+          <h2>Product highlights</h2>
+          <div class="highlight-layout">
+            <div class="highlight-focus" role="tablist" aria-label="Highlight focus">
+              <button class="highlight-btn is-active" type="button" data-highlight="speed">Fast start</button>
+              <button class="highlight-btn" type="button" data-highlight="flow">Clean delivery</button>
+              <button class="highlight-btn" type="button" data-highlight="consistency">Consistent UX</button>
+            </div>
+
+            <article class="highlight-panel tilt-card" id="highlight-panel">
+              <h3 id="highlight-title">Fast startup, practical depth</h3>
+              <p id="highlight-desc">
+                MYmd keeps the path from launch to writing short while preserving the core tools needed for technical docs.
+              </p>
+            </article>
+          </div>
+
+          <div class="highlight-points" role="list" aria-label="Highlight points">
+            <article class="highlight-point tilt-card" role="listitem">
+              <h3>Stable writing loop</h3>
+              <p>From open to save to export, the workflow stays clear and predictable.</p>
+            </article>
+            <article class="highlight-point tilt-card" role="listitem">
+              <h3>Built for technical content</h3>
+              <p>Native support for formulas, diagrams, and structured Markdown output.</p>
+            </article>
+            <article class="highlight-point tilt-card" role="listitem">
+              <h3>Desktop delivery ready</h3>
+              <p>Release artifacts are always reachable through a direct and maintainable path.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="release" class="release reveal" data-delay="250">
+          <h2>Latest release</h2>
+          <div class="release-panel tilt-card">
+            <p class="release-version">Current version: <strong id="release-version-inline">v1.2.3</strong></p>
+            <p>Windows installers are continuously published for local-first writing and delivery workflows.</p>
             <a
-              class="btn btn-secondary"
+              class="btn btn-secondary magnetic"
               href="https://github.com/LaplaceYoung/MYmd/releases/latest"
               target="_blank"
               rel="noreferrer"
-              >打开 Release 页面</a
+              >Open release page</a
             >
           </div>
         </section>
       </main>
 
-      <footer class="footer reveal" data-delay="260">
-        <p>© <span id="year"></span> MYmd · Lightweight Markdown Editor for Windows</p>
+      <footer class="footer reveal" data-delay="300">
+        <p>© <span id="year"></span> MYmd · Local-First Markdown Desktop Editor</p>
       </footer>
     </div>
 

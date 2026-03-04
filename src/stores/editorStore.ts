@@ -66,6 +66,10 @@ interface EditorState {
     insertDialog: InsertDialogType
     /** 搜索栏是否可见 */
     searchVisible: boolean
+    /** Recent search terms used by the in-editor search bar */
+    searchHistory: string[]
+    /** Max number of search terms to keep */
+    searchHistoryLimit: number
     /** 主题模式 */
     themeMode: ThemeMode
     /** 配色方案 */
@@ -105,6 +109,9 @@ interface EditorState {
     setActiveMarks: (marks: string[]) => void
     setInsertDialog: (type: InsertDialogType) => void
     setSearchVisible: (visible: boolean) => void
+    pushSearchHistory: (query: string) => void
+    clearSearchHistory: () => void
+    setSearchHistory: (history: string[]) => void
     setThemeMode: (mode: ThemeMode) => void
     setColorScheme: (scheme: ColorScheme) => void
     setEditorFontSize: (size: number) => void
@@ -139,6 +146,33 @@ interface EditorState {
 }
 
 let tabCounter = 0
+const SEARCH_HISTORY_STORAGE_KEY = 'mymd.searchHistory'
+const DEFAULT_SEARCH_HISTORY_LIMIT = 10
+
+function loadSearchHistoryFromStorage(): string[] {
+    if (typeof window === 'undefined') return []
+    try {
+        const raw = window.localStorage.getItem(SEARCH_HISTORY_STORAGE_KEY)
+        if (!raw) return []
+        const parsed = JSON.parse(raw)
+        if (!Array.isArray(parsed)) return []
+        return parsed
+            .map(item => (typeof item === 'string' ? item.trim() : ''))
+            .filter(Boolean)
+            .slice(0, DEFAULT_SEARCH_HISTORY_LIMIT)
+    } catch {
+        return []
+    }
+}
+
+function persistSearchHistory(history: string[]) {
+    if (typeof window === 'undefined') return
+    try {
+        window.localStorage.setItem(SEARCH_HISTORY_STORAGE_KEY, JSON.stringify(history))
+    } catch {
+        // ignore persistence failures
+    }
+}
 
 function generateTabId(): string {
     return `tab-${Date.now()}-${++tabCounter}`
@@ -161,6 +195,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     activeMarks: [],
     insertDialog: null,
     searchVisible: false,
+    searchHistory: loadSearchHistoryFromStorage(),
+    searchHistoryLimit: DEFAULT_SEARCH_HISTORY_LIMIT,
     themeMode: 'system',
     colorScheme: 'default',
     editorFontSize: 16,
@@ -284,6 +320,32 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     setInsertDialog: (type) => set({ insertDialog: type }),
 
     setSearchVisible: (visible) => set({ searchVisible: visible }),
+
+    pushSearchHistory: (query) => {
+        const normalized = query.trim()
+        if (!normalized) return
+
+        set(state => {
+            const deduped = state.searchHistory.filter(item => item !== normalized)
+            const nextHistory = [normalized, ...deduped].slice(0, state.searchHistoryLimit)
+            persistSearchHistory(nextHistory)
+            return { searchHistory: nextHistory }
+        })
+    },
+
+    clearSearchHistory: () => {
+        persistSearchHistory([])
+        set({ searchHistory: [] })
+    },
+
+    setSearchHistory: (history) => {
+        const nextHistory = history
+            .map(item => item.trim())
+            .filter(Boolean)
+            .slice(0, get().searchHistoryLimit)
+        persistSearchHistory(nextHistory)
+        set({ searchHistory: nextHistory })
+    },
 
     setThemeMode: (mode) => set({ themeMode: mode }),
 

@@ -14,6 +14,7 @@
     gap: var(--space-2);
     animation: slideDown 150ms ease-out;
     min-width: 380px;
+    max-width: min(560px, calc(100vw - 48px));
     pointer-events: auto;
     -webkit-app-region: no-drag;
 }
@@ -125,4 +126,93 @@
 .search-bar__replace-btn:hover {
     background: var(--bg-hover);
     border-color: var(--accent);
+}
+
+.search-bar__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-left: 28px;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.search-bar__shortcut {
+    white-space: nowrap;
+}
+
+.search-bar__feedback {
+    margin-left: 28px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.search-bar__history {
+    margin-left: 28px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    overflow: hidden;
+}
+
+.search-bar__history-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary, var(--bg-hover));
+}
+
+.search-bar__history-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.search-bar__history-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    padding: 2px 6px;
+    color: var(--text-muted);
+}
+
+.search-bar__history-clear:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.search-bar__history-list {
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+    max-height: 140px;
+    overflow-y: auto;
+}
+
+.search-bar__history-list li {
+    margin: 0;
+}
+
+.search-bar__history-item {
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 12px;
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    cursor: pointer;
+}
+
+.search-bar__history-item:hover,
+.search-bar__history-item.is-active {
+    background: var(--bg-hover);
 }

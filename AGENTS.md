@@ -16,3 +16,6 @@
 
 ---
 *由 Pixiu Agent 自動生成*
+## User Long-Term Memory (Added 2026-03-04)
+
+- Preference: after user acceptance is confirmed, the agent should proceed with git deployment by default (stage/commit/push), without asking for an extra confirmation step.
