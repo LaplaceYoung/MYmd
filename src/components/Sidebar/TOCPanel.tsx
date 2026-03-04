@@ -1,6 +1,7 @@
 import { useEditorStore } from '@/stores/editorStore'
 import { X, List } from 'lucide-react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { analyzeDocumentPerformance } from '@/utils/performance'
 import './TOCPanel.css'
 
 interface TOCItem {
@@ -10,48 +11,108 @@ interface TOCItem {
     index: number
 }
 
+function extractHeadings(content: string): TOCItem[] {
+    if (!content) return []
+
+    const lines = content.split('\n')
+    const items: TOCItem[] = []
+    let headingIndex = 0
+    let inCodeBlock = false
+
+    for (const line of lines) {
+        if (line.trim().startsWith('```')) {
+            inCodeBlock = !inCodeBlock
+            continue
+        }
+        if (inCodeBlock) continue
+
+        const match = line.match(/^(#{1,6})\s+(.+)$/)
+        if (!match) continue
+
+        items.push({
+            id: `toc-${headingIndex}`,
+            level: match[1].length,
+            text: match[2].trim(),
+            index: headingIndex,
+        })
+        headingIndex++
+    }
+
+    return items
+}
+
 export function TOCPanel() {
-    const tocVisible = useEditorStore(s => s.tocVisible)
-    const setTocVisible = useEditorStore(s => s.setTocVisible)
-    const activeTabId = useEditorStore(s => s.activeTabId)
-    const tabs = useEditorStore(s => s.tabs)
-    const viewMode = useEditorStore(s => s.viewMode)
+    const tocVisible = useEditorStore((s) => s.tocVisible)
+    const setTocVisible = useEditorStore((s) => s.setTocVisible)
+    const activeTabId = useEditorStore((s) => s.activeTabId)
+    const tabs = useEditorStore((s) => s.tabs)
+    const viewMode = useEditorStore((s) => s.viewMode)
 
-    const activeTab = tabs.find(t => t.id === activeTabId)
+    const activeTab = tabs.find((t) => t.id === activeTabId)
     const content = activeTab?.content || ''
+    const [headings, setHeadings] = useState<TOCItem[]>([])
+    const [isIndexing, setIsIndexing] = useState(false)
+    const perfInfo = useMemo(() => analyzeDocumentPerformance(content), [content])
 
-    // 动态提取标题
-    const headings = useMemo<TOCItem[]>(() => {
-        if (!content) return []
-        const lines = content.split('\n')
-        const items: TOCItem[] = []
-        let headingIndex = 0
+    useEffect(() => {
+        let cancelled = false
 
-        let inCodeBlock = false
-        for (const line of lines) {
-            // 跳过代码块内部的 #
-            if (line.trim().startsWith('```')) {
-                inCodeBlock = !inCodeBlock
-                continue
-            }
-            if (inCodeBlock) continue
-
-            const match = line.match(/^(#{1,6})\s+(.+)$/)
-            if (match) {
-                items.push({
-                    id: `toc-${headingIndex}`,
-                    level: match[1].length,
-                    text: match[2].trim(),
-                    index: headingIndex
-                })
-                headingIndex++
+        if (!content) {
+            setHeadings([])
+            setIsIndexing(false)
+            return () => {
+                cancelled = true
             }
         }
-        return items
-    }, [content])
+
+        const commitHeadings = () => {
+            const next = extractHeadings(content)
+            if (cancelled) return
+            setHeadings(next)
+            setIsIndexing(false)
+        }
+
+        if (perfInfo.isLarge) {
+            setIsIndexing(true)
+            const idleWindow = window as Window & {
+                requestIdleCallback?: (
+                    callback: IdleRequestCallback,
+                    options?: IdleRequestOptions
+                ) => number
+                cancelIdleCallback?: (id: number) => void
+            }
+
+            if (idleWindow.requestIdleCallback && idleWindow.cancelIdleCallback) {
+                const idleId = idleWindow.requestIdleCallback(
+                    () => {
+                        commitHeadings()
+                    },
+                    { timeout: 300 }
+                )
+
+                return () => {
+                    cancelled = true
+                    idleWindow.cancelIdleCallback?.(idleId)
+                }
+            }
+
+            const timer = window.setTimeout(() => {
+                commitHeadings()
+            }, 40)
+
+            return () => {
+                cancelled = true
+                window.clearTimeout(timer)
+            }
+        }
+
+        commitHeadings()
+        return () => {
+            cancelled = true
+        }
+    }, [content, perfInfo.isLarge])
 
     const handleHeadingClick = (index: number) => {
-        // 尝试在 DOM 中寻找对应的标题元素并滚动
         setTimeout(() => {
             let containerSelector = '.editor-wysiwyg .editor'
             if (viewMode === 'split') {
@@ -59,11 +120,11 @@ export function TOCPanel() {
             }
 
             const container = document.querySelector(containerSelector)
-            if (container) {
-                const domHeadings = container.querySelectorAll('h1, h2, h3, h4, h5, h6')
-                if (domHeadings && domHeadings[index]) {
-                    domHeadings[index].scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }
+            if (!container) return
+
+            const domHeadings = container.querySelectorAll('h1, h2, h3, h4, h5, h6')
+            if (domHeadings && domHeadings[index]) {
+                domHeadings[index].scrollIntoView({ behavior: 'smooth', block: 'start' })
             }
         }, 50)
     }
@@ -82,7 +143,8 @@ export function TOCPanel() {
                 </button>
             </div>
             <div className="toc-panel__content">
-                {headings.length === 0 ? (
+                {isIndexing && <div className="toc-panel__empty">Indexing headings...</div>}
+                {!isIndexing && headings.length === 0 ? (
                     <div className="toc-panel__empty">无标题</div>
                 ) : (
                     headings.map((h) => (

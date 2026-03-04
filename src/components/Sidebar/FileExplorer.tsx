@@ -1,53 +1,50 @@
 import { useState, useEffect, useCallback } from 'react'
 import { FolderOpen, FileText, ChevronRight, ChevronDown, X, RefreshCw } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
-import { readDir } from '@tauri-apps/plugin-fs'
+import { readDir, readTextFile } from '@tauri-apps/plugin-fs'
 import { open as openDialog } from '@tauri-apps/plugin-dialog'
 import './FileExplorer.css'
 
-// 简单的文件树节点类型定义
 interface FileNode {
     name: string
     path: string
     isDirectory: boolean
     children?: FileNode[]
-    isOpen?: boolean // 用于目录的展开/折叠状态
+    isOpen?: boolean
 }
 
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 
 export function FileExplorer() {
-    const fileExplorerVisible = useEditorStore(s => s.fileExplorerVisible)
-    const setFileExplorerVisible = useEditorStore(s => s.setFileExplorerVisible)
-    const activeWorkspace = useEditorStore(s => s.activeWorkspace)
-    const setActiveWorkspace = useEditorStore(s => s.setActiveWorkspace)
-    const addTab = useEditorStore(s => s.addTab)
+    const fileExplorerVisible = useEditorStore((s) => s.fileExplorerVisible)
+    const setFileExplorerVisible = useEditorStore((s) => s.setFileExplorerVisible)
+    const activeWorkspace = useEditorStore((s) => s.activeWorkspace)
+    const setActiveWorkspace = useEditorStore((s) => s.setActiveWorkspace)
+    const addTab = useEditorStore((s) => s.addTab)
+    const markSaved = useEditorStore((s) => s.markSaved)
 
     const [fileTree, setFileTree] = useState<FileNode[]>([])
     const [loading, setLoading] = useState(false)
 
-    // 递归读取目录内容
     const loadDirectory = useCallback(async (dirPath: string): Promise<FileNode[]> => {
         if (!isTauri) return []
+
         try {
             const entries = await readDir(dirPath)
 
-            // 过滤并排序：文件夹在前，文件在后，只保留 md 文件
-            const filtered = entries.filter(e => {
-                if (e.isDirectory) return true
-                if (e.name && e.name.toLowerCase().endsWith('.md')) return true
-                return false
+            const filtered = entries.filter((entry) => {
+                if (entry.isDirectory) return true
+                return Boolean(entry.name && entry.name.toLowerCase().endsWith('.md'))
             })
 
-            const nodes: FileNode[] = filtered.map(e => ({
-                name: e.name || 'Unknown',
-                path: `${dirPath}/${e.name}`,
-                isDirectory: e.isDirectory,
+            const nodes: FileNode[] = filtered.map((entry) => ({
+                name: entry.name || 'Unknown',
+                path: `${dirPath}/${entry.name}`,
+                isDirectory: entry.isDirectory,
                 children: undefined,
-                isOpen: false
+                isOpen: false,
             }))
 
-            // 排序: 文件夹先
             nodes.sort((a, b) => {
                 if (a.isDirectory && !b.isDirectory) return -1
                 if (!a.isDirectory && b.isDirectory) return 1
@@ -55,14 +52,15 @@ export function FileExplorer() {
             })
 
             return nodes
-        } catch (err) {
-            console.error('Failed to read directory:', err)
+        } catch (error) {
+            console.error('Failed to read directory:', error)
             return []
         }
     }, [])
 
     const refreshWorkspace = useCallback(async () => {
         if (!activeWorkspace) return
+
         setLoading(true)
         const nodes = await loadDirectory(activeWorkspace)
         setFileTree(nodes)
@@ -71,38 +69,42 @@ export function FileExplorer() {
 
     useEffect(() => {
         if (fileExplorerVisible && activeWorkspace) {
-            refreshWorkspace()
+            void refreshWorkspace()
         }
     }, [fileExplorerVisible, activeWorkspace, refreshWorkspace])
 
     const handleSelectWorkspace = async () => {
         if (!isTauri) return
+
         try {
             const selectedPath = await openDialog({
                 directory: true,
                 multiple: false,
-                title: '打开文件夹 (工作区)'
+                title: 'Open workspace folder',
             })
+
             if (selectedPath && typeof selectedPath === 'string') {
                 setActiveWorkspace(selectedPath)
             }
-        } catch (e) {
-            console.error('Failed to select workspace:', e)
+        } catch (error) {
+            console.error('Failed to select workspace:', error)
         }
     }
 
     const toggleNode = async (node: FileNode, pathSegments: number[]) => {
         if (!node.isDirectory) {
-            // 打开文件
-            addTab(node.path)
+            try {
+                const content = await readTextFile(node.path)
+                const tabId = addTab(node.path, content)
+                markSaved(tabId, node.path)
+            } catch (error) {
+                console.error('Failed to open file from workspace tree:', error)
+            }
             return
         }
 
-        // 浅拷贝树以进行状态更新
         const newTree = [...fileTree]
-
-        // 查找引用的节点
-        let currentNode: FileNode | undefined = undefined
+        let currentNode: FileNode | undefined
         let currentArray = newTree
 
         for (const idx of pathSegments) {
@@ -112,18 +114,15 @@ export function FileExplorer() {
             }
         }
 
-        if (currentNode) {
-            currentNode.isOpen = !currentNode.isOpen
+        if (!currentNode) return
 
-            // 如果是展开且还没加载过子节点，则去加载
-            if (currentNode.isOpen && !currentNode.children) {
-                currentNode.children = await loadDirectory(currentNode.path)
-                // 再次触发渲染
-                setFileTree([...newTree])
-            } else {
-                setFileTree(newTree)
-            }
+        currentNode.isOpen = !currentNode.isOpen
+
+        if (currentNode.isOpen && !currentNode.children) {
+            currentNode.children = await loadDirectory(currentNode.path)
         }
+
+        setFileTree([...newTree])
     }
 
     const renderTree = (nodes: FileNode[], pathPrefix: number[] = []) => {
@@ -133,7 +132,7 @@ export function FileExplorer() {
                 <div key={node.path} className="file-node-container">
                     <div
                         className={`file-node file-node--level-${pathPrefix.length}`}
-                        onClick={() => toggleNode(node, currentPath)}
+                        onClick={() => void toggleNode(node, currentPath)}
                         title={node.path}
                     >
                         <span className="file-node__icon">
@@ -166,11 +165,20 @@ export function FileExplorer() {
                 </div>
                 <div className="file-explorer__actions">
                     {activeWorkspace && (
-                        <button className="file-explorer__btn" onClick={refreshWorkspace} title="刷新" disabled={loading}>
+                        <button
+                            className="file-explorer__btn"
+                            onClick={() => void refreshWorkspace()}
+                            title="刷新"
+                            disabled={loading}
+                        >
                             <RefreshCw size={14} className={loading ? 'spinning' : ''} />
                         </button>
                     )}
-                    <button className="file-explorer__btn" onClick={() => setFileExplorerVisible(false)} title="关闭视图">
+                    <button
+                        className="file-explorer__btn"
+                        onClick={() => setFileExplorerVisible(false)}
+                        title="关闭视图"
+                    >
                         <X size={16} />
                     </button>
                 </div>
@@ -179,7 +187,7 @@ export function FileExplorer() {
                 {!activeWorkspace ? (
                     <div className="file-explorer__empty">
                         <p>未打开任何文件夹</p>
-                        <button className="btn-primary" onClick={handleSelectWorkspace}>
+                        <button className="btn-primary" onClick={() => void handleSelectWorkspace()}>
                             打开工作区
                         </button>
                     </div>
@@ -194,7 +202,7 @@ export function FileExplorer() {
             </div>
             {activeWorkspace && (
                 <div className="file-explorer__footer">
-                    <button className="btn-secondary btn-small" onClick={handleSelectWorkspace}>
+                    <button className="btn-secondary btn-small" onClick={() => void handleSelectWorkspace()}>
                         切换文件夹
                     </button>
                 </div>

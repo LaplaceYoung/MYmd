@@ -1,10 +1,14 @@
-import { useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useEditorStore } from '@/stores/editorStore'
 import { WysiwygEditor } from './WysiwygEditor'
 import { SourceEditor } from './SourceEditor'
 import { SearchBar } from './SearchBar'
 import { InsertDialog } from './InsertDialog'
 import { WelcomeView } from './WelcomeView'
+import {
+    analyzeDocumentPerformance,
+    LARGE_DOC_PREVIEW_DELAY_MS
+} from '@/utils/performance'
 
 // Custom Hooks
 import { useEditorShortcuts } from './hooks/useEditorShortcuts'
@@ -21,11 +25,21 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
     const activeTabId = useEditorStore(s => s.activeTabId)
     const activeTab = tabs.find(t => t.id === activeTabId)
     const viewMode = useEditorStore(s => s.viewMode)
+    const setViewMode = useEditorStore(s => s.setViewMode)
     const zoom = useEditorStore(s => s.zoom)
     const watermark = useEditorStore(s => s.watermark)
     const commandRef = useRef<((cmd: string, payload?: unknown) => void) | null>(null)
+    const [previewContent, setPreviewContent] = useState(activeTab?.content ?? '')
+    const [showModeGuide, setShowModeGuide] = useState(() => {
+        if (typeof window === 'undefined') return false
+        return window.localStorage.getItem('mymd:view-mode-guide:v1') !== 'dismissed'
+    })
 
     const splitContainerRef = useRef<HTMLDivElement>(null)
+    const perfInfo = useMemo(
+        () => analyzeDocumentPerformance(activeTab?.content ?? ''),
+        [activeTab?.content]
+    )
 
     // Shortcuts and file operations
     const { handleNewFile, handleOpenFile, handleOpenRecentFile } = useEditorShortcuts()
@@ -35,6 +49,36 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
 
     // Sync scroll
     useSyncScroll(viewMode, activeTabId, splitContainerRef, isDraggingRef)
+
+    useEffect(() => {
+        if (!activeTab) {
+            setPreviewContent('')
+            return
+        }
+
+        if (!perfInfo.isLarge) {
+            setPreviewContent(activeTab.content)
+            return
+        }
+
+        const timer = window.setTimeout(() => {
+            setPreviewContent(activeTab.content)
+        }, LARGE_DOC_PREVIEW_DELAY_MS)
+
+        return () => window.clearTimeout(timer)
+    }, [activeTab, perfInfo.isLarge, activeTab?.content])
+
+    useEffect(() => {
+        if (viewMode === 'split' && showModeGuide) {
+            window.localStorage.setItem('mymd:view-mode-guide:v1', 'dismissed')
+            setShowModeGuide(false)
+        }
+    }, [showModeGuide, viewMode])
+
+    const dismissModeGuide = () => {
+        window.localStorage.setItem('mymd:view-mode-guide:v1', 'dismissed')
+        setShowModeGuide(false)
+    }
 
     // 无标签时显示欢迎页；但在启动参数解析阶段先抑制欢迎页，避免“先首页后打开文件”的闪跳
     if (!activeTab) {
@@ -57,6 +101,32 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
         <div className={`editor-container ${watermark ? 'has-watermark' : ''}`}>
             <SearchBar />
             <InsertDialog />
+            {showModeGuide && (
+                <div className="editor-mode-guide" role="status" aria-live="polite">
+                    <span className="editor-mode-guide__text">
+                        Tip: Try split mode for source + preview review.
+                    </span>
+                    <div className="editor-mode-guide__actions">
+                        <button
+                            type="button"
+                            className="editor-mode-guide__btn editor-mode-guide__btn--primary"
+                            onClick={() => {
+                                setViewMode('split')
+                                dismissModeGuide()
+                            }}
+                        >
+                            Try Split View
+                        </button>
+                        <button
+                            type="button"
+                            className="editor-mode-guide__btn"
+                            onClick={dismissModeGuide}
+                        >
+                            Dismiss
+                        </button>
+                    </div>
+                </div>
+            )}
             {viewMode === 'wysiwyg' ? (
                 <div className="editor-workspace">
                     <div className="editor-zoom-container" style={zoomStyle}>
@@ -70,6 +140,11 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
                 </div>
             ) : (
                 <div className="editor-split" ref={splitContainerRef}>
+                    {perfInfo.isLarge && (
+                        <div className="editor-performance-hint">
+                            Large document mode enabled ({perfInfo.lineCount.toLocaleString()} lines): preview refreshes every {LARGE_DOC_PREVIEW_DELAY_MS}ms.
+                        </div>
+                    )}
                     <div
                         className="editor-split__source"
                         style={{
@@ -98,7 +173,7 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
                             <WysiwygEditor
                                 key={`preview-${activeTab.id}`}
                                 tabId={activeTab.id}
-                                content={activeTab.content}
+                                content={previewContent}
                                 readOnly
                             />
                         </div>

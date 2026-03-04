@@ -8,6 +8,7 @@ import { SaveConfirmDialog } from './components/Dialog/SaveConfirmDialog'
 import { useEditorStore } from './stores/editorStore'
 import { useAutoSave } from './components/Editor/hooks/useAutoSave'
 import { useCliFileOpener } from './components/Editor/hooks/useCliFileOpener'
+import { useSessionRecovery } from './components/Editor/hooks/useSessionRecovery'
 import './styles/immersive.css'
 
 import { TOCPanel } from './components/Sidebar/TOCPanel'
@@ -16,6 +17,7 @@ import { FileExplorer } from './components/Sidebar/FileExplorer'
 export default function App() {
     useAutoSave()
     const isCliInitDone = useCliFileOpener()
+    const isSessionReady = useSessionRecovery(isCliInitDone)
     const tabs = useEditorStore(s => s.tabs)
     const hasActiveTab = tabs.length > 0
     const themeMode = useEditorStore(s => s.themeMode)
@@ -58,7 +60,7 @@ export default function App() {
                 <FileExplorer />
                 <TOCPanel />
                 <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                    <EditorContainer suppressWelcome={!isCliInitDone} />
+                    <EditorContainer suppressWelcome={!isCliInitDone || !isSessionReady} />
                 </div>
             </div>
             <StatusBar />
