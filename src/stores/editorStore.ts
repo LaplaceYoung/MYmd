@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { writeTextFile } from '@tauri-apps/plugin-fs'
 import { save } from '@tauri-apps/plugin-dialog'
 import { invoke } from '@tauri-apps/api/core'
+import { indexKnowledgeDocument, rebuildWorkspaceIndex } from '@/knowledge/service'
 // 单个标签页
 export interface Tab {
     /** 唯一标识 */
@@ -86,6 +87,8 @@ interface EditorState {
     typewriterMode: boolean
     /** 是否显示 TOC (大纲) 侧边栏 */
     tocVisible: boolean
+    /** 是否显示反向链接侧边栏 */
+    backlinksVisible: boolean
     /** 是否显示文件浏览侧边栏 */
     fileExplorerVisible: boolean
     /** 当前打开的文件夹路径 */
@@ -120,6 +123,7 @@ interface EditorState {
     setFocusMode: (enable: boolean) => void
     setTypewriterMode: (enable: boolean) => void
     setTocVisible: (visible: boolean) => void
+    setBacklinksVisible: (visible: boolean) => void
     setFileExplorerVisible: (visible: boolean) => void
     setActiveWorkspace: (path: string | null) => void
     openMathEdit: (state: MathEditState) => void
@@ -205,6 +209,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     focusMode: false,
     typewriterMode: false,
     tocVisible: false,
+    backlinksVisible: false,
     fileExplorerVisible: true,
     activeWorkspace: null,
     mathEdit: null,
@@ -269,6 +274,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     },
 
     markSaved: (tabId, filePath) => {
+        const existingTab = get().tabs.find(t => t.id === tabId)
+        const resolvedPath = filePath ?? existingTab?.filePath ?? null
         set(state => ({
             tabs: state.tabs.map(t =>
                 t.id === tabId
@@ -281,6 +288,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
                     : t
             )
         }))
+
+        if (resolvedPath) {
+            const latestTab = get().tabs.find(t => t.id === tabId)
+            const content = latestTab?.content ?? existingTab?.content ?? ''
+            void indexKnowledgeDocument(resolvedPath, content, get().activeWorkspace)
+        }
     },
 
     setViewMode: (mode) => set({ viewMode: mode }),
@@ -362,10 +375,16 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     setTypewriterMode: (enable) => set({ typewriterMode: enable }),
 
     setTocVisible: (enable) => set({ tocVisible: enable }),
+    setBacklinksVisible: (enable) => set({ backlinksVisible: enable }),
 
     setFileExplorerVisible: (enable) => set({ fileExplorerVisible: enable }),
 
-    setActiveWorkspace: (path) => set({ activeWorkspace: path }),
+    setActiveWorkspace: (path) => {
+        set({ activeWorkspace: path })
+        if (path) {
+            void rebuildWorkspaceIndex(path)
+        }
+    },
 
     openMathEdit: (state) => set({ mathEdit: state }),
 

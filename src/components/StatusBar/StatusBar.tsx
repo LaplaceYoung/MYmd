@@ -1,8 +1,7 @@
-import { BookOpen, AlignLeft, ZoomIn, ZoomOut, FileText, List } from 'lucide-react'
+import { BookOpen, AlignLeft, ZoomIn, ZoomOut, FileText, List, Link2 } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
 import './StatusBar.css'
 
-/** 底部状态栏：显示文件路径、字数等信息 */
 export function StatusBar() {
     const activeTab = useEditorStore(s => {
         const id = s.activeTabId
@@ -15,52 +14,56 @@ export function StatusBar() {
     const setViewMode = useEditorStore(s => s.setViewMode)
     const tocVisible = useEditorStore(s => s.tocVisible)
     const setTocVisible = useEditorStore(s => s.setTocVisible)
+    const backlinksVisible = useEditorStore(s => s.backlinksVisible)
+    const setBacklinksVisible = useEditorStore(s => s.setBacklinksVisible)
 
     if (!activeTab) return <div className="statusbar statusbar--fluent" />
 
-    // 简单统计
     const charCount = activeTab.content.length
     const wordCount = activeTab.content.trim().split(/\s+/).filter(Boolean).length
-    const readingTime = Math.max(1, Math.ceil(charCount / 400)) // 中文阅读速度约 400字/分钟
+    const readingTime = Math.max(1, Math.ceil(charCount / 400))
 
     return (
         <div className="statusbar statusbar--fluent">
-            {/* 左侧信息区 */}
             <div className="statusbar__left">
-                <div className="statusbar__btn tooltip" title={`字符总数: ${charCount}\n非空白字符: ${activeTab.content.replace(/\s/g, '').length}\n汉字/单词: ${wordCount}\n预计阅读时间: ${readingTime} 分钟`}>
-                    {wordCount} 词 | 约 {readingTime} 分钟阅读
+                <div className="statusbar__btn tooltip" title={`Characters: ${charCount}\nNon-whitespace: ${activeTab.content.replace(/\s/g, '').length}\nWords: ${wordCount}\nReading time: ${readingTime} min`}>
+                    {wordCount} words | ~{readingTime} min read
                 </div>
                 <div className="statusbar__btn">
                     <FileText size={12} strokeWidth={1.5} style={{ marginRight: 4 }} />
-                    {activeTab.filePath ? '已保存至此电脑' : '尚未保存'}
+                    {activeTab.filePath ? 'Saved to disk' : 'Unsaved'}
                 </div>
-                <div className="statusbar__btn">
-                    中文(中国)
-                </div>
+                <div className="statusbar__btn">UTF-8</div>
             </div>
 
             <div className="statusbar__spacer" />
 
-            {/* 右侧控制区 (视图与缩放) */}
             <div className="statusbar__right">
                 <button
                     className={`statusbar__icon-btn ${tocVisible ? 'active' : ''}`}
-                    title="文档大纲"
+                    title="Table of contents"
                     onClick={() => setTocVisible(!tocVisible)}
                 >
                     <List size={14} />
                 </button>
+                <button
+                    className={`statusbar__icon-btn ${backlinksVisible ? 'active' : ''}`}
+                    title="Backlinks"
+                    onClick={() => setBacklinksVisible(!backlinksVisible)}
+                >
+                    <Link2 size={14} />
+                </button>
                 <div className="statusbar__divider" style={{ width: 1, height: 14, backgroundColor: 'var(--border)', margin: '0 4px' }} />
                 <button
                     className={`statusbar__icon-btn ${viewMode === 'wysiwyg' ? 'active' : ''}`}
-                    title="所见即所得模式"
+                    title="WYSIWYG mode"
                     onClick={() => setViewMode('wysiwyg')}
                 >
                     <BookOpen size={14} />
                 </button>
                 <button
                     className={`statusbar__icon-btn ${viewMode === 'split' ? 'active' : ''}`}
-                    title="分屏模式"
+                    title="Split mode"
                     onClick={() => setViewMode('split')}
                 >
                     <AlignLeft size={14} />
@@ -68,11 +71,7 @@ export function StatusBar() {
 
                 <div className="statusbar__zoom-controls">
                     <span className="statusbar__zoom-label">{zoom}%</span>
-                    <button
-                        className="statusbar__zoom-btn"
-                        title="缩小"
-                        onClick={() => setZoom(zoom - 10)}
-                    >
+                    <button className="statusbar__zoom-btn" title="Zoom out" onClick={() => setZoom(zoom - 10)}>
                         <ZoomOut size={14} />
                     </button>
                     <div className="statusbar__slider-container">
@@ -83,14 +82,10 @@ export function StatusBar() {
                             value={zoom}
                             onChange={(e) => setZoom(Number(e.target.value))}
                             className="statusbar__slider"
-                            title="缩放比例"
+                            title="Zoom"
                         />
                     </div>
-                    <button
-                        className="statusbar__zoom-btn"
-                        title="放大"
-                        onClick={() => setZoom(zoom + 10)}
-                    >
+                    <button className="statusbar__zoom-btn" title="Zoom in" onClick={() => setZoom(zoom + 10)}>
                         <ZoomIn size={14} />
                     </button>
                 </div>

@@ -9,10 +9,12 @@ import { useEditorStore } from './stores/editorStore'
 import { useAutoSave } from './components/Editor/hooks/useAutoSave'
 import { useCliFileOpener } from './components/Editor/hooks/useCliFileOpener'
 import { useSessionRecovery } from './components/Editor/hooks/useSessionRecovery'
+import { GlobalSearchModal } from './components/Editor/GlobalSearchModal'
 import './styles/immersive.css'
 
 import { TOCPanel } from './components/Sidebar/TOCPanel'
 import { FileExplorer } from './components/Sidebar/FileExplorer'
+import { BacklinksPanel } from './components/Sidebar/BacklinksPanel'
 
 export default function App() {
     useAutoSave()
@@ -59,12 +61,14 @@ export default function App() {
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden', width: '100%' }}>
                 <FileExplorer />
                 <TOCPanel />
+                <BacklinksPanel />
                 <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     <EditorContainer suppressWelcome={!isCliInitDone || !isSessionReady} />
                 </div>
             </div>
             <StatusBar />
             <SaveConfirmDialog />
+            <GlobalSearchModal />
         </>
     )
 }
