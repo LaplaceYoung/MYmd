@@ -4,45 +4,24 @@ const prefersReducedMotion = reducedMotionQuery.matches;
 const lowEndDevice = (navigator.hardwareConcurrency || 8) <= 4;
 const enableHighMotion = !prefersReducedMotion && !lowEndDevice;
 
-const modeContent = {
-  wysiwyg: {
-    title: "Write and format in one flow",
-    items: [
-      "Fast input with live visual feedback",
-      "Instant word stats and reading estimate",
-      "Keyboard and context menu stay consistent"
-    ]
-  },
-  split: {
-    title: "Review in split mode",
-    items: [
-      "Edit source and preview side-by-side",
-      "Perfect for technical docs and specification review",
-      "Search and structure stay synchronized"
-    ]
-  },
-  source: {
-    title: "Source-first focus mode",
-    items: [
-      "Pure Markdown editing for speed",
-      "Great for template-driven writing and bulk updates",
-      "Works well with autosave and versioned delivery"
-    ]
-  }
-};
-
 const highlightContent = {
-  speed: {
-    title: "Fast startup, practical depth",
-    desc: "MYmd keeps the path from launch to writing short while preserving the core tools needed for technical docs."
+  light: {
+    title: "轻量启动，快速进入写作状态",
+    desc: "打开即写，保留核心能力密度，避免重型软件带来的学习与切换负担。",
+    head: "启动路径",
+    list: ["打开文件或新建文档", "直接进入编辑区", "关键工具始终可达"]
   },
   flow: {
-    title: "Clean path from draft to delivery",
-    desc: "File workflow, export, and release entry points are kept explicit so you can ship documents without friction."
+    title: "写作到发布一条链路",
+    desc: "从编辑、保存到导出与下载页跳转，交付路径明确且可复用。",
+    head: "交付闭环",
+    list: ["编辑与预览同步", "保存与导出路径稳定", "版本发布入口直接可达"]
   },
   consistency: {
-    title: "Consistent interaction system",
-    desc: "Toolbar actions, side panels, and state feedback follow one interaction rhythm across the whole workspace."
+    title: "统一交互降低学习成本",
+    desc: "工具栏、侧栏与状态反馈遵循同一节奏，减少认知跳转。",
+    head: "交互一致性",
+    list: ["按钮语义稳定", "反馈时机明确", "模式切换成本低"]
   }
 };
 
@@ -66,7 +45,7 @@ function animateNumber(element, target) {
     return;
   }
 
-  const duration = 720;
+  const duration = 760;
   const startTime = performance.now();
 
   function tick(now) {
@@ -110,60 +89,98 @@ function initReveal() {
   items.forEach((item) => observer.observe(item));
 }
 
-function initRibbonTabs() {
-  const tabs = Array.from(document.querySelectorAll("[data-ribbon-tab]"));
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      tabs.forEach((node) => node.classList.remove("is-active"));
-      tab.classList.add("is-active");
-    });
-  });
-}
+function initScrollProgress() {
+  const bar = document.getElementById("scroll-progress-bar");
+  if (!bar) return;
 
-function initModeSwitch() {
-  const buttons = Array.from(document.querySelectorAll(".mode-btn"));
-  const titleEl = document.getElementById("stage-mode-title");
-  const listEl = document.getElementById("stage-mode-list");
-  const canvas = document.getElementById("stage-canvas");
+  let ticking = false;
 
-  if (!titleEl || !listEl || !canvas || buttons.length === 0) return;
-
-  function render(modeKey) {
-    const data = modeContent[modeKey];
-    if (!data) return;
-
-    canvas.classList.add("is-swapping");
-
-    const commit = () => {
-      titleEl.textContent = data.title;
-      listEl.innerHTML = data.items.map((item) => `<li>${item}</li>`).join("");
-      canvas.classList.remove("is-swapping");
-    };
-
-    if (!enableHighMotion) {
-      commit();
-      return;
-    }
-
-    window.setTimeout(commit, 130);
+  function update() {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const percent = Math.min(100, Math.max(0, (scrollTop / maxScroll) * 100));
+    bar.style.transform = `scaleX(${percent / 100})`;
+    ticking = false;
   }
 
-  buttons.forEach((button) => {
-    button.addEventListener("click", () => {
-      buttons.forEach((node) => node.classList.remove("is-active"));
-      button.classList.add("is-active");
-      render(button.dataset.mode || "wysiwyg");
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  update();
+}
+
+function initSectionSpy() {
+  const sectionIds = ["hero", "features", "highlights", "release"];
+  const navLinks = Array.from(document.querySelectorAll("[data-nav-target]"));
+
+  function activate(target) {
+    navLinks.forEach((link) => {
+      const isCurrent = link.getAttribute("data-nav-target") === target;
+      link.classList.toggle("is-current", isCurrent);
+    });
+  }
+
+  navLinks.forEach((link) => {
+    const target = link.getAttribute("data-nav-target");
+    if (!target) return;
+
+    link.addEventListener("click", (event) => {
+      const anchor = document.getElementById(target);
+      if (!anchor) return;
+      event.preventDefault();
+      anchor.scrollIntoView({ behavior: enableHighMotion ? "smooth" : "auto", block: "start" });
+      activate(target);
     });
   });
+
+  if (typeof IntersectionObserver === "undefined") {
+    activate("hero");
+    return;
+  }
+
+  const sections = sectionIds
+    .map((id) => document.getElementById(id))
+    .filter(Boolean);
+
+  if (sections.length === 0) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      let best = null;
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        if (!best || entry.intersectionRatio > best.intersectionRatio) {
+          best = entry;
+        }
+      });
+
+      if (!best || !best.target?.id) return;
+      activate(best.target.id);
+    },
+    {
+      threshold: [0.2, 0.4, 0.6],
+      rootMargin: "-16% 0px -55% 0px"
+    }
+  );
+
+  sections.forEach((section) => observer.observe(section));
+  activate("hero");
 }
 
 function initHighlightSwitch() {
   const buttons = Array.from(document.querySelectorAll(".highlight-btn"));
   const titleEl = document.getElementById("highlight-title");
   const descEl = document.getElementById("highlight-desc");
+  const headEl = document.getElementById("proof-head");
+  const listEl = document.getElementById("proof-list");
   const panelEl = document.getElementById("highlight-panel");
 
-  if (!titleEl || !descEl || !panelEl || buttons.length === 0) return;
+  if (!titleEl || !descEl || !headEl || !listEl || !panelEl || buttons.length === 0) return;
 
   function render(key) {
     const data = highlightContent[key];
@@ -174,6 +191,8 @@ function initHighlightSwitch() {
     const commit = () => {
       titleEl.textContent = data.title;
       descEl.textContent = data.desc;
+      headEl.textContent = data.head;
+      listEl.innerHTML = data.list.map((item) => `<li>${item}</li>`).join("");
       panelEl.classList.remove("is-swapping");
     };
 
@@ -182,14 +201,14 @@ function initHighlightSwitch() {
       return;
     }
 
-    window.setTimeout(commit, 130);
+    window.setTimeout(commit, 120);
   }
 
   buttons.forEach((button) => {
     button.addEventListener("click", () => {
       buttons.forEach((node) => node.classList.remove("is-active"));
       button.classList.add("is-active");
-      render(button.dataset.highlight || "speed");
+      render(button.dataset.highlight || "light");
     });
   });
 }
@@ -204,9 +223,9 @@ function initTiltCards() {
       const rect = card.getBoundingClientRect();
       const x = (event.clientX - rect.left) / rect.width;
       const y = (event.clientY - rect.top) / rect.height;
-      const rotateX = (0.5 - y) * 3.6;
-      const rotateY = (x - 0.5) * 3.6;
-      card.style.transform = `perspective(980px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-1px)`;
+      const rotateX = (0.5 - y) * 2.6;
+      const rotateY = (x - 0.5) * 2.6;
+      card.style.transform = `perspective(980px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
     });
 
     card.addEventListener("mouseleave", () => {
@@ -231,7 +250,7 @@ function initParallax() {
       const rect = el.getBoundingClientRect();
       const center = rect.top + rect.height / 2;
       const normalized = (center - vh / 2) / vh;
-      const offset = Math.max(-16, Math.min(16, -normalized * intensity));
+      const offset = Math.max(-14, Math.min(14, -normalized * intensity));
       el.style.setProperty("--parallax-y", `${offset.toFixed(2)}px`);
     });
 
@@ -241,7 +260,7 @@ function initParallax() {
   function onScroll() {
     if (ticking) return;
     ticking = true;
-    window.requestAnimationFrame(updateParallax);
+    requestAnimationFrame(updateParallax);
   }
 
   window.addEventListener("scroll", onScroll, { passive: true });
@@ -259,7 +278,7 @@ function initMagneticButtons() {
       const rect = button.getBoundingClientRect();
       const x = event.clientX - (rect.left + rect.width / 2);
       const y = event.clientY - (rect.top + rect.height / 2);
-      button.style.transform = `translate(${x * 0.06}px, ${y * 0.06}px)`;
+      button.style.transform = `translate(${x * 0.05}px, ${y * 0.05}px)`;
     });
 
     button.addEventListener("mouseleave", () => {
@@ -286,10 +305,20 @@ async function fetchJson(url) {
 async function loadRepoStats() {
   try {
     const data = await fetchJson(`https://api.github.com/repos/${repo}`);
+    const stars = Number(data.stargazers_count ?? 0);
+    const starsWrap = document.getElementById("stars-wrap");
     const starsEl = document.getElementById("stars-count");
-    if (starsEl) animateNumber(starsEl, Number(data.stargazers_count ?? 0));
+
+    if (starsWrap && stars < 100) {
+      starsWrap.style.display = "none";
+    }
+
+    if (starsEl) {
+      animateNumber(starsEl, stars);
+    }
   } catch {
-    // keep fallback
+    const starsWrap = document.getElementById("stars-wrap");
+    if (starsWrap) starsWrap.style.display = "none";
   }
 }
 
@@ -323,8 +352,8 @@ async function loadLatestRelease() {
 async function bootstrap() {
   setYear();
   initReveal();
-  initRibbonTabs();
-  initModeSwitch();
+  initScrollProgress();
+  initSectionSpy();
   initHighlightSwitch();
   initTiltCards();
   initParallax();
