@@ -6,7 +6,8 @@
     "dev": "vite",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
     "build": "vite build",
-    "ci:check": "npm run build",
+    "ci:repo-hygiene": "node scripts/repo-hygiene-check.mjs",
+    "ci:check": "npm run ci:repo-hygiene && npm run build",
     "preview": "vite preview",
     "tauri": "tauri"
   },
