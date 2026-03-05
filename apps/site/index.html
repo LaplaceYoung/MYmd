@@ -3,257 +3,370 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MYmd | 本地优先的 Markdown 桌面编辑器</title>
+    <title>MYmd | Local-First Document Editor</title>
     <meta
       name="description"
-      content="MYmd 是本地优先的 Markdown 桌面编辑器，支持 WYSIWYG / Split / Source、多标签、自动保存、KaTeX 与 Mermaid，适合高频技术文档与知识沉淀。"
+      content="MYmd 是本地优先的 Markdown 桌面编辑器，支持 WYSIWYG / Split / Source、多标签、自动保存，专注文档稳定交付。"
     />
-    <meta property="og:title" content="MYmd | 本地优先的 Markdown 桌面编辑器" />
+    <meta property="og:title" content="MYmd | Local-First Document Editor" />
     <meta
       property="og:description"
       content="把写作、审阅、导出、发布放进一条稳定链路。轻量启动，专注文档交付。"
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://laplaceyoung.github.io/MYmd/" />
-    <meta name="theme-color" content="#0f766e" />
+    <!-- Social Preview Image (Placeholder url for final asset) -->
+    <meta
+      property="og:image"
+      content="https://laplaceyoung.github.io/MYmd/assets/social-cover.jpg"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MYmd | Local-First Document Editor" />
+    <meta name="twitter:description" content="专注文档交付的本地优先编辑器" />
+    <meta
+      name="twitter:image"
+      content="https://laplaceyoung.github.io/MYmd/assets/social-cover.jpg"
+    />
+    <meta
+      name="theme-color"
+      content="#f4f0ec"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#121212"
+      media="(prefers-color-scheme: dark)"
+    />
+
+    <!-- Google Fonts: Serif (Playfair) and Monospace (JetBrains) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Serif+SC:wght@400;700;900&family=Playfair+Display:ital,wght@0,500;0,800;1,500;1,800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./styles.css" />
   </head>
+
   <body>
-    <div class="scroll-progress" aria-hidden="true">
-      <span id="scroll-progress-bar"></span>
+    <!-- Grid Overlay lines -->
+    <div class="grid-overlay" aria-hidden="true">
+      <div class="v-line" style="left: 20%"></div>
+      <div class="v-line" style="left: 50%"></div>
+      <div class="v-line" style="left: 80%"></div>
+      <div class="h-line" style="top: 80px"></div>
     </div>
 
-    <div id="burst-layer" aria-hidden="true"></div>
+    <div class="noise-layer" aria-hidden="true"></div>
 
-    <header class="topbar reveal" data-delay="0">
-      <a class="brand" href="#hero" aria-label="MYmd 首页">
-        <img src="./assets/mymd-logo.jpeg" alt="MYmd Logo" class="brand-logo" />
-        <span class="brand-name">MYmd</span>
-      </a>
-
-      <button id="nav-toggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
-        菜单
-      </button>
-
-      <nav id="site-nav" class="topnav" aria-label="主导航">
-        <a href="#hero" data-nav-target="hero">首页</a>
-        <a href="#workflow" data-nav-target="workflow">工作流</a>
-        <a href="#features" data-nav-target="features">核心能力</a>
-        <a href="#proof" data-nav-target="proof">功能展示</a>
-        <a href="#release" data-nav-target="release">下载</a>
-      </nav>
-
-      <a
-        id="release-cta"
-        class="btn btn-primary"
-        href="https://github.com/LaplaceYoung/MYmd/releases/latest"
-        target="_blank"
-        rel="noreferrer"
-      >
-        下载 Windows 版
-      </a>
-    </header>
-
-    <main>
-      <section id="hero" class="hero reveal" data-delay="40">
-        <div class="hero-copy">
-          <p class="eyebrow">LOCAL-FIRST | MARKDOWN | DESKTOP</p>
-          <h1>把文档生产从“能写”升级到“能稳定交付”</h1>
-          <p>
-            MYmd 面向高频写作与技术文档场景：多标签、自动保存、结构化导航、公式图表支持，帮助你用更短路径完成写作到发布。
-          </p>
-
-          <div class="hero-actions">
-            <a
-              id="release-link"
-              class="btn btn-primary"
-              href="https://github.com/LaplaceYoung/MYmd/releases/latest"
-              target="_blank"
-              rel="noreferrer"
-            >
-              立即下载
-            </a>
-            <a class="btn btn-ghost" href="https://github.com/LaplaceYoung/MYmd" target="_blank" rel="noreferrer">
-              查看源码
-            </a>
-            <button id="celebrate-btn" class="btn btn-soft" type="button">查看动效演示</button>
-          </div>
-
-          <div class="hero-metrics" aria-label="核心指标">
-            <div class="metric-card">
-              <span>最新版本</span>
-              <strong id="latest-version">v1.3.0</strong>
-            </div>
-            <div class="metric-card" id="stars-wrap">
-              <span>GitHub Stars</span>
-              <strong id="stars-count">--</strong>
-            </div>
-            <div class="metric-card">
-              <span>首次上手</span>
-              <strong>&lt; 3 分钟</strong>
-            </div>
-          </div>
-        </div>
-
-        <aside class="hero-preview reveal" data-delay="80" aria-label="MYmd 编辑界面演示">
-          <div class="window">
-            <div class="window-head">
-              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-              <strong>MYmd Editor</strong>
-              <span id="window-badge" class="badge">WYSIWYG</span>
-            </div>
-            <div class="window-toolbar">
-              <span>H1</span><span>B</span><span>I</span><span>Code</span><span>Math</span><span>Mermaid</span>
-              <div class="mode-pills" role="tablist" aria-label="编辑模式切换">
-                <button class="mode-pill is-active" type="button" data-demo-mode="wysiwyg">WYSIWYG</button>
-                <button class="mode-pill" type="button" data-demo-mode="split">Split</button>
-                <button class="mode-pill" type="button" data-demo-mode="source">Source</button>
-              </div>
-            </div>
-            <div class="window-body" id="demo-body" data-mode="wysiwyg">
-              <div class="pane pane-edit">
-                <p class="line title"># Release Checklist</p>
-                <p class="line">- [x] 完成编辑核心能力</p>
-                <p class="line">- [x] 支持 KaTeX / Mermaid</p>
-                <p class="line typing">- [ ] 发布安装包与版本说明</p>
-                <p class="line muted">Updated: 2026-03-05 09:40</p>
-              </div>
-              <div class="pane pane-preview">
-                <h3>Release Checklist</h3>
-                <p>1. Build and smoke test</p>
-                <p>2. Pack desktop installer</p>
-                <p>3. Publish release notes</p>
-                <span class="chip">TOC + Search + Export</span>
-              </div>
-            </div>
-          </div>
-          <p class="preview-note">支持 WYSIWYG / Split / Source 三种写作模式</p>
-        </aside>
-      </section>
-
-      <section id="workflow" class="section reveal" data-delay="120">
-        <div class="section-head">
-          <h2>写作到发布，四步完成闭环</h2>
-          <p>突出“本地优先 + 结构化内容 + 可交付”的生产链路。</p>
-        </div>
-        <div class="workflow-grid">
-          <article>
-            <strong>01 打开与接入</strong>
-            <p>支持打开文件、工作区浏览、最近文件快速恢复。</p>
-          </article>
-          <article>
-            <strong>02 专注写作</strong>
-            <p>WYSIWYG 与 Source 无缝切换，自动保存持续兜底。</p>
-          </article>
-          <article>
-            <strong>03 审阅与结构化</strong>
-            <p>TOC、搜索替换、反向链接帮助快速定位与校对。</p>
-          </article>
-          <article>
-            <strong>04 导出与发布</strong>
-            <p>保存 / 另存为 / 导出 HTML，形成稳定交付动作。</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="features" class="section alt reveal" data-delay="140">
-        <div class="section-head">
-          <h2>核心能力</h2>
-          <p>为技术文档密集场景设计，不做无效复杂度。</p>
-        </div>
-        <div class="feature-grid">
-          <article class="feature-card lift-card">
-            <h3>编辑效率</h3>
-            <p>多标签、快捷键、自动保存、未保存关闭确认。</p>
-          </article>
-          <article class="feature-card lift-card">
-            <h3>技术表达</h3>
-            <p>KaTeX、Mermaid、语法高亮，覆盖常见工程文档。</p>
-          </article>
-          <article class="feature-card lift-card">
-            <h3>知识结构</h3>
-            <p>TOC、文件树、全局搜索、反向链接，便于规模化维护。</p>
-          </article>
-          <article class="feature-card lift-card">
-            <h3>本地可控</h3>
-            <p>桌面运行、文件路径透明、无网络依赖也可完整工作。</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="proof" class="section reveal" data-delay="160">
-        <div class="section-head">
-          <h2>功能展示与交互效果</h2>
-          <p>只展示与产品能力直接相关的内容。</p>
-        </div>
-
-        <div class="proof-layout">
-          <div class="proof-tabs" role="tablist" aria-label="功能切换">
-            <button class="proof-tab is-active" type="button" data-highlight="light">编辑体验</button>
-            <button class="proof-tab" type="button" data-highlight="flow">文件工作流</button>
-            <button class="proof-tab" type="button" data-highlight="team">交付效率</button>
-          </div>
-
-          <article id="proof-panel" class="proof-panel lift-card">
-            <h3 id="proof-title">轻量启动，打开就写</h3>
-            <p id="proof-desc">降低从“打开工具”到“进入写作状态”的时间损耗。</p>
-            <ul id="proof-list">
-              <li>本地文件直接打开</li>
-              <li>首次上手路径短</li>
-              <li>关键动作入口集中</li>
-            </ul>
-          </article>
-        </div>
-
-        <div class="showcase-kpis">
-          <div class="kpi-card lift-card">
-            <strong>自动保存</strong>
-            <span>降低内容丢失风险</span>
-          </div>
-          <div class="kpi-card lift-card">
-            <strong>搜索替换</strong>
-            <span>提升长文档编辑效率</span>
-          </div>
-          <div class="kpi-card lift-card">
-            <strong>导出 HTML</strong>
-            <span>快速进入交付环节</span>
-          </div>
-        </div>
-      </section>
-
-      <section id="release" class="section alt reveal" data-delay="180">
-        <div class="section-head">
-          <h2>下载与发布</h2>
-          <p>持续交付安装包，保持可下载、可验证、可回滚。</p>
-        </div>
-
-        <div class="release-card lift-card">
-          <p>当前版本：<strong id="release-version-inline">v1.3.0</strong></p>
-          <p>推荐在 Windows 桌面端使用，获得完整文件工作流和稳定编辑体验。</p>
-          <a
-            class="btn btn-primary"
-            href="https://github.com/LaplaceYoung/MYmd/releases/latest"
-            target="_blank"
-            rel="noreferrer"
-          >
-            前往版本页下载
+    <div class="container">
+      <header class="topbar">
+        <div class="brand-block">
+          <span class="mono-label" data-i18n="nav_version">APP / v1.3.0</span>
+          <a class="brand" href="#hero">
+            <img src="./assets/icon.png" class="brand-logo" alt="MYmd" />
+            <span class="brand-name">MYmd.</span>
           </a>
         </div>
-      </section>
-    </main>
+        <nav id="site-nav" class="topnav">
+          <a href="#workflow" data-i18n="nav_workflow">WORKFLOW.</a>
+          <a href="#features" data-i18n="nav_spec">SPEC.</a>
+          <a href="#proof" data-i18n="nav_modules">MODULES.</a>
+          <button id="lang-toggle" class="btn-lang" type="button">
+            ZH / EN
+          </button>
+          <a
+            href="#release"
+            class="btn-accent"
+            target="_blank"
+            rel="noreferrer"
+            data-i18n="nav_download"
+            >GET BINARY / WIN</a
+          >
+          <button id="mobile-toggle" class="mobile-menu-btn" type="button">
+            [ MENU ]
+          </button>
+        </nav>
+      </header>
 
-    <a
-      class="mobile-cta btn btn-primary"
-      href="https://github.com/LaplaceYoung/MYmd/releases/latest"
-      target="_blank"
-      rel="noreferrer"
-    >
-      下载 Windows 版
-    </a>
+      <!-- Mobile Nav Overlay -->
+      <div id="mobile-menu" class="mobile-overlay" aria-hidden="true">
+        <button id="mobile-close" class="btn-close" type="button">
+          [ CLOSE ]
+        </button>
+        <a href="#workflow" class="mobile-link" data-i18n="nav_workflow"
+          >WORKFLOW.</a
+        >
+        <a href="#features" class="mobile-link" data-i18n="nav_spec">SPEC.</a>
+        <a href="#release" class="mobile-link" data-i18n="nav_download"
+          >GET BINARY</a
+        >
+      </div>
 
-    <footer class="footer reveal" data-delay="220">
-      <p>(c) <span id="year"></span> MYmd | Local-First Markdown Desktop Editor</p>
-    </footer>
+      <main>
+        <!-- HERO SECTION -->
+        <section id="hero" class="hero-grid">
+          <div class="hero-cell cell-title reveal" data-delay="0">
+            <span class="mono-tag" data-i18n="hero_tag">[ SYS_READY ]</span>
+            <h1 class="serif-giant">
+              <span data-i18n="hero_t1">本地优先。</span><br />
+              <span data-i18n="hero_t2">严肃的</span><br />
+              <span data-i18n="hero_t3">文档交付。</span>
+            </h1>
+            <p class="mono-desc">
+              > LOCAL-FIRST ARCHITECTURE.<br />
+              > WYSIWYG / SPLIT / SOURCE ENGINES.<br />
+              > TARGET: HIGH-FREQUENCY PUBLISHING.<br />
+              <span data-i18n="hero_desc"
+                >MYmd
+                是面向长文写作、知识库与技术文档场景的桌面端排版工业载体。丢掉繁琐的网络同步，回归纯文本的绝对控制权。</span
+              >
+            </p>
+            <div class="hero-actions">
+              <a
+                class="btn-solid"
+                href="https://github.com/LaplaceYoung/MYmd/releases/latest"
+                target="_blank"
+                data-i18n="btn_dl"
+              >
+                [ DOWNLOAD_EXE ]
+              </a>
+              <a
+                class="btn-outline"
+                href="https://github.com/LaplaceYoung/MYmd"
+                target="_blank"
+                data-i18n="btn_src"
+              >
+                [ READ_SOURCE ]
+              </a>
+            </div>
+          </div>
+
+          <div class="hero-cell cell-visual reveal" data-delay="100">
+            <div class="visual-blueprint">
+              <div class="blueprint-head">
+                <span class="mono-tiny">X-POS: 341 Y-POS: 882</span>
+                <span class="mono-tiny badge-accent">ACTIVE</span>
+              </div>
+              <div class="blueprint-body">
+                <h3 class="serif-title">Release.md</h3>
+                <div class="code-block">
+                  <span class="line"
+                    ><span class="c-accent">#</span> Release Checklist</span
+                  >
+                  <span class="line"
+                    ><span class="c-dim">- [x]</span>
+                    <span data-i18n="code_1"
+                      >Core editing routines compiled.</span
+                    ></span
+                  >
+                  <span class="line"
+                    ><span class="c-dim">- [x]</span>
+                    <span data-i18n="code_2">DOM sync established.</span></span
+                  >
+                  <span class="line"
+                    ><span class="c-dim">- [x]</span>
+                    <span data-i18n="code_3"
+                      >Math parsing via KaTeX running.</span
+                    ></span
+                  >
+                  <span class="line type-anim"
+                    ><span class="c-accent">- [ ]</span>
+                    <span data-i18n="code_4"
+                      >Awaiting installer package...</span
+                    ></span
+                  >
+                </div>
+              </div>
+              <div class="blueprint-foot">
+                <span class="mono-tiny">RENDER_MODE: WYSIWYG</span>
+                <span class="mono-tiny">MEM: 32MB</span>
+              </div>
+            </div>
+            <!-- Decorative crosshairs -->
+            <div class="crosshair tl"></div>
+            <div class="crosshair tr"></div>
+            <div class="crosshair bl"></div>
+            <div class="crosshair br"></div>
+          </div>
+        </section>
+
+        <!-- WORKFLOW SECTION -->
+        <section id="workflow" class="blueprint-section reveal" data-delay="50">
+          <header class="section-header">
+            <span class="mono-tag" data-i18n="flow_tag"
+              >[ PHASE_01: WORKFLOW ]</span
+            >
+            <h2 class="serif-h2" data-i18n="flow_title">四步交付闭环。</h2>
+          </header>
+
+          <div class="bento-hard">
+            <article class="bento-cell" style="grid-column: span 6">
+              <div class="cell-index">01.</div>
+              <h3 class="mono-title" data-i18n="flow_1_t">打开 / 接入</h3>
+              <p class="serif-text" data-i18n="flow_1_d">
+                原生级别的桌面文件接入。支持工作区浏览与最近文件快速恢复，摒弃多余的导入导出屏障。
+              </p>
+            </article>
+            <article class="bento-cell" style="grid-column: span 6">
+              <div class="cell-index">02.</div>
+              <h3 class="mono-title" data-i18n="flow_2_t">极致专注</h3>
+              <p class="serif-text" data-i18n="flow_2_d">
+                WYSIWYG 引擎与 Raw Source 无缝切换。无感知自动保存 (Auto-save)
+                机制持续为您做数据兜底。
+              </p>
+            </article>
+            <article class="bento-cell" style="grid-column: span 8">
+              <div class="cell-index">03.</div>
+              <h3 class="mono-title" data-i18n="flow_3_t">大纲与校验</h3>
+              <p class="serif-text" data-i18n="flow_3_d">
+                TOC
+                大纲视图、全词汇搜索替换、反向链接追踪，极大提高超长篇结构化文档的后期校对效率。
+              </p>
+            </article>
+            <article
+              class="bento-cell bento-accent"
+              style="grid-column: span 4"
+            >
+              <div class="cell-index" style="color: var(--bg-color)">04.</div>
+              <h3
+                class="mono-title"
+                style="color: var(--bg-color)"
+                data-i18n="flow_4_t"
+              >
+                输出发布
+              </h3>
+              <p
+                class="serif-text"
+                style="color: var(--bg-color)"
+                data-i18n="flow_4_d"
+              >
+                保存 / 另存为 / 快速导出
+                HTML。一键进入静态化部署与分发环节，形成稳定工作流。
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <!-- FEATURES SECTION -->
+        <section id="features" class="blueprint-section reveal" data-delay="50">
+          <header class="section-header border-top">
+            <span class="mono-tag" data-i18n="spec_tag"
+              >[ PHASE_02: SPECIFICATIONS ]</span
+            >
+            <h2 class="serif-h2" data-i18n="spec_title">工业级编辑特性。</h2>
+            <p class="mono-desc" data-i18n="spec_desc">
+              为技术文档密集型输出环境而设计，去除无效复杂度。
+            </p>
+          </header>
+
+          <div class="data-table">
+            <div class="data-row row-header">
+              <span class="col-head">SYS_MODULE</span>
+              <span class="col-head">DESCRIPTION</span>
+              <span class="col-head text-right">STATUS</span>
+            </div>
+            <div class="data-row">
+              <span class="mono-data" data-i18n="f1_t">编辑效率 (Editor)</span>
+              <span class="serif-data" data-i18n="f1_d"
+                >多标签并列、严格快捷键映射、全自动后台保存、未保存离开防御中断。</span
+              >
+              <span class="mono-status c-accent">[ RUNNING ]</span>
+            </div>
+            <div class="data-row">
+              <span class="mono-data" data-i18n="f2_t">技术方言 (Markup)</span>
+              <span class="serif-data" data-i18n="f2_d"
+                >全量内建支持 KaTeX 数学公式渲染、Mermaid
+                流程/时序图实时生成、代码块语法高亮。</span
+              >
+              <span class="mono-status c-accent">[ ACTIVE ]</span>
+            </div>
+            <div class="data-row">
+              <span class="mono-data" data-i18n="f3_t"
+                >拓扑知识 (Topology)</span
+              >
+              <span class="serif-data" data-i18n="f3_d"
+                >沉浸式文件树漫游、全局字符串高速检索、文献与段落级反向链接追踪。</span
+              >
+              <span class="mono-status c-accent">[ ACTIVE ]</span>
+            </div>
+            <div class="data-row">
+              <span class="mono-data" data-i18n="f4_t"
+                >环境独立 (Air-Gapped)</span
+              >
+              <span class="serif-data" data-i18n="f4_d"
+                >完全摒弃云端授信。全盘本地化处理，文件系统交互穿透，无网络依赖情况下的
+                100% 可用性。</span
+              >
+              <span class="mono-status c-accent">[ VERIFIED ]</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- DOWNLOAD & PROOF SECTION -->
+        <section id="release" class="blueprint-section reveal" data-delay="50">
+          <div class="release-grid">
+            <div class="release-info border-right">
+              <span class="mono-tag" data-i18n="rls_tag">[ DEPLOYMENT ]</span>
+              <h2 class="serif-h2" data-i18n="rls_title">获取稳定版本。</h2>
+              <div class="metrics-list">
+                <div class="metric">
+                  <span class="label">VERSION</span>
+                  <span class="val" id="latest-version">v1.3.0</span>
+                </div>
+                <div class="metric">
+                  <span class="label">PLATFORM</span>
+                  <span class="val">WINDOWS (NATIVE)</span>
+                </div>
+                <div class="metric" id="stars-wrap">
+                  <span class="label">GITHUB_STARS</span>
+                  <span class="val c-accent" id="stars-count">--</span>
+                </div>
+              </div>
+              <a
+                class="btn-solid block-btn"
+                href="https://github.com/LaplaceYoung/MYmd/releases/latest"
+                target="_blank"
+                data-i18n="btn_dl_full"
+              >
+                [ INITIATE_DOWNLOAD ]
+              </a>
+            </div>
+
+            <div class="release-visual">
+              <div class="blueprint-head">
+                <span class="mono-title">SYSTEM.DIAGNOSTICS</span>
+              </div>
+              <div class="blueprint-body logs">
+                <p class="mono-tiny" data-i18n="log_1">
+                  > Booting local environment...
+                </p>
+                <p class="mono-tiny" data-i18n="log_2">
+                  > Checking FS read/write permissions... OK
+                </p>
+                <p class="mono-tiny" data-i18n="log_3">
+                  > Mounting WYSIWYG Editor kernel...
+                </p>
+                <p class="mono-tiny" data-i18n="log_4">
+                  > Syncing layout engine...
+                </p>
+                <p class="mono-tiny c-accent" data-i18n="log_5">
+                  > SYSTEM READY FOR WRITING.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer border-top">
+        <span class="mono-tiny">(C) <span id="year"></span> LAPLACEYOUNG.</span>
+        <span class="mono-tiny"
+          >MYmd // DESKTOP MARKDOWN PUBLISHER. //
+          <a href="https://github.com/LaplaceYoung/MYmd">GITHUB</a></span
+        >
+      </footer>
+    </div>
 
     <script src="./main.js" defer></script>
   </body>
