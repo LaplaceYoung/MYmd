@@ -1,4 +1,4 @@
-import { create } from 'zustand'
+﻿import { create } from 'zustand'
 import { writeTextFile } from '@tauri-apps/plugin-fs'
 import { save } from '@tauri-apps/plugin-dialog'
 import { invoke } from '@tauri-apps/api/core'
@@ -131,12 +131,14 @@ interface EditorState {
     /** 执行保存操作（保存当前活动标签） */
     saveActiveTab: () => Promise<void>
     /** 执行保存操作（保存指定标签） */
-    saveTab: (tabId: string) => Promise<boolean>
+    saveTab: (tabId: string) => Promise<'saved' | 'cancelled' | 'failed'>
 
     /** 当前等待确认的关闭动作类型 */
     pendingCloseAction: 'tab' | 'window' | null
     /** 当前正在确认关闭的标签 ID */
     pendingCloseTabId: string | null
+    pendingCloseSaving: boolean
+    pendingCloseError: string | null
     /** 请求关闭标签（可能触发未保存确认） */
     requestCloseTab: (tabId: string) => void
     /** 请求关闭窗口（可能触发未保存确认） */
@@ -215,6 +217,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     mathEdit: null,
     pendingCloseAction: null,
     pendingCloseTabId: null,
+    pendingCloseSaving: false,
+    pendingCloseError: null,
 
     addTab: (filePath, content = '') => {
         const id = generateTabId()
@@ -398,10 +402,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     },
 
     saveTab: async (tabId: string) => {
-        if (!isTauri) return false
+        if (!isTauri) return 'failed'
 
         const tab = get().tabs.find(t => t.id === tabId)
-        if (!tab) return false
+        if (!tab) return 'failed'
 
         try {
             if (!tab.filePath) {
@@ -417,17 +421,17 @@ export const useEditorStore = create<EditorState>((set, get) => ({
                     await writeTextFile(filePath, tab.content);
                     get().markSaved(tab.id, filePath);
                     get().addRecentFile(filePath, getFileName(filePath));
-                    return true;
+                    return 'saved';
                 }
-                return false;
+                return 'cancelled';
             } else {
                 await writeTextFile(tab.filePath, tab.content);
                 get().markSaved(tab.id);
-                return true;
+                return 'saved';
             }
         } catch (e) {
             console.error('Failed to save file:', e);
-            return false;
+            return 'failed';
         }
     },
 
@@ -437,7 +441,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
         if (tab.isDirty) {
             // 需要弹窗确认
-            set({ pendingCloseAction: 'tab', pendingCloseTabId: tabId })
+            set({ pendingCloseAction: 'tab', pendingCloseTabId: tabId, pendingCloseSaving: false, pendingCloseError: null })
         } else {
             // 直接关闭
             get().removeTab(tabId)
@@ -448,10 +452,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         const dirtyTabs = get().tabs.filter(t => t.isDirty)
         if (dirtyTabs.length > 0) {
             // 取第一个未保存的进行确认
-            set({ pendingCloseAction: 'window', pendingCloseTabId: dirtyTabs[0].id })
+            set({ pendingCloseAction: 'window', pendingCloseTabId: dirtyTabs[0].id, pendingCloseSaving: false, pendingCloseError: null })
         } else {
             // 全部已保存，直接退出程序
-            set({ pendingCloseAction: null, pendingCloseTabId: null })
+            set({ pendingCloseAction: null, pendingCloseTabId: null, pendingCloseSaving: false, pendingCloseError: null })
             if (isTauri) {
                 invoke('exit_app')
             }
@@ -462,21 +466,32 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         const { pendingCloseTabId, pendingCloseAction } = get()
         if (!pendingCloseTabId) return
 
-        const saved = await get().saveTab(pendingCloseTabId)
-        if (saved) {
+        set({ pendingCloseSaving: true, pendingCloseError: null })
+        const saveResult = await get().saveTab(pendingCloseTabId)
+        set({ pendingCloseSaving: false })
+
+        if (saveResult === 'saved') {
             if (pendingCloseAction === 'tab') {
                 // 保存后关闭标签页
                 get().removeTab(pendingCloseTabId)
-                set({ pendingCloseAction: null, pendingCloseTabId: null })
+                set({ pendingCloseAction: null, pendingCloseTabId: null, pendingCloseSaving: false, pendingCloseError: null })
             } else if (pendingCloseAction === 'window') {
                 // 将被保存的标签页从 dirty 状态中移除(移除此 tab 即可)
                 get().removeTab(pendingCloseTabId)
-                set({ pendingCloseAction: null, pendingCloseTabId: null })
+                set({ pendingCloseAction: null, pendingCloseTabId: null, pendingCloseSaving: false, pendingCloseError: null })
 
                 // 检查是否还有其他未保存的标签页
                 get().requestCloseWindow()
             }
+            return
         }
+
+        if (saveResult === 'cancelled') {
+            set({ pendingCloseError: 'Save was cancelled. Please choose a file path and try again.' })
+            return
+        }
+
+        set({ pendingCloseError: 'Save failed. Please check file path and permissions, then retry.' })
     },
 
     confirmDiscard: () => {
@@ -486,11 +501,11 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         if (pendingCloseAction === 'tab') {
             // 丢弃并关闭当前标签页
             get().removeTab(pendingCloseTabId)
-            set({ pendingCloseAction: null, pendingCloseTabId: null })
+            set({ pendingCloseAction: null, pendingCloseTabId: null, pendingCloseSaving: false, pendingCloseError: null })
         } else if (pendingCloseAction === 'window') {
             // 丢弃并关闭当前标签页
             get().removeTab(pendingCloseTabId)
-            set({ pendingCloseAction: null, pendingCloseTabId: null })
+            set({ pendingCloseAction: null, pendingCloseTabId: null, pendingCloseSaving: false, pendingCloseError: null })
 
             // 检查是否还有其他未保存的标签页
             get().requestCloseWindow()
@@ -498,6 +513,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     },
 
     cancelClose: () => {
-        set({ pendingCloseAction: null, pendingCloseTabId: null })
+        set({ pendingCloseAction: null, pendingCloseTabId: null, pendingCloseSaving: false, pendingCloseError: null })
     }
 }))

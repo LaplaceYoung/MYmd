@@ -1,10 +1,12 @@
-import { AlertTriangle } from 'lucide-react'
+﻿import { AlertTriangle } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
 import './SaveConfirmDialog.css'
 
 export function SaveConfirmDialog() {
     const pendingCloseAction = useEditorStore(s => s.pendingCloseAction)
     const pendingCloseTabId = useEditorStore(s => s.pendingCloseTabId)
+    const pendingCloseSaving = useEditorStore(s => s.pendingCloseSaving)
+    const pendingCloseError = useEditorStore(s => s.pendingCloseError)
     const tabs = useEditorStore(s => s.tabs)
     const confirmSave = useEditorStore(s => s.confirmSave)
     const confirmDiscard = useEditorStore(s => s.confirmDiscard)
@@ -26,32 +28,23 @@ export function SaveConfirmDialog() {
                 </div>
 
                 <div className="save-confirm-body">
-                    <p className="save-confirm-text">
-                        是否保存对 "{tab.title}" 的更改？
-                    </p>
-                    <p className="save-confirm-subtext">
-                        如果您不保存，系统将丢弃自上次保存以来的所有更改。
-                    </p>
+                    <p className="save-confirm-text">是否保存“{tab.title}”的更改？</p>
+                    <p className="save-confirm-subtext">如果不保存，最近的修改将会丢失。</p>
+                    {pendingCloseError && (
+                        <p className="save-confirm-error" role="status" aria-live="polite">
+                            {pendingCloseError}
+                        </p>
+                    )}
                 </div>
 
                 <div className="save-confirm-footer">
-                    <button
-                        className="btn btn-primary"
-                        onClick={confirmSave}
-                        autoFocus
-                    >
-                        保存
+                    <button className="btn btn-primary" onClick={confirmSave} disabled={pendingCloseSaving} autoFocus>
+                        {pendingCloseSaving ? '保存中...' : '保存'}
                     </button>
-                    <button
-                        className="btn btn-secondary"
-                        onClick={confirmDiscard}
-                    >
+                    <button className="btn btn-secondary" onClick={confirmDiscard} disabled={pendingCloseSaving}>
                         不保存
                     </button>
-                    <button
-                        className="btn btn-secondary"
-                        onClick={cancelClose}
-                    >
+                    <button className="btn btn-secondary" onClick={cancelClose} disabled={pendingCloseSaving}>
                         取消
                     </button>
                 </div>

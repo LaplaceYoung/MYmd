@@ -278,6 +278,40 @@ function initCelebrateBurst() {
   });
 }
 
+function initMagneticButtons() {
+  if (!enableMotion) return;
+  const buttons = Array.from(document.querySelectorAll(".btn"));
+  buttons.forEach((button) => {
+    button.addEventListener("mousemove", (event) => {
+      const rect = button.getBoundingClientRect();
+      const offsetX = event.clientX - (rect.left + rect.width / 2);
+      const offsetY = event.clientY - (rect.top + rect.height / 2);
+      button.style.transform = `translate(${offsetX * 0.04}px, ${offsetY * 0.04}px)`;
+    });
+    button.addEventListener("mouseleave", () => {
+      button.style.transform = "";
+    });
+  });
+}
+
+function initLiftCards() {
+  if (!enableMotion) return;
+  const cards = Array.from(document.querySelectorAll(".lift-card"));
+  cards.forEach((card) => {
+    card.addEventListener("mousemove", (event) => {
+      const rect = card.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
+      const rotateX = (0.5 - y) * 2.4;
+      const rotateY = (x - 0.5) * 2.4;
+      card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+    });
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "";
+    });
+  });
+}
+
 async function fetchJson(url) {
   const response = await fetch(url, {
     headers: {
@@ -342,6 +376,8 @@ async function bootstrap() {
   initHighlightSwitch();
   initHeroModes();
   initCelebrateBurst();
+  initMagneticButtons();
+  initLiftCards();
 
   await Promise.allSettled([loadRepoStats(), loadLatestRelease()]);
 }

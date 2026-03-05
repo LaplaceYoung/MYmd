@@ -39,7 +39,7 @@
         <a href="#hero" data-nav-target="hero">首页</a>
         <a href="#workflow" data-nav-target="workflow">工作流</a>
         <a href="#features" data-nav-target="features">核心能力</a>
-        <a href="#proof" data-nav-target="proof">用户证明</a>
+        <a href="#proof" data-nav-target="proof">功能展示</a>
         <a href="#release" data-nav-target="release">下载</a>
       </nav>
 
@@ -162,19 +162,19 @@
           <p>为技术文档密集场景设计，不做无效复杂度。</p>
         </div>
         <div class="feature-grid">
-          <article class="feature-card">
+          <article class="feature-card lift-card">
             <h3>编辑效率</h3>
             <p>多标签、快捷键、自动保存、未保存关闭确认。</p>
           </article>
-          <article class="feature-card">
+          <article class="feature-card lift-card">
             <h3>技术表达</h3>
             <p>KaTeX、Mermaid、语法高亮，覆盖常见工程文档。</p>
           </article>
-          <article class="feature-card">
+          <article class="feature-card lift-card">
             <h3>知识结构</h3>
             <p>TOC、文件树、全局搜索、反向链接，便于规模化维护。</p>
           </article>
-          <article class="feature-card">
+          <article class="feature-card lift-card">
             <h3>本地可控</h3>
             <p>桌面运行、文件路径透明、无网络依赖也可完整工作。</p>
           </article>
@@ -183,18 +183,18 @@
 
       <section id="proof" class="section reveal" data-delay="160">
         <div class="section-head">
-          <h2>为什么选择 MYmd</h2>
-          <p>以“价值结果”而不是“功能堆叠”组织页面信息。</p>
+          <h2>功能展示与交互效果</h2>
+          <p>只展示与产品能力直接相关的内容。</p>
         </div>
 
         <div class="proof-layout">
-          <div class="proof-tabs" role="tablist" aria-label="亮点切换">
-            <button class="proof-tab is-active" type="button" data-highlight="light">轻量稳定</button>
-            <button class="proof-tab" type="button" data-highlight="flow">交付闭环</button>
-            <button class="proof-tab" type="button" data-highlight="team">团队一致性</button>
+          <div class="proof-tabs" role="tablist" aria-label="功能切换">
+            <button class="proof-tab is-active" type="button" data-highlight="light">编辑体验</button>
+            <button class="proof-tab" type="button" data-highlight="flow">文件工作流</button>
+            <button class="proof-tab" type="button" data-highlight="team">交付效率</button>
           </div>
 
-          <article id="proof-panel" class="proof-panel">
+          <article id="proof-panel" class="proof-panel lift-card">
             <h3 id="proof-title">轻量启动，打开就写</h3>
             <p id="proof-desc">降低从“打开工具”到“进入写作状态”的时间损耗。</p>
             <ul id="proof-list">
@@ -205,15 +205,19 @@
           </article>
         </div>
 
-        <div class="testimonial-grid">
-          <blockquote>
-            “拿来做项目文档比在线编辑器更稳，尤其是离线时。”
-            <cite>开发者 / Windows 桌面用户</cite>
-          </blockquote>
-          <blockquote>
-            “Split 模式非常适合边写边审阅，导出链路也顺。”
-            <cite>产品经理 / 技术协作场景</cite>
-          </blockquote>
+        <div class="showcase-kpis">
+          <div class="kpi-card lift-card">
+            <strong>自动保存</strong>
+            <span>降低内容丢失风险</span>
+          </div>
+          <div class="kpi-card lift-card">
+            <strong>搜索替换</strong>
+            <span>提升长文档编辑效率</span>
+          </div>
+          <div class="kpi-card lift-card">
+            <strong>导出 HTML</strong>
+            <span>快速进入交付环节</span>
+          </div>
         </div>
       </section>
 
@@ -223,7 +227,7 @@
           <p>持续交付安装包，保持可下载、可验证、可回滚。</p>
         </div>
 
-        <div class="release-card">
+        <div class="release-card lift-card">
           <p>当前版本：<strong id="release-version-inline">v1.3.0</strong></p>
           <p>推荐在 Windows 桌面端使用，获得完整文件工作流和稳定编辑体验。</p>
           <a

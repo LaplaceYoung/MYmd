@@ -23,6 +23,7 @@ body {
     radial-gradient(circle at 0% 0%, rgba(66, 184, 131, 0.16), transparent 36%),
     radial-gradient(circle at 100% 12%, rgba(15, 118, 110, 0.14), transparent 34%),
     var(--bg);
+  animation: pageGlow 12s ease-in-out infinite alternate;
 }
 
 .scroll-progress {
@@ -143,6 +144,7 @@ main,
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease;
 }
 
 .btn-primary {
@@ -152,6 +154,7 @@ main,
 }
 
 .btn-primary:hover {
+  transform: translateY(-1px);
   background: linear-gradient(180deg, #16a394, #0f766e);
 }
 
@@ -165,6 +168,10 @@ main,
   background: var(--brand-soft);
   color: #125650;
   border-color: #b3e8df;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
 }
 
 main {
@@ -408,8 +415,7 @@ main {
 }
 
 .workflow-grid,
-.feature-grid,
-.testimonial-grid {
+.feature-grid {
   margin-top: 14px;
   display: grid;
   gap: 10px;
@@ -422,13 +428,22 @@ main {
 
 .workflow-grid article,
 .feature-card,
-.testimonial-grid blockquote,
 .proof-panel {
   margin: 0;
   border: 1px solid var(--line);
   border-radius: 11px;
   background: #fff;
   padding: 12px;
+}
+
+.lift-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.lift-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+  border-color: #b8d4d1;
 }
 
 .workflow-grid p,
@@ -474,11 +489,31 @@ blockquote {
   color: #36595d;
 }
 
-blockquote cite {
-  margin-top: 8px;
+.showcase-kpis {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.kpi-card {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 12px;
+  background: #fff;
+}
+
+.kpi-card strong {
   display: block;
-  font-size: 12px;
-  color: #6a7c81;
+  font-size: 16px;
+}
+
+.kpi-card span {
+  margin-top: 6px;
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .release-card {
@@ -551,6 +586,15 @@ blockquote cite {
   }
 }
 
+@keyframes pageGlow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
 @media (max-width: 980px) {
   .hero {
     grid-template-columns: 1fr;
@@ -594,7 +638,7 @@ blockquote cite {
 
   .workflow-grid,
   .feature-grid,
-  .testimonial-grid,
+  .showcase-kpis,
   .hero-metrics {
     grid-template-columns: 1fr;
   }
