@@ -1,0 +1,261 @@
+.welcome-word {
+    background:
+        radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 12%, transparent), transparent 30%),
+        linear-gradient(180deg, var(--bg-surface), var(--bg-base));
+}
+
+.welcome-word__sidebar {
+    width: 116px;
+    background: color-mix(in srgb, var(--bg-elevated) 92%, var(--bg-surface));
+}
+
+.welcome-word__sidebar-brand-name,
+.welcome-word__sidebar-btn.active,
+.welcome-word__section-title,
+.welcome-word__action-title,
+.welcome-word__guide-title,
+.welcome-word__knowledge-title {
+    font-weight: 700;
+}
+
+.welcome-word__sidebar-btn.text-only {
+    justify-content: center;
+}
+
+.welcome-word__main {
+    background: transparent;
+}
+
+.welcome-word__header {
+    align-items: flex-start;
+}
+
+.welcome-word__logo {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--bg-surface) 80%, white 20%);
+    border: 1px solid var(--border-light);
+    padding: 10px;
+}
+
+.welcome-word__hero-copy {
+    max-width: 760px;
+}
+
+.welcome-word__eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.welcome-word__title {
+    margin-top: var(--space-2);
+    font-size: clamp(28px, 4vw, 42px);
+    letter-spacing: -0.04em;
+}
+
+.welcome-word__subtitle {
+    margin-top: var(--space-3);
+    max-width: 760px;
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.welcome-word__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.welcome-word__section--split {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+}
+
+.welcome-word__section-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-3);
+}
+
+.welcome-word__section-caption {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.welcome-word__action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+.welcome-word__action-card,
+.welcome-word__guide-card,
+.welcome-word__knowledge-card {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--bg-surface) 94%, white 6%);
+    box-shadow: var(--shadow-2);
+}
+
+.welcome-word__action-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    text-align: left;
+    color: inherit;
+    transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.welcome-word__action-card:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-3);
+}
+
+.welcome-word__action-card:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.welcome-word__action-card--primary {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, var(--bg-surface)), var(--bg-surface));
+}
+
+.welcome-word__action-copy,
+.welcome-word__guide-copy,
+.welcome-word__knowledge-copy {
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.welcome-word__guide-card,
+.welcome-word__knowledge-card {
+    padding: var(--space-5);
+}
+
+.welcome-word__guide-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.welcome-word__guide-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+}
+
+.welcome-word__guide-index {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.welcome-word__knowledge-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+.welcome-word__knowledge-item {
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: var(--space-4);
+    background: var(--bg-base);
+}
+
+.welcome-word__knowledge-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-2);
+}
+
+@media (max-width: 1024px) {
+    .welcome-word__action-grid,
+    .welcome-word__section--split,
+    .welcome-word__knowledge-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .welcome-word {
+        flex-direction: column;
+    }
+
+    .welcome-word__sidebar {
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        padding: var(--space-3) var(--space-4);
+        overflow-x: auto;
+    }
+
+    .welcome-word__sidebar-brand {
+        padding: 0 var(--space-4) 0 0;
+        flex-shrink: 0;
+    }
+
+    .welcome-word__sidebar-top,
+    .welcome-word__sidebar-bottom {
+        flex-direction: row;
+    }
+
+    .welcome-word__sidebar-bottom {
+        margin-top: 0;
+        margin-left: auto;
+    }
+
+    .welcome-word__sidebar-divider {
+        width: 1px;
+        height: 28px;
+        margin: 0 var(--space-3);
+    }
+
+    .welcome-word__sidebar-btn {
+        min-width: 76px;
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .welcome-word__sidebar-btn.active::before {
+        top: auto;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 24px;
+        height: 3px;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .welcome-word__main {
+        padding: var(--space-6);
+    }
+
+    .welcome-word__header {
+        flex-direction: column;
+    }
+}

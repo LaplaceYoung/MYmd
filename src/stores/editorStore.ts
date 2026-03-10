@@ -1,6 +1,4 @@
 ﻿import { create } from 'zustand'
-import { writeTextFile } from '@tauri-apps/plugin-fs'
-import { save } from '@tauri-apps/plugin-dialog'
 import { invoke } from '@tauri-apps/api/core'
 import { indexKnowledgeDocument, rebuildWorkspaceIndex } from '@/knowledge/service'
 // 单个标签页
@@ -48,6 +46,34 @@ export interface MathEditState {
     nodeType: 'math_inline' | 'math_block'
 }
 
+export interface PluginCommand {
+    id: string
+    title: string
+    run: (payload?: unknown) => void
+}
+
+export interface PluginSidebarCard {
+    id: string
+    title: string
+    description?: string
+    actionLabel?: string
+    onAction?: () => void
+}
+
+export interface PluginSearchHit {
+    id: string
+    title: string
+    subtitle?: string
+    onSelect: () => void
+}
+
+export interface PluginSearchProvider {
+    id: string
+    search: (query: string) => Promise<PluginSearchHit[]>
+}
+
+type SaveTabResult = 'saved' | 'cancelled' | 'failed'
+
 interface EditorState {
     /** 所有标签页 */
     tabs: Tab[]
@@ -67,6 +93,10 @@ interface EditorState {
     insertDialog: InsertDialogType
     /** 搜索栏是否可见 */
     searchVisible: boolean
+    /** 全局知识检索弹窗是否可见 */
+    globalSearchVisible: boolean
+    /** 全局知识检索弹窗的初始/当前查询词 */
+    globalSearchQuery: string
     /** Recent search terms used by the in-editor search bar */
     searchHistory: string[]
     /** Max number of search terms to keep */
@@ -93,8 +123,24 @@ interface EditorState {
     fileExplorerVisible: boolean
     /** 当前打开的文件夹路径 */
     activeWorkspace: string | null
+    /** 图谱侧栏可见性 */
+    knowledgeGraphVisible: boolean
+    /** 知识索引状态 */
+    knowledgeIndexStatus: 'idle' | 'indexing' | 'error'
+    /** 知识索引已处理文件数 */
+    knowledgeIndexProcessed: number
+    /** 知识索引总文件数 */
+    knowledgeIndexTotal: number
+    /** 知识索引错误信息 */
+    knowledgeIndexError: string | null
     /** 当前数学公式编辑浮层 */
     mathEdit: MathEditState | null
+    /** 只读插件命令注册表 */
+    pluginCommands: Record<string, PluginCommand>
+    /** 只读插件侧栏卡片 */
+    pluginSidebarCards: Record<string, PluginSidebarCard>
+    /** 只读插件搜索提供器 */
+    pluginSearchProviders: Record<string, PluginSearchProvider>
 
     // 操作
     addTab: (filePath: string | null, content?: string) => string
@@ -112,6 +158,9 @@ interface EditorState {
     setActiveMarks: (marks: string[]) => void
     setInsertDialog: (type: InsertDialogType) => void
     setSearchVisible: (visible: boolean) => void
+    openGlobalSearch: (query?: string) => void
+    closeGlobalSearch: () => void
+    setGlobalSearchQuery: (query: string) => void
     pushSearchHistory: (query: string) => void
     clearSearchHistory: () => void
     setSearchHistory: (history: string[]) => void
@@ -125,13 +174,25 @@ interface EditorState {
     setTocVisible: (visible: boolean) => void
     setBacklinksVisible: (visible: boolean) => void
     setFileExplorerVisible: (visible: boolean) => void
+    setKnowledgeGraphVisible: (visible: boolean) => void
     setActiveWorkspace: (path: string | null) => void
+    rebuildKnowledgeIndex: () => Promise<void>
+    registerPluginCommand: (command: PluginCommand) => void
+    unregisterPluginCommand: (id: string) => void
+    runPluginCommand: (id: string, payload?: unknown) => void
+    registerPluginSidebarCard: (card: PluginSidebarCard) => void
+    unregisterPluginSidebarCard: (id: string) => void
+    registerPluginSearchProvider: (provider: PluginSearchProvider) => void
+    unregisterPluginSearchProvider: (id: string) => void
+    queryPluginSearch: (query: string) => Promise<PluginSearchHit[]>
     openMathEdit: (state: MathEditState) => void
     closeMathEdit: () => void
     /** 执行保存操作（保存当前活动标签） */
     saveActiveTab: () => Promise<void>
     /** 执行保存操作（保存指定标签） */
-    saveTab: (tabId: string) => Promise<'saved' | 'cancelled' | 'failed'>
+    saveTab: (tabId: string) => Promise<SaveTabResult>
+    /** 执行另存为（保存指定标签） */
+    saveTabAs: (tabId: string) => Promise<SaveTabResult>
 
     /** 当前等待确认的关闭动作类型 */
     pendingCloseAction: 'tab' | 'window' | null
@@ -188,6 +249,29 @@ function getFileName(filePath: string): string {
     return filePath.split(/[\\/]/).pop() || '未命名'
 }
 
+function getSaveFileSuggestion(tab: Tab): string {
+    const fallbackName = tab.filePath ? getFileName(tab.filePath) : tab.title || '未命名.md'
+    const safeName = fallbackName
+        .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_')
+        .trim() || '未命名.md'
+    return /\.md$/i.test(safeName) ? safeName : `${safeName}.md`
+}
+
+function normalizeSavedPath(path: string | null): string | null {
+    if (!path) return null
+    const normalized = path.trim()
+    return normalized.length > 0 ? normalized : null
+}
+
+async function saveTabWithNativeDialog(tab: Tab): Promise<string | null> {
+    const savedPath = await invoke<string | null>('save_markdown_via_dialog', {
+        defaultFileName: getSaveFileSuggestion(tab),
+        currentPath: tab.filePath,
+        content: tab.content
+    })
+    return normalizeSavedPath(savedPath)
+}
+
 // 检测 Tauri 环境
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 
@@ -201,6 +285,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     activeMarks: [],
     insertDialog: null,
     searchVisible: false,
+    globalSearchVisible: false,
+    globalSearchQuery: '',
     searchHistory: loadSearchHistoryFromStorage(),
     searchHistoryLimit: DEFAULT_SEARCH_HISTORY_LIMIT,
     themeMode: 'system',
@@ -214,7 +300,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     backlinksVisible: false,
     fileExplorerVisible: true,
     activeWorkspace: null,
+    knowledgeGraphVisible: false,
+    knowledgeIndexStatus: 'idle',
+    knowledgeIndexProcessed: 0,
+    knowledgeIndexTotal: 0,
+    knowledgeIndexError: null,
     mathEdit: null,
+    pluginCommands: {},
+    pluginSidebarCards: {},
+    pluginSearchProviders: {},
     pendingCloseAction: null,
     pendingCloseTabId: null,
     pendingCloseSaving: false,
@@ -328,6 +422,36 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     }),
 
     executeCommand: (cmd, payload) => {
+        if (cmd === 'openGlobalSearch') {
+            const query =
+                typeof payload === 'string'
+                    ? payload
+                    : (payload as { query?: string } | undefined)?.query ?? ''
+            get().openGlobalSearch(query)
+            return
+        }
+
+        if (cmd === 'closeGlobalSearch') {
+            get().closeGlobalSearch()
+            return
+        }
+
+        if (cmd === 'openInDocumentSearch') {
+            get().setSearchVisible(true)
+            return
+        }
+
+        if (cmd === 'toggleKnowledgeGraph') {
+            const current = get().knowledgeGraphVisible
+            get().setKnowledgeGraphVisible(!current)
+            return
+        }
+
+        if (cmd.startsWith('plugin:')) {
+            get().runPluginCommand(cmd, payload)
+            return
+        }
+
         const { editorCommands } = get()
         Object.values(editorCommands).forEach(executor => executor(cmd, payload))
     },
@@ -337,6 +461,22 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     setInsertDialog: (type) => set({ insertDialog: type }),
 
     setSearchVisible: (visible) => set({ searchVisible: visible }),
+
+    openGlobalSearch: (query = '') => {
+        set({
+            globalSearchVisible: true,
+            globalSearchQuery: query.trim()
+        })
+    },
+
+    closeGlobalSearch: () => {
+        set({
+            globalSearchVisible: false,
+            globalSearchQuery: ''
+        })
+    },
+
+    setGlobalSearchQuery: (query) => set({ globalSearchQuery: query }),
 
     pushSearchHistory: (query) => {
         const normalized = query.trim()
@@ -383,11 +523,147 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     setFileExplorerVisible: (enable) => set({ fileExplorerVisible: enable }),
 
+    setKnowledgeGraphVisible: (visible) => set({ knowledgeGraphVisible: visible }),
+
     setActiveWorkspace: (path) => {
         set({ activeWorkspace: path })
-        if (path) {
-            void rebuildWorkspaceIndex(path)
+        if (!path) {
+            set({
+                knowledgeIndexStatus: 'idle',
+                knowledgeIndexProcessed: 0,
+                knowledgeIndexTotal: 0,
+                knowledgeIndexError: null
+            })
+            return
         }
+        void get().rebuildKnowledgeIndex()
+    },
+
+    rebuildKnowledgeIndex: async () => {
+        const workspacePath = get().activeWorkspace
+        if (!workspacePath) return
+
+        set({
+            knowledgeIndexStatus: 'indexing',
+            knowledgeIndexProcessed: 0,
+            knowledgeIndexTotal: 0,
+            knowledgeIndexError: null
+        })
+
+        try {
+            await rebuildWorkspaceIndex(workspacePath, {
+                onStart: ({ total }) => {
+                    set({
+                        knowledgeIndexStatus: 'indexing',
+                        knowledgeIndexProcessed: 0,
+                        knowledgeIndexTotal: total,
+                        knowledgeIndexError: null
+                    })
+                },
+                onProgress: ({ processed, total }) => {
+                    set({
+                        knowledgeIndexStatus: 'indexing',
+                        knowledgeIndexProcessed: processed,
+                        knowledgeIndexTotal: total
+                    })
+                },
+                onComplete: ({ processed, total }) => {
+                    set({
+                        knowledgeIndexStatus: 'idle',
+                        knowledgeIndexProcessed: processed,
+                        knowledgeIndexTotal: total,
+                        knowledgeIndexError: null
+                    })
+                },
+                onError: ({ message, processed, total }) => {
+                    set({
+                        knowledgeIndexStatus: 'error',
+                        knowledgeIndexProcessed: processed,
+                        knowledgeIndexTotal: total,
+                        knowledgeIndexError: message
+                    })
+                }
+            })
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Knowledge indexing failed'
+            set({
+                knowledgeIndexStatus: 'error',
+                knowledgeIndexError: message
+            })
+        }
+    },
+
+    registerPluginCommand: (command) =>
+        set(state => ({
+            pluginCommands: {
+                ...state.pluginCommands,
+                [command.id]: command
+            }
+        })),
+
+    unregisterPluginCommand: (id) =>
+        set(state => {
+            const next = { ...state.pluginCommands }
+            delete next[id]
+            return { pluginCommands: next }
+        }),
+
+    runPluginCommand: (id, payload) => {
+        const command = get().pluginCommands[id]
+        if (!command) return
+        try {
+            command.run(payload)
+        } catch (error) {
+            console.warn(`plugin command failed: ${id}`, error)
+        }
+    },
+
+    registerPluginSidebarCard: (card) =>
+        set(state => ({
+            pluginSidebarCards: {
+                ...state.pluginSidebarCards,
+                [card.id]: card
+            }
+        })),
+
+    unregisterPluginSidebarCard: (id) =>
+        set(state => {
+            const next = { ...state.pluginSidebarCards }
+            delete next[id]
+            return { pluginSidebarCards: next }
+        }),
+
+    registerPluginSearchProvider: (provider) =>
+        set(state => ({
+            pluginSearchProviders: {
+                ...state.pluginSearchProviders,
+                [provider.id]: provider
+            }
+        })),
+
+    unregisterPluginSearchProvider: (id) =>
+        set(state => {
+            const next = { ...state.pluginSearchProviders }
+            delete next[id]
+            return { pluginSearchProviders: next }
+        }),
+
+    queryPluginSearch: async (query) => {
+        const normalized = query.trim()
+        if (!normalized) return []
+
+        const providers = Object.values(get().pluginSearchProviders)
+        const results = await Promise.all(
+            providers.map(async provider => {
+                try {
+                    return await provider.search(normalized)
+                } catch (error) {
+                    console.warn(`plugin search provider failed: ${provider.id}`, error)
+                    return []
+                }
+            })
+        )
+        return results.flat().slice(0, 40)
     },
 
     openMathEdit: (state) => set({ mathEdit: state }),
@@ -401,6 +677,25 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         }
     },
 
+    saveTabAs: async (tabId: string) => {
+        if (!isTauri) return 'failed'
+
+        const tab = get().tabs.find(t => t.id === tabId)
+        if (!tab) return 'failed'
+
+        try {
+            const filePath = await saveTabWithNativeDialog(tab)
+            if (!filePath) return 'cancelled'
+
+            get().markSaved(tab.id, filePath)
+            get().addRecentFile(filePath, getFileName(filePath))
+            return 'saved'
+        } catch (e) {
+            console.error('Failed to save file as:', e)
+            return 'failed'
+        }
+    },
+
     saveTab: async (tabId: string) => {
         if (!isTauri) return 'failed'
 
@@ -409,29 +704,18 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
         try {
             if (!tab.filePath) {
-                // 另存为
-                const filePath = await save({
-                    filters: [{
-                        name: 'Markdown',
-                        extensions: ['md']
-                    }]
-                });
-
-                if (filePath) {
-                    await writeTextFile(filePath, tab.content);
-                    get().markSaved(tab.id, filePath);
-                    get().addRecentFile(filePath, getFileName(filePath));
-                    return 'saved';
-                }
-                return 'cancelled';
-            } else {
-                await writeTextFile(tab.filePath, tab.content);
-                get().markSaved(tab.id);
-                return 'saved';
+                return get().saveTabAs(tabId)
             }
+
+            await invoke('write_text_file_to_path', {
+                path: tab.filePath,
+                content: tab.content
+            })
+            get().markSaved(tab.id)
+            return 'saved'
         } catch (e) {
-            console.error('Failed to save file:', e);
-            return 'failed';
+            console.error('Failed to save file:', e)
+            return 'failed'
         }
     },
 

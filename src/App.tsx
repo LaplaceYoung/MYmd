@@ -15,6 +15,8 @@ import './styles/immersive.css'
 import { TOCPanel } from './components/Sidebar/TOCPanel'
 import { FileExplorer } from './components/Sidebar/FileExplorer'
 import { BacklinksPanel } from './components/Sidebar/BacklinksPanel'
+import { KnowledgeGraphPanel } from './components/Sidebar/KnowledgeGraphPanel'
+import { installBuiltinKnowledgePlugin } from './plugins/builtinKnowledgePlugin'
 
 export default function App() {
     useAutoSave()
@@ -49,6 +51,11 @@ export default function App() {
         }
     }, [colorScheme])
 
+    useEffect(() => {
+        const cleanup = installBuiltinKnowledgePlugin()
+        return cleanup
+    }, [])
+
     return (
         <>
             <TitleBar />
@@ -62,6 +69,7 @@ export default function App() {
                 <FileExplorer />
                 <TOCPanel />
                 <BacklinksPanel />
+                <KnowledgeGraphPanel />
                 <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     <EditorContainer suppressWelcome={!isCliInitDone || !isSessionReady} />
                 </div>

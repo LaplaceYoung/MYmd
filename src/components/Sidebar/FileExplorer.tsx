@@ -29,6 +29,11 @@ export function FileExplorer() {
     const setActiveWorkspace = useEditorStore((s) => s.setActiveWorkspace)
     const addTab = useEditorStore((s) => s.addTab)
     const markSaved = useEditorStore((s) => s.markSaved)
+    const knowledgeIndexStatus = useEditorStore((s) => s.knowledgeIndexStatus)
+    const knowledgeIndexProcessed = useEditorStore((s) => s.knowledgeIndexProcessed)
+    const knowledgeIndexTotal = useEditorStore((s) => s.knowledgeIndexTotal)
+    const knowledgeIndexError = useEditorStore((s) => s.knowledgeIndexError)
+    const rebuildKnowledgeIndex = useEditorStore((s) => s.rebuildKnowledgeIndex)
 
     const [fileTree, setFileTree] = useState<FileNode[]>([])
     const [loading, setLoading] = useState(false)
@@ -213,7 +218,7 @@ export function FileExplorer() {
                             className="file-explorer__btn"
                             onClick={() => void refreshWorkspace()}
                             title="刷新工作区"
-                            disabled={loading}
+                            disabled={loading || knowledgeIndexStatus === 'indexing'}
                         >
                             <RefreshCw size={14} className={loading ? 'spinning' : ''} />
                         </button>
@@ -246,6 +251,27 @@ export function FileExplorer() {
                                 <span>{loadError}</span>
                             </div>
                         )}
+                        {knowledgeIndexStatus === 'indexing' && (
+                            <div className="file-explorer__error" role="status" aria-live="polite">
+                                <RefreshCw size={14} className="spinning" />
+                                <span>
+                                    正在建立索引 {knowledgeIndexProcessed}/{knowledgeIndexTotal || '?'}
+                                </span>
+                            </div>
+                        )}
+                        {knowledgeIndexStatus === 'error' && knowledgeIndexError && (
+                            <div className="file-explorer__error" role="status" aria-live="polite">
+                                <AlertCircle size={14} />
+                                <span>{knowledgeIndexError}</span>
+                                <button
+                                    className="btn-secondary btn-small"
+                                    onClick={() => void rebuildKnowledgeIndex()}
+                                    style={{ marginLeft: 'auto' }}
+                                >
+                                    重试索引
+                                </button>
+                            </div>
+                        )}
                         {renderTree(fileTree)}
                     </div>
                 )}
@@ -254,6 +280,13 @@ export function FileExplorer() {
                 <div className="file-explorer__footer">
                     <button className="btn-secondary btn-small" onClick={() => void handleSelectWorkspace()}>
                         切换工作区
+                    </button>
+                    <button
+                        className="btn-secondary btn-small"
+                        onClick={() => void rebuildKnowledgeIndex()}
+                        disabled={knowledgeIndexStatus === 'indexing'}
+                    >
+                        {knowledgeIndexStatus === 'indexing' ? '索引中…' : '重建索引'}
                     </button>
                 </div>
             )}

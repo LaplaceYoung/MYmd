@@ -62,6 +62,7 @@ export function Ribbon() {
     const setViewMode = useEditorStore(s => s.setViewMode)
     const executeCommand = useEditorStore(s => s.executeCommand)
     const saveActiveTab = useEditorStore(s => s.saveActiveTab)
+    const saveTabAs = useEditorStore(s => s.saveTabAs)
     const addTab = useEditorStore(s => s.addTab)
     const activeMarks = useEditorStore(s => s.activeMarks)
     const setInsertDialog = useEditorStore(s => s.setInsertDialog)
@@ -123,22 +124,15 @@ export function Ribbon() {
 
     const handleSaveAs = useCallback(async () => {
         if (!isTauri) return
-        const tab = useEditorStore.getState().getActiveTab()
+        const store = useEditorStore.getState()
+        const tab = store.getActiveTab()
         if (!tab) return
 
-        try {
-            const filePath = await saveDialog({
-                filters: [{ name: 'Markdown', extensions: ['md', 'txt'] }],
-                defaultPath: tab.filePath ?? undefined
-            })
-            if (filePath) {
-                await writeTextFile(filePath, tab.content)
-                useEditorStore.getState().markSaved(tab.id, filePath)
-            }
-        } catch (e) {
-            console.error('Save failed:', e)
+        const result = await store.saveTabAs(tab.id)
+        if (result === 'failed') {
+            console.error('Save as failed')
         }
-    }, [])
+    }, [saveTabAs])
 
     const handleExportHTML = useCallback(async () => {
         if (!isTauri) return

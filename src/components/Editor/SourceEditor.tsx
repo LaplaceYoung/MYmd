@@ -3,7 +3,9 @@ import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror'
 import { SearchQuery, setSearchQuery, findNext, findPrevious, replaceNext, replaceAll } from '@codemirror/search'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
+import { autocompletion, type Completion, type CompletionContext } from '@codemirror/autocomplete'
 import { useEditorStore } from '@/stores/editorStore'
+import { queryKnowledge } from '@/knowledge/service'
 
 interface SourceEditorProps {
     tabId: string
@@ -36,15 +38,98 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
 
     const [val, setVal] = useState(content)
     const isDark = useIsDark()
+    const editorFontSize = useEditorStore(s => s.editorFontSize)
     const focusMode = useEditorStore(s => s.focusMode)
     const typewriterMode = useEditorStore(s => s.typewriterMode)
     const editorRef = useRef<ReactCodeMirrorRef>(null)
+
+    const completeWikilink = useCallback(async (context: CompletionContext) => {
+        const before = context.matchBefore(/\[\[[^\]\n]*$/)
+        if (!before) return null
+        if (before.from === before.to && !context.explicit) return null
+
+        const typed = before.text.slice(2).trim()
+        if (!typed) return null
+
+        try {
+            const result = await queryKnowledge(typed, 12, 0)
+            const options: Completion[] = []
+
+            for (const doc of result.documents.slice(0, 6)) {
+                const title = (doc.title || '').trim() || doc.file_path
+                options.push({
+                    label: title,
+                    type: 'text',
+                    apply: `[[${title}]]`,
+                    detail: 'Document'
+                })
+            }
+
+            for (const heading of result.headings.slice(0, 6)) {
+                const base = (heading.document_title || '').trim() || heading.file_path
+                const headingText = heading.heading_text.trim()
+                if (!base || !headingText) continue
+                options.push({
+                    label: `${base}#${headingText}`,
+                    type: 'text',
+                    apply: `[[${base}#${headingText}]]`,
+                    detail: 'Heading'
+                })
+            }
+
+            if (options.length === 0) return null
+            return {
+                from: before.from,
+                options
+            }
+        } catch (error) {
+            console.warn('wikilink completion failed:', error)
+            return null
+        }
+    }, [])
 
     const executeCommand = useCallback((cmd: string, payload?: unknown) => {
         const view = editorRef.current?.view;
         if (!view) return;
 
         switch (cmd) {
+            case 'insertLink': {
+                const { href, text } = payload as { href: string; text?: string }
+                if (!href) break
+                const label = (text || '').trim() || href
+                const insertion = `[${label}](${href})`
+                const from = view.state.selection.main.from
+                const to = view.state.selection.main.to
+                view.dispatch({
+                    changes: { from, to, insert: insertion },
+                    selection: { anchor: from + insertion.length }
+                })
+                break
+            }
+            case 'insertImage': {
+                const { src, alt } = payload as { src: string; alt?: string }
+                if (!src) break
+                const label = (alt || '').trim()
+                const insertion = `![${label}](${src})`
+                const from = view.state.selection.main.from
+                const to = view.state.selection.main.to
+                view.dispatch({
+                    changes: { from, to, insert: insertion },
+                    selection: { anchor: from + insertion.length }
+                })
+                break
+            }
+            case 'insertText': {
+                const insertion = String(payload ?? '')
+                if (!insertion) break
+                const from = view.state.selection.main.from
+                const to = view.state.selection.main.to
+                view.dispatch({
+                    changes: { from, to, insert: insertion },
+                    selection: { anchor: from + insertion.length }
+                })
+                break
+            }
             case 'search': {
                 const queryStr = payload as string;
                 view.dispatch({
@@ -102,11 +187,14 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
                 height="100%"
                 style={{
                     height: '100%',
-                    fontSize: '16px',
+                    fontSize: `${editorFontSize}px`,
                     fontFamily: 'var(--font-mono)',
                     lineHeight: '1.8',
                 }}
-                extensions={[markdown({ base: markdownLanguage, codeLanguages: languages })]}
+                extensions={[
+                    markdown({ base: markdownLanguage, codeLanguages: languages }),
+                    autocompletion({ override: [completeWikilink] })
+                ]}
                 onChange={onChange}
                 theme={isDark ? 'dark' : 'light'}
                 basicSetup={{

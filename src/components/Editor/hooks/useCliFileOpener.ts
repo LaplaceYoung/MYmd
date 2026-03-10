@@ -81,6 +81,7 @@ async function readTextFromPath(path: string): Promise<string> {
 async function openFilesFromArgs(
     args: string[],
     addTab: (filePath: string | null, content?: string) => string,
+    markSaved: (tabId: string, filePath?: string) => void,
     isMounted?: () => boolean
 ) {
     const filePaths = collectCliFilePaths(args)
@@ -89,7 +90,8 @@ async function openFilesFromArgs(
         try {
             const content = await readTextFromPath(filePath)
             if (!isMounted || isMounted()) {
-                addTab(filePath, content)
+                const tabId = addTab(filePath, content)
+                markSaved(tabId, filePath)
             }
         } catch (err) {
             console.error(`Failed to read file from cli arg: ${filePath}`, err)
@@ -104,6 +106,7 @@ async function openFilesFromArgs(
  */
 export function useCliFileOpener() {
     const addTab = useEditorStore(s => s.addTab)
+    const markSaved = useEditorStore(s => s.markSaved)
     const [isCliInitDone, setIsCliInitDone] = useState(!isTauri)
 
     useEffect(() => {
@@ -118,11 +121,11 @@ export function useCliFileOpener() {
         async function initCliOpen() {
             try {
                 unlisten = await listen<string[]>('mymd://open-files', async (event) => {
-                    await openFilesFromArgs(event.payload, addTab)
+                    await openFilesFromArgs(event.payload, addTab, markSaved)
                 })
 
                 const args = await invoke<string[]>('get_cli_args')
-                await openFilesFromArgs(args, addTab, () => mounted)
+                await openFilesFromArgs(args, addTab, markSaved, () => mounted)
             } catch (e) {
                 console.error('Failed to get cli args from backend', e)
             } finally {
@@ -140,7 +143,7 @@ export function useCliFileOpener() {
                 unlisten()
             }
         }
-    }, [addTab])
+    }, [addTab, markSaved])
 
     return isCliInitDone
 }

@@ -6,6 +6,7 @@ import type {
 interface ParsedWikiTarget {
   docPath: string;
   headingSlug: string;
+  aliasText: string;
 }
 
 function isAbsolutePath(path: string): boolean {
@@ -98,7 +99,11 @@ function parseWikiTarget(
   const source = rawTarget.trim();
   if (!source) return null;
 
-  const [docPartRaw, headingRaw = ""] = source.split("#");
+  const [targetPartRaw, aliasPartRaw = ""] = source.split("|", 2);
+  const targetPart = targetPartRaw.trim();
+  const aliasText = aliasPartRaw.trim();
+
+  const [docPartRaw, headingRaw = ""] = targetPart.split("#", 2);
   const docPart = normalizeDocPath(docPartRaw.trim());
   if (!docPart) return null;
 
@@ -116,7 +121,8 @@ function parseWikiTarget(
 
   return {
     docPath: resolvedDocPath,
-    headingSlug: slugifyHeading(headingRaw)
+    headingSlug: slugifyHeading(headingRaw),
+    aliasText
   };
 }
 
@@ -139,7 +145,8 @@ export function extractWikilinks(
     links.push({
       raw_text: rawText,
       to_doc_path: target.docPath,
-      to_heading_slug: target.headingSlug
+      to_heading_slug: target.headingSlug,
+      alias_text: target.aliasText
     });
   }
 

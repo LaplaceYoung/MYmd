@@ -3,12 +3,21 @@ import { readDir } from "@tauri-apps/plugin-fs";
 import { extractHeadings, extractTags, extractWikilinks } from "./parser";
 import type {
   KnowledgeBacklinkItem,
+  KnowledgeGraphResponse,
+  KnowledgeUnlinkedMentionItem,
   KnowledgeSearchResponse,
   KnowledgeUpsertPayload
 } from "./types";
 import { readTextFileWithFallback } from "@/utils/fileRead";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+interface RebuildWorkspaceIndexHooks {
+  onStart?: (payload: { total: number }) => void;
+  onProgress?: (payload: { processed: number; total: number; filePath: string }) => void;
+  onComplete?: (payload: { processed: number; total: number }) => void;
+  onError?: (payload: { processed: number; total: number; message: string }) => void;
+}
 
 function titleFromPath(path: string): string {
   const normalized = path.replace(/\\/g, "/");
@@ -68,17 +77,36 @@ export async function indexKnowledgeDocument(
   window.dispatchEvent(new CustomEvent("mymd:knowledge-indexed", { detail: { filePath } }));
 }
 
-export async function rebuildWorkspaceIndex(workspacePath: string): Promise<void> {
+export async function rebuildWorkspaceIndex(
+  workspacePath: string,
+  hooks?: RebuildWorkspaceIndexHooks
+): Promise<void> {
   if (!isTauri || !workspacePath) return;
 
-  const files = await collectMarkdownFiles(workspacePath);
-  for (const filePath of files) {
-    try {
-      const content = await readTextFileWithFallback(filePath);
-      await indexKnowledgeDocument(filePath, content, workspacePath);
-    } catch (error) {
-      console.warn("knowledge index skip file:", filePath, error);
+  let processed = 0;
+  let total = 0;
+  try {
+    const files = await collectMarkdownFiles(workspacePath);
+    total = files.length;
+    hooks?.onStart?.({ total });
+
+    for (const filePath of files) {
+      try {
+        const content = await readTextFileWithFallback(filePath);
+        await indexKnowledgeDocument(filePath, content, workspacePath);
+      } catch (error) {
+        console.warn("knowledge index skip file:", filePath, error);
+      } finally {
+        processed += 1;
+        hooks?.onProgress?.({ processed, total, filePath });
+      }
     }
+
+    hooks?.onComplete?.({ processed, total });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to rebuild workspace index";
+    hooks?.onError?.({ processed, total, message });
+    throw error;
   }
 }
 
@@ -88,7 +116,7 @@ export async function queryKnowledge(
   offset = 0
 ): Promise<KnowledgeSearchResponse> {
   if (!isTauri || !searchText.trim()) {
-    return { documents: [], headings: [] };
+    return { documents: [], headings: [], tags: [] };
   }
 
   return invoke<KnowledgeSearchResponse>("knowledge_query", {
@@ -102,5 +130,34 @@ export async function getBacklinks(filePath: string): Promise<KnowledgeBacklinkI
   if (!isTauri || !filePath) return [];
   return invoke<KnowledgeBacklinkItem[]>("knowledge_get_backlinks", {
     file_path: filePath
+  });
+}
+
+export async function getUnlinkedMentions(
+  filePath: string
+): Promise<KnowledgeUnlinkedMentionItem[]> {
+  if (!isTauri || !filePath) return [];
+  return invoke<KnowledgeUnlinkedMentionItem[]>("knowledge_get_unlinked_mentions", {
+    file_path: filePath
+  });
+}
+
+export async function linkUnlinkedMention(payload: {
+  from_file_path: string;
+  target_file_path: string;
+  mention_text: string;
+}): Promise<boolean> {
+  if (!isTauri) return false;
+  return invoke<boolean>("knowledge_link_unlinked_mention", payload);
+}
+
+export async function getKnowledgeGraph(
+  filterText = "",
+  limit = 300
+): Promise<KnowledgeGraphResponse> {
+  if (!isTauri) return { nodes: [], edges: [] };
+  return invoke<KnowledgeGraphResponse>("knowledge_graph", {
+    filter_text: filterText,
+    limit
   });
 }

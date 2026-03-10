@@ -12,6 +12,7 @@ import { math } from '@milkdown/plugin-math'
 import { diagram } from '@milkdown/plugin-diagram'
 import { prism } from '@milkdown/plugin-prism'
 import { search as prosemirrorSearchPlugin, SearchQuery, setSearchState, findNext, findPrev, replaceNext, replaceAll as pmReplaceAll } from 'prosemirror-search'
+import { TextSelection } from '@milkdown/kit/prose/state'
 import { createSyntaxHintPlugin } from './plugins/syntaxHintPlugin'
 import { mathEditPlugin } from './plugins/mathEditPlugin'
 import { diagramViewPlugin } from './plugins/diagramPlugin'
@@ -34,7 +35,6 @@ import {
     createCodeBlockCommand,
     insertHrCommand,
     insertImageCommand,
-    toggleLinkCommand,
     turnIntoTextCommand,
     sinkListItemCommand,
     liftListItemCommand,
@@ -70,6 +70,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
     const unregisterCommand = useEditorStore(s => s.unregisterCommand)
     const setActiveMarks = useEditorStore(s => s.setActiveMarks)
     const spellcheck = useEditorStore(s => s.spellcheck)
+    const editorFontSize = useEditorStore(s => s.editorFontSize)
     const focusMode = useEditorStore(s => s.focusMode)
     const typewriterMode = useEditorStore(s => s.typewriterMode)
 
@@ -364,7 +365,31 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                 case 'insertLink': {
                     const linkData = payload as { href: string; text?: string }
                     if (linkData?.href) {
-                        editor.action(callCommand(toggleLinkCommand.key, { href: linkData.href }))
+                        editor.action(ctx => {
+                            const view = ctx.get(editorViewCtx)
+                            const { state, dispatch } = view
+                            const { from, to, empty } = state.selection
+                            const linkMark = state.schema.marks.link?.create({ href: linkData.href })
+                            if (!linkMark) return
+
+                            const label = (linkData.text || '').trim()
+                            const fallbackText = state.doc.textBetween(from, to, ' ').trim()
+                            const finalText = label || fallbackText || linkData.href
+                            let tr = state.tr
+
+                            if (empty) {
+                                tr = tr.insert(from, state.schema.text(finalText, [linkMark]))
+                                const pos = from + finalText.length
+                                tr = tr.setSelection(TextSelection.create(tr.doc, pos))
+                            } else {
+                                tr = tr.insertText(finalText, from, to)
+                                tr = tr.addMark(from, from + finalText.length, linkMark)
+                                tr = tr.setSelection(TextSelection.create(tr.doc, from + finalText.length))
+                            }
+
+                            dispatch(tr.scrollIntoView())
+                            view.focus()
+                        })
                     }
                     break
                 }
@@ -509,6 +534,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
             <div
                 ref={containerRef}
                 className={`editor-wysiwyg selectable${readOnly ? ' editor-wysiwyg--readonly' : ''}${focusMode ? ' focus-mode' : ''}${typewriterMode ? ' typewriter-mode' : ''}`}
+                style={{ fontSize: `${editorFontSize}px` }}
                 spellCheck={readOnly ? false : spellcheck}
                 onContextMenu={(e) => {
                     if (readOnly) return

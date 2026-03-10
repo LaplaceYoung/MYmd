@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react'
 import { useEditorStore } from '@/stores/editorStore'
-import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog'
-import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
+import { open as openDialog } from '@tauri-apps/plugin-dialog'
+import { readTextFile } from '@tauri-apps/plugin-fs'
 
 // 检测是否在 Tauri 环境中
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
@@ -69,29 +69,15 @@ export function useEditorShortcuts() {
                         e.preventDefault()
                         if (!isTauri) break
 
-                        const tab = useEditorStore.getState().getActiveTab()
+                        const store = useEditorStore.getState()
+                        const tab = store.getActiveTab()
                         if (!tab) break
 
-                        if (e.shiftKey || !tab.filePath) {
-                            try {
-                                const filePath = await saveDialog({
-                                    filters: [{ name: 'Markdown', extensions: ['md', 'txt'] }],
-                                    defaultPath: tab.filePath ?? undefined
-                                })
-                                if (filePath) {
-                                    await writeTextFile(filePath, tab.content)
-                                    useEditorStore.getState().markSaved(tab.id, filePath)
-                                }
-                            } catch (error) {
-                                console.error('Save failed:', error)
-                            }
-                        } else {
-                            try {
-                                await writeTextFile(tab.filePath, tab.content)
-                                useEditorStore.getState().markSaved(tab.id)
-                            } catch (error) {
-                                console.error('Save failed:', error)
-                            }
+                        const result = e.shiftKey
+                            ? await store.saveTabAs(tab.id)
+                            : await store.saveTab(tab.id)
+                        if (result === 'failed') {
+                            console.error('Save failed in keyboard shortcut')
                         }
                         break
                     }

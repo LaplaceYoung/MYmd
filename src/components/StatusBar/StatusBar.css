@@ -137,4 +137,38 @@
 
 .statusbar__slider::-webkit-slider-thumb:hover {
     background: var(--accent);
+}.statusbar__btn--action,
+.statusbar__text-btn {
+    border: 1px solid transparent;
+    border-radius: 999px;
+}
+.statusbar__btn--action {
+    gap: 4px;
+}
+.statusbar__btn--action:hover,
+.statusbar__text-btn:hover {
+    border-color: var(--border);
+}
+.statusbar__btn--danger {
+    color: var(--danger);
+}
+.statusbar__text-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    padding: 0 10px;
+    color: var(--text-secondary);
+    background: transparent;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+.statusbar__text-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.statusbar__icon-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
 }
