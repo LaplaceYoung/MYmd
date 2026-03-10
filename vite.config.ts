@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
+  base: './',
   plugins: [react()],
   resolve: {
     alias: {
@@ -11,6 +12,7 @@ export default defineConfig({
   // Tauri configuration
   clearScreen: false,
   build: {
+    minify: false,
     rollupOptions: {
       output: {
         manualChunks: {

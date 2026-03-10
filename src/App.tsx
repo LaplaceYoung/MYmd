@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { TitleBar } from './components/TitleBar/TitleBar'
 import { TabBar } from './components/TabBar/TabBar'
 import { Ribbon } from './components/Ribbon/Ribbon'
@@ -22,6 +22,7 @@ export default function App() {
     useAutoSave()
     const isCliInitDone = useCliFileOpener()
     const isSessionReady = useSessionRecovery(isCliInitDone)
+    const [startupGuardExpired, setStartupGuardExpired] = useState(false)
     const tabs = useEditorStore(s => s.tabs)
     const hasActiveTab = tabs.length > 0
     const themeMode = useEditorStore(s => s.themeMode)
@@ -56,6 +57,25 @@ export default function App() {
         return cleanup
     }, [])
 
+    useEffect(() => {
+        // Guard against a permanent blank screen if startup hooks never resolve.
+        if (isCliInitDone && isSessionReady) {
+            setStartupGuardExpired(false)
+            return
+        }
+
+        const timer = window.setTimeout(() => {
+            setStartupGuardExpired(true)
+        }, 2500)
+
+        return () => window.clearTimeout(timer)
+    }, [isCliInitDone, isSessionReady])
+
+    const suppressWelcome = useMemo(
+        () => (!isCliInitDone || !isSessionReady) && !startupGuardExpired,
+        [isCliInitDone, isSessionReady, startupGuardExpired]
+    )
+
     return (
         <>
             <TitleBar />
@@ -71,7 +91,7 @@ export default function App() {
                 <BacklinksPanel />
                 <KnowledgeGraphPanel />
                 <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                    <EditorContainer suppressWelcome={!isCliInitDone || !isSessionReady} />
+                    <EditorContainer suppressWelcome={suppressWelcome} />
                 </div>
             </div>
             <StatusBar />

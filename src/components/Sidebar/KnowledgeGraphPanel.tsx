@@ -10,7 +10,11 @@ export function KnowledgeGraphPanel() {
     const setKnowledgeGraphVisible = useEditorStore(s => s.setKnowledgeGraphVisible)
     const addTab = useEditorStore(s => s.addTab)
     const markSaved = useEditorStore(s => s.markSaved)
-    const pluginSidebarCards = useEditorStore(s => Object.values(s.pluginSidebarCards))
+    const pluginSidebarCardsMap = useEditorStore(s => s.pluginSidebarCards)
+    const pluginSidebarCards = useMemo(
+        () => Object.values(pluginSidebarCardsMap),
+        [pluginSidebarCardsMap]
+    )
 
     const [filterText, setFilterText] = useState('')
     const [loading, setLoading] = useState(false)

@@ -1,6 +1,6 @@
 {
   "name": "mymd",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Local-first Markdown desktop editor built with React, TypeScript, and Tauri.",
   "scripts": {
     "dev": "vite",

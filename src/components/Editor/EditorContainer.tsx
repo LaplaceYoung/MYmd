@@ -83,7 +83,22 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
     // 无标签时显示欢迎页；但在启动参数解析阶段先抑制欢迎页，避免“先首页后打开文件”的闪跳
     if (!activeTab) {
         if (suppressWelcome) {
-            return <div className={`editor-container ${watermark ? 'has-watermark' : ''}`} />
+            return (
+                <div className={`editor-container ${watermark ? 'has-watermark' : ''}`}>
+                    <div
+                        style={{
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'var(--text-muted)',
+                            fontSize: 13
+                        }}
+                    >
+                        Initializing workspace...
+                    </div>
+                </div>
+            )
         }
 
         return (
