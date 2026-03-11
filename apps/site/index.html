@@ -134,6 +134,17 @@
                 查看源码
               </a>
             </div>
+            <div class="competitive-points" id="competitive-points">
+              <span class="competitive-point is-active" data-point="0" data-i18n="cmp_1">
+                更快上手：不先学 vault / graph / plugin
+              </span>
+              <span class="competitive-point" data-point="1" data-i18n="cmp_2">
+                更轻负担：默认就是打开文件开始写
+              </span>
+              <span class="competitive-point" data-point="2" data-i18n="cmp_3">
+                更稳本地：离线可用，数据留在本机
+              </span>
+            </div>
           </div>
 
           <div class="hero-cell cell-visual reveal" data-delay="100">
@@ -144,6 +155,23 @@
               </div>
               <div class="blueprint-body">
                 <h3 class="serif-title">Release.md</h3>
+                <div class="capability-radar" id="capability-radar">
+                  <div class="capability-radar__head">
+                    <span class="mono-tiny c-accent" data-i18n="demo_label">核心能力动态演示</span>
+                    <span class="mono-tiny" id="demo-mode-label" data-i18n="demo_mode_1">编辑模式：WYSIWYG</span>
+                  </div>
+                  <div class="capability-radar__dots" id="capability-dots">
+                    <span class="capability-dot is-active"></span>
+                    <span class="capability-dot"></span>
+                    <span class="capability-dot"></span>
+                  </div>
+                  <div class="capability-radar__chips" id="capability-chips">
+                    <span class="capability-chip is-active" data-chip="0" data-i18n="demo_s1">模式切换：WYSIWYG / Split / Source</span>
+                    <span class="capability-chip" data-chip="1" data-i18n="demo_s2">自动保存：后台持续托底</span>
+                    <span class="capability-chip" data-chip="2" data-i18n="demo_s3">全局搜索：文档 / 标题 / 标签</span>
+                    <span class="capability-chip" data-chip="3" data-i18n="demo_s4">反向链接：自动回流引用关系</span>
+                  </div>
+                </div>
                 <div class="code-block">
                   <span class="line"><span class="c-accent">#</span> Quick Start</span>
                   <span class="line"
@@ -171,8 +199,8 @@
                 </div>
               </div>
               <div class="blueprint-foot">
-                <span class="mono-tiny">MODE: WYSIWYG</span>
-                <span class="mono-tiny">AUTO SAVE: ON</span>
+                <span class="mono-tiny" id="footer-mode" data-i18n="foot_mode_1">MODE: WYSIWYG</span>
+                <span class="mono-tiny" id="footer-save" data-i18n="foot_save_1">AUTO SAVE: ON</span>
               </div>
             </div>
             <!-- Decorative crosshairs -->

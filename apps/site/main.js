@@ -19,6 +19,23 @@ const i18nDict = {
     code_2: "按 Ctrl+P 搜索标题与内容",
     code_3: "输入 [[ 建立文档连接",
     code_4: "继续完成你的第一篇笔记...",
+    demo_label: "核心能力动态演示",
+    demo_mode_1: "编辑模式：WYSIWYG",
+    demo_mode_2: "编辑模式：Split View",
+    demo_mode_3: "编辑模式：Source",
+    demo_s1: "模式切换：WYSIWYG / Split / Source",
+    demo_s2: "自动保存：后台持续托底",
+    demo_s3: "全局搜索：文档 / 标题 / 标签",
+    demo_s4: "反向链接：自动回流引用关系",
+    foot_mode_1: "MODE: WYSIWYG",
+    foot_mode_2: "MODE: SPLIT",
+    foot_mode_3: "MODE: SOURCE",
+    foot_save_1: "AUTO SAVE: ON",
+    foot_save_2: "INDEX: SYNCING",
+    foot_save_3: "BACKLINKS: LIVE",
+    cmp_1: "更快上手：不先学 vault / graph / plugin",
+    cmp_2: "更轻负担：默认就是打开文件开始写",
+    cmp_3: "更稳本地：离线可用，数据留在本机",
     flow_tag: "上手路径",
     flow_title: "四步进入稳定写作节奏。",
     flow_1_t: "打开 / 接入",
@@ -71,6 +88,23 @@ const i18nDict = {
     code_2: "Press Ctrl+P to search notes and headings",
     code_3: "Type [[ to create a wiki-style link",
     code_4: "Continue your first writing session...",
+    demo_label: "Core capability demo",
+    demo_mode_1: "Mode: WYSIWYG",
+    demo_mode_2: "Mode: Split View",
+    demo_mode_3: "Mode: Source",
+    demo_s1: "Mode switching: WYSIWYG / Split / Source",
+    demo_s2: "Auto-save: always protecting in background",
+    demo_s3: "Global search: docs / headings / tags",
+    demo_s4: "Backlinks: references flow back automatically",
+    foot_mode_1: "MODE: WYSIWYG",
+    foot_mode_2: "MODE: SPLIT",
+    foot_mode_3: "MODE: SOURCE",
+    foot_save_1: "AUTO SAVE: ON",
+    foot_save_2: "INDEX: SYNCING",
+    foot_save_3: "BACKLINKS: LIVE",
+    cmp_1: "Faster onboarding: no vault/graph/plugin learning first",
+    cmp_2: "Lower friction: open a file and start writing",
+    cmp_3: "Stronger local-first: offline-ready, data stays local",
     flow_tag: "Onboarding",
     flow_title: "A stable writing workflow in 4 steps.",
     flow_1_t: "Open & Start",
@@ -237,6 +271,42 @@ function initTiltCards() {
   });
 }
 
+function initFeatureNarrative() {
+  const dots = Array.from(document.querySelectorAll(".capability-dot"));
+  const chips = Array.from(document.querySelectorAll(".capability-chip"));
+  const points = Array.from(document.querySelectorAll(".competitive-point"));
+  const modeEl = document.getElementById("demo-mode-label");
+  const footerModeEl = document.getElementById("footer-mode");
+  const footerSaveEl = document.getElementById("footer-save");
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (!dots.length || !chips.length || !modeEl || !footerModeEl || !footerSaveEl) return;
+
+  let index = 0;
+  const modeKeys = ["demo_mode_1", "demo_mode_2", "demo_mode_3"];
+  const footerModeKeys = ["foot_mode_1", "foot_mode_2", "foot_mode_3"];
+  const footerSaveKeys = ["foot_save_1", "foot_save_2", "foot_save_3"];
+
+  const render = () => {
+    const dict = i18nDict[currentLang];
+    dots.forEach((dot, i) => dot.classList.toggle("is-active", i === index % dots.length));
+    chips.forEach((chip, i) => chip.classList.toggle("is-active", i === index % chips.length));
+    points.forEach((point, i) => point.classList.toggle("is-active", i === index % points.length));
+
+    modeEl.textContent = dict[modeKeys[index % modeKeys.length]];
+    footerModeEl.textContent = dict[footerModeKeys[index % footerModeKeys.length]];
+    footerSaveEl.textContent = dict[footerSaveKeys[index % footerSaveKeys.length]];
+  };
+
+  render();
+  if (prefersReduced) return;
+
+  window.setInterval(() => {
+    index += 1;
+    render();
+  }, 2200);
+}
+
 async function fetchJson(url) {
   const response = await fetch(url, {
     headers: {
@@ -290,6 +360,7 @@ async function bootstrap() {
   initReveal();
   initScrollProgress();
   initTiltCards();
+  initFeatureNarrative();
   await Promise.allSettled([loadRepoStats(), loadLatestRelease()]);
 }
 
