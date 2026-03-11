@@ -196,6 +196,47 @@ function initReveal() {
   nodes.forEach((node) => observer.observe(node));
 }
 
+function initScrollProgress() {
+  const bar = document.getElementById("scroll-progress");
+  if (!bar) return;
+
+  const update = () => {
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    if (total <= 0) {
+      bar.style.width = "0%";
+      return;
+    }
+    const progress = Math.min(100, Math.max(0, (window.scrollY / total) * 100));
+    bar.style.width = `${progress.toFixed(2)}%`;
+  };
+
+  update();
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update);
+}
+
+function initTiltCards() {
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReduced) return;
+
+  const cards = document.querySelectorAll("[data-tilt]");
+  cards.forEach((card) => {
+    card.addEventListener("mousemove", (event) => {
+      const rect = card.getBoundingClientRect();
+      const px = (event.clientX - rect.left) / rect.width;
+      const py = (event.clientY - rect.top) / rect.height;
+      const rotateY = (px - 0.5) * 6;
+      const rotateX = (0.5 - py) * 6;
+
+      card.style.transform = `perspective(900px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`;
+    });
+
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
+    });
+  });
+}
+
 async function fetchJson(url) {
   const response = await fetch(url, {
     headers: {
@@ -247,6 +288,8 @@ async function bootstrap() {
   initMobileMenu();
   setYear();
   initReveal();
+  initScrollProgress();
+  initTiltCards();
   await Promise.allSettled([loadRepoStats(), loadLatestRelease()]);
 }
 

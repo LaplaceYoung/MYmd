@@ -57,6 +57,18 @@ body {
   overflow-x: hidden;
 }
 
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0;
+  z-index: 60;
+  background: linear-gradient(90deg, var(--accent-color), color-mix(in srgb, var(--accent-color) 65%, #8fb8ff));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent-color) 42%, transparent);
+  transition: width 0.15s linear;
+}
+
 .noise-layer,
 .grid-overlay {
   pointer-events: none;
@@ -209,6 +221,16 @@ body {
   box-shadow: var(--shadow-soft);
 }
 
+.topbar::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-color) 18%, var(--line)), transparent);
+}
+
 .brand-block {
   display: flex;
   flex-direction: column;
@@ -224,12 +246,19 @@ body {
 }
 
 .brand-logo {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
   object-fit: cover;
-  border: 1px solid var(--line-strong);
+  border: 1px solid color-mix(in srgb, var(--accent-color) 30%, var(--line-strong));
   background: var(--surface-soft);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--accent-color) 20%, transparent);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.brand:hover .brand-logo {
+  transform: translateY(-1px) rotate(-2deg);
+  box-shadow: 0 8px 16px color-mix(in srgb, var(--accent-color) 28%, transparent);
 }
 
 .brand-name {
@@ -302,6 +331,8 @@ body {
   border-radius: 10px;
   border: 1px solid var(--line-strong);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-solid {
@@ -315,6 +346,21 @@ body {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
   transform: translateY(-1px);
+}
+
+.btn-solid::after,
+.btn-outline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.26), transparent);
+  transition: transform 0.75s ease;
+}
+
+.btn-solid:hover::after,
+.btn-outline:hover::after {
+  transform: translateX(120%);
 }
 
 .btn-outline {
@@ -338,6 +384,30 @@ body {
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: 28px;
   margin-bottom: 70px;
+  position: relative;
+}
+
+.hero-grid::before {
+  content: "";
+  position: absolute;
+  width: clamp(180px, 28vw, 360px);
+  aspect-ratio: 1;
+  right: 22%;
+  top: -70px;
+  border-radius: 999px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent-color) 25%, transparent), transparent 66%);
+  filter: blur(6px);
+  pointer-events: none;
+  animation: hero-orbit 7.2s ease-in-out infinite alternate;
+}
+
+@keyframes hero-orbit {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(8px, 14px, 0) scale(1.05);
+  }
 }
 
 .hero-cell {
@@ -363,6 +433,13 @@ body {
   border-radius: 14px;
   overflow: hidden;
   background: var(--surface-soft);
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--accent-color) 12%, transparent);
+}
+
+.visual-blueprint:hover {
+  box-shadow: 0 20px 36px color-mix(in srgb, var(--accent-color) 18%, transparent);
 }
 
 .blueprint-head,
@@ -585,14 +662,14 @@ body {
 
 .reveal {
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.45s ease, transform 0.45s ease;
+  transform: translateY(12px) scale(0.99);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--delay, 0ms);
 }
 
 .reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -664,6 +741,11 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .hero-grid::before {
+    right: 8%;
+    top: -40px;
+  }
+
   .data-row {
     grid-template-columns: 1fr;
   }
@@ -717,6 +799,10 @@ body {
 
   .hero-cell {
     padding: 22px;
+  }
+
+  .hero-grid::before {
+    display: none;
   }
 
   .bento-hard {
