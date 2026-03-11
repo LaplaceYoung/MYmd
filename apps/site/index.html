@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MYmd | Local-First Document Editor</title>
+    <title>MYmd | 像 Word 一样自然的本地 Markdown 编辑器</title>
     <meta
       name="description"
-      content="MYmd 是本地优先的 Markdown 桌面编辑器，支持 WYSIWYG / Split / Source、多标签、自动保存，专注文档稳定交付。"
+      content="MYmd 是本地优先的 Markdown 桌面编辑器。像 Word 一样打开就能写，支持 WYSIWYG / 分屏 / 源码、多标签、自动保存和知识连接。"
     />
-    <meta property="og:title" content="MYmd | Local-First Document Editor" />
+    <meta property="og:title" content="MYmd | 像 Word 一样自然的本地 Markdown 编辑器" />
     <meta
       property="og:description"
-      content="把写作、审阅、导出、发布放进一条稳定链路。轻量启动，专注文档交付。"
+      content="打开即写，逐步连接知识。保留 Markdown 的自由，也保留 Word 式低学习成本。"
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://laplaceyoung.github.io/MYmd/" />
@@ -21,8 +21,8 @@
       content="https://laplaceyoung.github.io/MYmd/assets/social-cover.jpg"
     />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="MYmd | Local-First Document Editor" />
-    <meta name="twitter:description" content="专注文档交付的本地优先编辑器" />
+    <meta name="twitter:title" content="MYmd | 像 Word 一样自然的本地 Markdown 编辑器" />
+    <meta name="twitter:description" content="打开即写，逐步连接知识的 local-first 编辑体验" />
     <meta
       name="twitter:image"
       content="https://laplaceyoung.github.io/MYmd/assets/social-cover.jpg"
@@ -62,16 +62,16 @@
     <div class="container">
       <header class="topbar">
         <div class="brand-block">
-          <span class="mono-label" data-i18n="nav_version">APP / v1.3.0</span>
+          <span class="mono-label" data-i18n="nav_version">MYmd / v1.3.0</span>
           <a class="brand" href="#hero">
             <img src="./assets/icon.png" class="brand-logo" alt="MYmd" />
             <span class="brand-name">MYmd.</span>
           </a>
         </div>
         <nav id="site-nav" class="topnav">
-          <a href="#workflow" data-i18n="nav_workflow">WORKFLOW.</a>
-          <a href="#features" data-i18n="nav_spec">SPEC.</a>
-          <a href="#proof" data-i18n="nav_modules">MODULES.</a>
+          <a href="#workflow" data-i18n="nav_workflow">上手路径</a>
+          <a href="#features" data-i18n="nav_spec">核心能力</a>
+          <a href="#release" data-i18n="nav_modules">场景</a>
           <button id="lang-toggle" class="btn-lang" type="button">
             ZH / EN
           </button>
@@ -81,45 +81,38 @@
             target="_blank"
             rel="noreferrer"
             data-i18n="nav_download"
-            >GET BINARY / WIN</a
+            >下载 Windows 版</a
           >
-          <button id="mobile-toggle" class="mobile-menu-btn" type="button">
-            [ MENU ]
-          </button>
+          <button id="mobile-toggle" class="mobile-menu-btn" type="button">菜单</button>
         </nav>
       </header>
 
       <!-- Mobile Nav Overlay -->
       <div id="mobile-menu" class="mobile-overlay" aria-hidden="true">
-        <button id="mobile-close" class="btn-close" type="button">
-          [ CLOSE ]
-        </button>
-        <a href="#workflow" class="mobile-link" data-i18n="nav_workflow"
-          >WORKFLOW.</a
-        >
-        <a href="#features" class="mobile-link" data-i18n="nav_spec">SPEC.</a>
-        <a href="#release" class="mobile-link" data-i18n="nav_download"
-          >GET BINARY</a
-        >
+        <button id="mobile-close" class="btn-close" type="button">关闭</button>
+          <a href="#workflow" class="mobile-link" data-i18n="nav_workflow">上手路径</a>
+          <a href="#features" class="mobile-link" data-i18n="nav_spec">核心能力</a>
+          <a href="#release" class="mobile-link" data-i18n="nav_download"
+            >下载 Windows 版</a
+          >
       </div>
 
       <main>
         <!-- HERO SECTION -->
         <section id="hero" class="hero-grid">
           <div class="hero-cell cell-title reveal" data-delay="0">
-            <span class="mono-tag" data-i18n="hero_tag">[ SYS_READY ]</span>
+            <span class="mono-tag" data-i18n="hero_tag">像 Word 一样顺手，但更适合 Markdown</span>
             <h1 class="serif-giant">
-              <span data-i18n="hero_t1">本地优先。</span><br />
-              <span data-i18n="hero_t2">严肃的</span><br />
-              <span data-i18n="hero_t3">文档交付。</span>
+              <span data-i18n="hero_t1">打开就写。</span><br />
+              <span data-i18n="hero_t2">三分钟上手的</span><br />
+              <span data-i18n="hero_t3">本地知识写作。</span>
             </h1>
             <p class="mono-desc">
-              > LOCAL-FIRST ARCHITECTURE.<br />
-              > WYSIWYG / SPLIT / SOURCE ENGINES.<br />
-              > TARGET: HIGH-FREQUENCY PUBLISHING.<br />
+              > LOCAL-FIRST WORKFLOW.<br />
+              > WYSIWYG / SPLIT / SOURCE.<br />
+              > BUILT FOR DAILY WRITING.<br />
               <span data-i18n="hero_desc"
-                >MYmd
-                是面向长文写作、知识库与技术文档场景的桌面端排版工业载体。丢掉繁琐的网络同步，回归纯文本的绝对控制权。</span
+                >MYmd 把复杂度藏在后面。你先像用 Word 一样开始写作，再自然用上搜索、链接和反向引用。</span
               >
             </p>
             <div class="hero-actions">
@@ -129,7 +122,7 @@
                 target="_blank"
                 data-i18n="btn_dl"
               >
-                [ DOWNLOAD_EXE ]
+                下载 EXE
               </a>
               <a
                 class="btn-outline"
@@ -137,7 +130,7 @@
                 target="_blank"
                 data-i18n="btn_src"
               >
-                [ READ_SOURCE ]
+                查看源码
               </a>
             </div>
           </div>
@@ -145,42 +138,40 @@
           <div class="hero-cell cell-visual reveal" data-delay="100">
             <div class="visual-blueprint">
               <div class="blueprint-head">
-                <span class="mono-tiny">X-POS: 341 Y-POS: 882</span>
-                <span class="mono-tiny badge-accent">ACTIVE</span>
+                <span class="mono-tiny">Welcome · Local Document</span>
+                <span class="mono-tiny badge-accent">READY</span>
               </div>
               <div class="blueprint-body">
                 <h3 class="serif-title">Release.md</h3>
                 <div class="code-block">
-                  <span class="line"
-                    ><span class="c-accent">#</span> Release Checklist</span
-                  >
+                  <span class="line"><span class="c-accent">#</span> Quick Start</span>
                   <span class="line"
                     ><span class="c-dim">- [x]</span>
                     <span data-i18n="code_1"
-                      >Core editing routines compiled.</span
+                      >新建文档并开始输入</span
                     ></span
                   >
                   <span class="line"
                     ><span class="c-dim">- [x]</span>
-                    <span data-i18n="code_2">DOM sync established.</span></span
+                    <span data-i18n="code_2">按 Ctrl+P 搜索标题与内容</span></span
                   >
                   <span class="line"
                     ><span class="c-dim">- [x]</span>
                     <span data-i18n="code_3"
-                      >Math parsing via KaTeX running.</span
+                      >输入 [[ 建立文档连接</span
                     ></span
                   >
                   <span class="line type-anim"
                     ><span class="c-accent">- [ ]</span>
                     <span data-i18n="code_4"
-                      >Awaiting installer package...</span
+                      >继续完成你的第一篇笔记...</span
                     ></span
                   >
                 </div>
               </div>
               <div class="blueprint-foot">
-                <span class="mono-tiny">RENDER_MODE: WYSIWYG</span>
-                <span class="mono-tiny">MEM: 32MB</span>
+                <span class="mono-tiny">MODE: WYSIWYG</span>
+                <span class="mono-tiny">AUTO SAVE: ON</span>
               </div>
             </div>
             <!-- Decorative crosshairs -->
@@ -194,10 +185,8 @@
         <!-- WORKFLOW SECTION -->
         <section id="workflow" class="blueprint-section reveal" data-delay="50">
           <header class="section-header">
-            <span class="mono-tag" data-i18n="flow_tag"
-              >[ PHASE_01: WORKFLOW ]</span
-            >
-            <h2 class="serif-h2" data-i18n="flow_title">四步交付闭环。</h2>
+            <span class="mono-tag" data-i18n="flow_tag">上手路径</span>
+            <h2 class="serif-h2" data-i18n="flow_title">四步进入稳定写作节奏。</h2>
           </header>
 
           <div class="bento-hard">
@@ -251,10 +240,8 @@
         <!-- FEATURES SECTION -->
         <section id="features" class="blueprint-section reveal" data-delay="50">
           <header class="section-header border-top">
-            <span class="mono-tag" data-i18n="spec_tag"
-              >[ PHASE_02: SPECIFICATIONS ]</span
-            >
-            <h2 class="serif-h2" data-i18n="spec_title">工业级编辑特性。</h2>
+            <span class="mono-tag" data-i18n="spec_tag">核心能力</span>
+            <h2 class="serif-h2" data-i18n="spec_title">你每天会用到的能力。</h2>
             <p class="mono-desc" data-i18n="spec_desc">
               为技术文档密集型输出环境而设计，去除无效复杂度。
             </p>
@@ -262,9 +249,9 @@
 
           <div class="data-table">
             <div class="data-row row-header">
-              <span class="col-head">SYS_MODULE</span>
-              <span class="col-head">DESCRIPTION</span>
-              <span class="col-head text-right">STATUS</span>
+              <span class="col-head">能力模块</span>
+              <span class="col-head">说明</span>
+              <span class="col-head text-right">状态</span>
             </div>
             <div class="data-row">
               <span class="mono-data" data-i18n="f1_t">编辑效率 (Editor)</span>
@@ -307,8 +294,8 @@
         <section id="release" class="blueprint-section reveal" data-delay="50">
           <div class="release-grid">
             <div class="release-info border-right">
-              <span class="mono-tag" data-i18n="rls_tag">[ DEPLOYMENT ]</span>
-              <h2 class="serif-h2" data-i18n="rls_title">获取稳定版本。</h2>
+              <span class="mono-tag" data-i18n="rls_tag">下载与版本</span>
+              <h2 class="serif-h2" data-i18n="rls_title">获取可直接安装的稳定版。</h2>
               <div class="metrics-list">
                 <div class="metric">
                   <span class="label">VERSION</span>
@@ -329,29 +316,29 @@
                 target="_blank"
                 data-i18n="btn_dl_full"
               >
-                [ INITIATE_DOWNLOAD ]
+                下载最新安装包
               </a>
             </div>
 
             <div class="release-visual">
               <div class="blueprint-head">
-                <span class="mono-title">SYSTEM.DIAGNOSTICS</span>
+                <span class="mono-title">FIRST OPEN EXPERIENCE</span>
               </div>
               <div class="blueprint-body logs">
                 <p class="mono-tiny" data-i18n="log_1">
-                  > Booting local environment...
+                  > 正在打开本地工作环境...
                 </p>
                 <p class="mono-tiny" data-i18n="log_2">
-                  > Checking FS read/write permissions... OK
+                  > 文件读写权限检测通过
                 </p>
                 <p class="mono-tiny" data-i18n="log_3">
-                  > Mounting WYSIWYG Editor kernel...
+                  > 正在加载所见即所得编辑器...
                 </p>
                 <p class="mono-tiny" data-i18n="log_4">
-                  > Syncing layout engine...
+                  > 正在同步排版与索引状态...
                 </p>
                 <p class="mono-tiny c-accent" data-i18n="log_5">
-                  > SYSTEM READY FOR WRITING.
+                  > 现在可以开始写作了。
                 </p>
               </div>
             </div>
