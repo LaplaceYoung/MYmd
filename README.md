@@ -12,13 +12,13 @@
 
 <br/>
 
-[Read in English](README_en.md) | [阅读中文版](README.md)
+[Read in English](README_en.md) | [阅读中文](README.md)
 
-MYmd 是一款基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编辑器，支持所见即所得、源码与分屏三种视图，适用于高频写作、知识整理和结构化内容创作。
+MYmd 是一个基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编辑器，支持所见即所得、源码与分屏三种编辑视图，适用于高频写作、知识整理与结构化内容创作。
 
 ## 版本信息
 
-- 当前版本：`v1.2.3`
+- 当前版本：`v1.4.2`
 - 目标平台：`Windows x64`
 - 最新发布：<https://github.com/LaplaceYoung/MYmd/releases>
 - 宣传页面：<https://laplaceyoung.github.io/MYmd/>
@@ -27,10 +27,10 @@ MYmd 是一款基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 
 ### 编辑与写作体验
 
-- 多标签编辑，支持快速切换文档上下文。
-- 三种编辑视图：WYSIWYG、Source、Split。
-- 支持 Focus Mode / Typewriter Mode，提升连续写作沉浸感。
-- 未保存状态检测与关闭前确认，避免内容丢失。
+- 多标签编辑，支持快速切换上下文。
+- 三种视图：WYSIWYG、Source、Split。
+- Focus Mode / Typewriter Mode，提升连续写作沉浸感。
+- 未保存状态检测与关闭确认，避免内容丢失。
 
 ### 文件工作流
 
@@ -44,19 +44,20 @@ MYmd 是一款基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 - 内置 KaTeX 数学公式渲染。
 - 内置 Mermaid 图表渲染。
 - 代码语法高亮（Prism/Refractor）。
-- TOC 目录侧栏与全文 Search/Replace。
+- TOC 侧栏与全局搜索/替换。
 
 ### 桌面集成与交互
 
 - Tauri 原生窗口能力，自定义标题栏与窗口控制。
 - 单实例运行：二次启动时将文件参数转发给当前窗口。
-- 启动参数文件打开链路优化，避免“先欢迎页再打开文件”的闪跳。
+- 启动参数文件打开链路已优化，避免欢迎页闪跳。
 
-## v1.2.3 重点更新
+## v1.4.2 重点更新
 
-1. 修复编辑器粘贴链路：右键菜单与菜单栏粘贴可正确写入编辑区（不再仅 `Ctrl+V` 有效）。
-2. 新增工程治理基线：CI、Issue/PR/Release 模板、Contributing 与 Security 文档。
-3. 新增 GitHub Pages 宣传站（`apps/site`），并自动展示仓库 Star 与最新版本。
+1. 修复顶部搜索栏下拉菜单透明度过高问题，避免与正文背景重叠造成阅读混淆。
+2. 收敛标题栏搜索相关样式变量：将未定义令牌（`--bg-secondary`、`--text-main`）替换为主题稳定变量，提升深浅色一致性。
+3. 完成发布质量验证：`npm run typecheck`、`npm run build`、`npm run tauri build`。
+4. 生成并同步新的 Windows 安装包到项目发布目录。
 
 ## 技术栈
 
@@ -75,7 +76,7 @@ MYmd 是一款基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 
 - Node.js 20+
 - Rust 1.77.2+
-- Windows 10/11（打包使用 NSIS）
+- Windows 10/11（NSIS 打包）
 
 ### 本地开发
 
@@ -100,12 +101,14 @@ npm run tauri build
 
 ## 安装包产物
 
-Tauri 构建后，Windows 产物位于：
+本机本次打包产物路径：
 
-- `src-tauri/target/release/bundle/nsis/MYmd_1.2.3_x64-setup.exe`
-- `src-tauri/target/release/bundle/nsis/MYmd_1.2.3_x64.exe`
+- `E:\EnvConfig\rust_target\release\bundle\nsis\MYmd_1.4.2_x64-setup.exe`
+- `E:\EnvConfig\rust_target\release\bundle\msi\MYmd_1.4.2_x64_en-US.msi`
 
-项目同时维护一个便于分发的 `release/` 目录（仅保留最新版本安装包）。
+项目内分发目录（已同步）：
+
+- `release/MYmd_1.4.2_x64-setup.exe`
 
 ## 目录结构
 

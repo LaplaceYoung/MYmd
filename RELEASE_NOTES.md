@@ -1,5 +1,43 @@
 # MYmd Release Notes
 
+## v1.4.2 (2026-03-29)
+
+### Highlights
+
+- Fixed top search dropdown readability in title bar command menu (removed accidental transparent blending with page content).
+- Aligned title-bar search palette to stable theme tokens for consistent light/dark rendering.
+- Completed repackaging and synced latest installer artifact into `release/`.
+
+### Core Fixes
+
+- Updated `src/components/TitleBar/TitleBar.css`:
+  - replaced undefined token references (`--bg-secondary`, `--text-main`)
+  - switched dropdown and footer to opaque `--bg-elevated` background
+  - stabilized dropdown text color and shadow fallback
+- Prevented low-contrast menu content when search input is focused.
+
+### Validation
+
+- `npm run typecheck` ✅
+- `npm run build` ✅
+- `npm run tauri build` ✅
+- Playwright existing suite status: 1 passed / 3 failed / 2 skipped (known selector drift in legacy cases, unrelated to this CSS fix)
+
+### Version Alignment
+
+- `package.json`: `1.4.2`
+- `package-lock.json`: `1.4.2`
+- `src-tauri/Cargo.toml`: `1.4.2`
+- `src-tauri/tauri.conf.json`: `1.4.2`
+
+### Build Outputs (Windows x64)
+
+- `E:\EnvConfig\rust_target\release\bundle\nsis\MYmd_1.4.2_x64-setup.exe`
+- `E:\EnvConfig\rust_target\release\bundle\msi\MYmd_1.4.2_x64_en-US.msi`
+- `release\MYmd_1.4.2_x64-setup.exe`
+
+---
+
 ## v1.2.3 (2026-03-03)
 
 ### Highlights

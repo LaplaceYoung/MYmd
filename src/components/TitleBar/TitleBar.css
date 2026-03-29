@@ -118,13 +118,13 @@
 .top-search-menu__input-wrapper:hover,
 .top-search-menu.is-focused .top-search-menu__input-wrapper {
     background: rgba(255, 255, 255, 0.95);
-    color: var(--text-main);
+    color: var(--text-primary, #242424);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .top-search-menu__input-wrapper:hover .top-search-menu__icon,
 .top-search-menu.is-focused .top-search-menu__icon {
-    color: var(--text-main);
+    color: var(--text-primary, #242424);
     opacity: 0.6;
 }
 
@@ -144,7 +144,7 @@
 }
 
 .top-search-menu.is-focused .top-search-menu__input {
-    color: var(--text-main, #333);
+    color: var(--text-primary, #333);
 }
 
 .top-search-menu__input::placeholder {
@@ -160,13 +160,13 @@
     position: absolute;
     top: calc(100% + 4px);
     width: 100%;
-    background-color: var(--bg-main, #f3f3f3);
+    background-color: var(--bg-elevated, #ffffff);
     border: 1px solid var(--border-light, #d2d2d2);
     border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-paper, 0 8px 24px rgba(0, 0, 0, 0.2));
     padding: 8px 0;
     z-index: 9999;
-    color: var(--text-main, #333);
+    color: var(--text-primary, #333);
 }
 
 .top-search-dropdown__section {
@@ -189,7 +189,7 @@
     cursor: pointer;
     transition: background-color var(--transition-fast);
     gap: 12px;
-    color: var(--text-main);
+    color: var(--text-primary, #333);
 }
 
 .top-search-item:hover {
@@ -274,8 +274,11 @@
 .titlebar__btn svg {
     width: 14px;
     height: 14px;
-}.top-search-dropdown {
-    background-color: color-mix(in srgb, var(--bg-secondary) 96%, white 4%);
+}
+
+.top-search-dropdown {
+    background-color: var(--bg-elevated, #ffffff);
+    border-color: var(--border-light, #d2d2d2);
     border-radius: 12px;
     box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
     padding: 8px 0 0;
@@ -319,5 +322,5 @@
 }
 .top-search-dropdown__footer {
     border-top: 1px solid var(--border-light, #d2d2d2);
-    background: color-mix(in srgb, var(--bg-surface) 80%, transparent);
+    background: var(--bg-elevated, #ffffff);
 }

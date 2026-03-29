@@ -12,13 +12,13 @@
 
 <br/>
 
-[Read in English](README_en.md) | [阅读中文版](README.md)
+[Read in English](README_en.md) | [阅读中文](README.md)
 
 MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor with WYSIWYG, source, and split views, designed for high-frequency writing and structured content workflows.
 
 ## Version
 
-- Current version: `v1.2.3`
+- Current version: `v1.4.2`
 - Target platform: `Windows x64`
 - Latest releases: <https://github.com/LaplaceYoung/MYmd/releases>
 - Landing page: <https://laplaceyoung.github.io/MYmd/>
@@ -52,11 +52,12 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 - Single-instance behavior: file args from second launches are forwarded to the running window.
 - Startup open-file flow avoids welcome-page flicker before CLI file loading finishes.
 
-## v1.2.3 Highlights
+## v1.4.2 Highlights
 
-1. Fixed editor paste flow: context-menu and menu-bar paste now work reliably (not only `Ctrl+V`).
-2. Added governance baseline: CI, Issue/PR/Release templates, Contributing, and Security docs.
-3. Added GitHub Pages landing site (`apps/site`) with dynamic Star and latest release metadata.
+1. Fixed top search dropdown readability: removed transparent/invalid background token usage that caused blending with page content.
+2. Stabilized title-bar search palette by replacing undefined tokens (`--bg-secondary`, `--text-main`) with theme-safe variables.
+3. Completed release validation cycle: `npm run typecheck`, `npm run build`, and `npm run tauri build`.
+4. Produced new Windows installer package and synced distribution artifact in `release/`.
 
 ## Tech Stack
 
@@ -100,12 +101,14 @@ npm run tauri build
 
 ## Installer Artifacts
 
-After a Tauri build on Windows, artifacts are generated in:
+After a Tauri build on this machine, artifacts are generated in:
 
-- `src-tauri/target/release/bundle/nsis/MYmd_1.2.3_x64-setup.exe`
-- `src-tauri/target/release/bundle/nsis/MYmd_1.2.3_x64.exe`
+- `E:\EnvConfig\rust_target\release\bundle\nsis\MYmd_1.4.2_x64-setup.exe`
+- `E:\EnvConfig\rust_target\release\bundle\msi\MYmd_1.4.2_x64_en-US.msi`
 
-The repository also keeps a `release/` folder for latest distribution-ready installers.
+Project distribution folder (tracked):
+
+- `release/MYmd_1.4.2_x64-setup.exe`
 
 ## Project Structure
 
@@ -115,7 +118,7 @@ MYmd/
 |- src-tauri/           # Tauri + Rust backend
 |- docs/                # Product and project docs
 |- templates/           # Built-in template examples
-|- release/             # Release artifacts (latest installer only)
+|- release/             # Release artifacts (latest installer)
 |- tests/               # Automation and debug scripts
 |- README.md            # Chinese README
 `- README_en.md         # English README
