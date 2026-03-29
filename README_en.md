@@ -23,6 +23,24 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 - Latest releases: <https://github.com/LaplaceYoung/MYmd/releases>
 - Landing page: <https://laplaceyoung.github.io/MYmd/>
 
+## Screenshots
+
+### Welcome Overview
+
+![Welcome overview](docs/screenshots/welcome-overview.png)
+
+### Top Search Dropdown (Transparency Fix Applied)
+
+![Top search dropdown](docs/screenshots/top-search-dropdown.png)
+
+### Global Search Modal
+
+![Global search modal](docs/screenshots/global-search-modal.png)
+
+### Split Editor with Live Preview (Mermaid Included)
+
+![Split editor and live preview](docs/screenshots/split-editor-preview.png)
+
 ## Feature Overview
 
 ### Editing Experience

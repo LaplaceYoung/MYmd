@@ -23,6 +23,24 @@ MYmd 是一个基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 - 最新发布：<https://github.com/LaplaceYoung/MYmd/releases>
 - 宣传页面：<https://laplaceyoung.github.io/MYmd/>
 
+## 功能截图
+
+### 欢迎页总览
+
+![欢迎页总览](docs/screenshots/welcome-overview.png)
+
+### 顶部搜索下拉菜单（已修复透明度问题）
+
+![顶部搜索下拉菜单](docs/screenshots/top-search-dropdown.png)
+
+### 全局搜索弹窗
+
+![全局搜索弹窗](docs/screenshots/global-search-modal.png)
+
+### 分屏编辑与实时预览（含 Mermaid）
+
+![分屏编辑与实时预览](docs/screenshots/split-editor-preview.png)
+
 ## 功能总览
 
 ### 编辑与写作体验
