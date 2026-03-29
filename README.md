@@ -18,7 +18,7 @@ MYmd 是一个基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 
 ## 版本信息
 
-- 当前版本：`v1.4.2`
+- 当前版本：`v1.4.3`
 - 目标平台：`Windows x64`
 - 最新发布：<https://github.com/LaplaceYoung/MYmd/releases>
 - 宣传页面：<https://laplaceyoung.github.io/MYmd/>
@@ -70,15 +70,15 @@ MYmd 是一个基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 - 单实例运行：二次启动时将文件参数转发给当前窗口。
 - 启动参数文件打开链路已优化，避免欢迎页闪跳。
 
-## v1.4.2 重点更新
+## v1.4.3 重点更新
 
-1. 修复顶部搜索栏下拉菜单透明度过高问题，避免与正文背景重叠造成阅读混淆。
-2. 收敛标题栏搜索相关样式变量：将未定义令牌（`--bg-secondary`、`--text-main`）替换为主题稳定变量，提升深浅色一致性。
-3. 完成发布质量验证：`npm run typecheck`、`npm run build`、`npm run tauri build`。
-4. 生成并同步新的 Windows 安装包到项目发布目录。
+1. 首页恢复为之前的仿 Word 简洁排版，移除冗余引导模块，回到高频写作优先路径。
+2. 修复全局搜索弹窗透明度：弹窗面板改为不透明主题背景，并加深遮罩层，避免与正文背景混淆。
+3. 保留并验证顶部搜索下拉菜单可读性修复，确保菜单与底层内容不再重叠干扰。
+4. 重新截取并更新 README 功能截图（欢迎页、顶部搜索下拉、全局搜索弹窗）。
+5. 完成发布前校验：`npm run typecheck`、`npm run build`、`npm run tauri build`。
 
 ## 技术栈
-
 | 层级 | 技术 |
 | --- | --- |
 | UI | React 19, TypeScript, Tailwind CSS |
@@ -121,12 +121,12 @@ npm run tauri build
 
 本机本次打包产物路径：
 
-- `E:\EnvConfig\rust_target\release\bundle\nsis\MYmd_1.4.2_x64-setup.exe`
-- `E:\EnvConfig\rust_target\release\bundle\msi\MYmd_1.4.2_x64_en-US.msi`
+- `E:\EnvConfig\rust_target\release\bundle\nsis\MYmd_1.4.3_x64-setup.exe`
+- `E:\EnvConfig\rust_target\release\bundle\msi\MYmd_1.4.3_x64_en-US.msi`
 
 项目内分发目录（已同步）：
 
-- `release/MYmd_1.4.2_x64-setup.exe`
+- `release/MYmd_1.4.3_x64-setup.exe`
 
 ## 目录结构
 
@@ -145,3 +145,4 @@ MYmd/
 ## 许可证
 
 MIT License
+

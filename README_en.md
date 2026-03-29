@@ -18,7 +18,7 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 
 ## Version
 
-- Current version: `v1.4.2`
+- Current version: `v1.4.3`
 - Target platform: `Windows x64`
 - Latest releases: <https://github.com/LaplaceYoung/MYmd/releases>
 - Landing page: <https://laplaceyoung.github.io/MYmd/>
@@ -70,15 +70,15 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 - Single-instance behavior: file args from second launches are forwarded to the running window.
 - Startup open-file flow avoids welcome-page flicker before CLI file loading finishes.
 
-## v1.4.2 Highlights
+## v1.4.3 Highlights
 
-1. Fixed top search dropdown readability: removed transparent/invalid background token usage that caused blending with page content.
-2. Stabilized title-bar search palette by replacing undefined tokens (`--bg-secondary`, `--text-main`) with theme-safe variables.
-3. Completed release validation cycle: `npm run typecheck`, `npm run build`, and `npm run tauri build`.
-4. Produced new Windows installer package and synced distribution artifact in `release/`.
+1. Restored the Welcome page to the previous concise Word-style layout and removed the redundant onboarding-heavy variant.
+2. Fixed global search modal transparency by switching to an opaque themed panel background and a stronger backdrop mask.
+3. Kept title-bar top search dropdown readability improvements and verified no background blending regression.
+4. Refreshed README screenshots for welcome page, top search dropdown, and global search modal.
+5. Completed release validation with `npm run typecheck`, `npm run build`, and `npm run tauri build`.
 
 ## Tech Stack
-
 | Layer | Technology |
 | --- | --- |
 | UI | React 19, TypeScript, Tailwind CSS |
@@ -121,12 +121,12 @@ npm run tauri build
 
 After a Tauri build on this machine, artifacts are generated in:
 
-- `E:\EnvConfig\rust_target\release\bundle\nsis\MYmd_1.4.2_x64-setup.exe`
-- `E:\EnvConfig\rust_target\release\bundle\msi\MYmd_1.4.2_x64_en-US.msi`
+- `E:\EnvConfig\rust_target\release\bundle\nsis\MYmd_1.4.3_x64-setup.exe`
+- `E:\EnvConfig\rust_target\release\bundle\msi\MYmd_1.4.3_x64_en-US.msi`
 
 Project distribution folder (tracked):
 
-- `release/MYmd_1.4.2_x64-setup.exe`
+- `release/MYmd_1.4.3_x64-setup.exe`
 
 ## Project Structure
 
@@ -145,3 +145,4 @@ MYmd/
 ## License
 
 MIT License
+

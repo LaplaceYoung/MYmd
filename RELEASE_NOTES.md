@@ -1,5 +1,51 @@
 # MYmd Release Notes
 
+## v1.4.3 (2026-03-29)
+
+### Highlights
+
+- Restored the Welcome page to the previous concise Word-style layout, removing redundant onboarding-heavy sections.
+- Fixed global search modal transparency with an opaque panel background and stronger overlay mask.
+- Refreshed README screenshots for welcome page, top search dropdown, and global search modal.
+- Repackaged desktop installers and synced latest NSIS output into `release/`.
+
+### Core Fixes
+
+- Updated `src/components/Editor/WelcomeView.tsx`:
+  - reverted to the earlier Word-style homepage structure
+  - removed verbose guide/knowledge blocks
+  - restored sidebar wording (`选项`) and simplified recent-files section
+- Removed `src/components/Editor/WelcomeView.css` override to avoid style drift from base Word-like theme.
+- Updated `src/components/Editor/GlobalSearchModal.css`:
+  - replaced unstable background token with opaque `--bg-elevated`
+  - increased backdrop opacity to improve foreground/background separation
+  - added explicit input surface background for readability
+
+### Validation
+
+- `npm run typecheck` ✅
+- `npm run build` ✅
+- `npm run tauri build` ✅
+- Playwright screenshot pass for:
+  - welcome overview
+  - top search dropdown
+  - global search modal
+
+### Version Alignment
+
+- `package.json`: `1.4.3`
+- `package-lock.json`: `1.4.3`
+- `src-tauri/Cargo.toml`: `1.4.3`
+- `src-tauri/tauri.conf.json`: `1.4.3`
+
+### Build Outputs (Windows x64)
+
+- `E:\EnvConfig\rust_target\release\bundle\nsis\MYmd_1.4.3_x64-setup.exe`
+- `E:\EnvConfig\rust_target\release\bundle\msi\MYmd_1.4.3_x64_en-US.msi`
+- `release\MYmd_1.4.3_x64-setup.exe`
+
+---
+
 ## v1.4.2 (2026-03-29)
 
 ### Highlights
