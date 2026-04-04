@@ -16,7 +16,9 @@ import { TOCPanel } from './components/Sidebar/TOCPanel'
 import { FileExplorer } from './components/Sidebar/FileExplorer'
 import { BacklinksPanel } from './components/Sidebar/BacklinksPanel'
 import { KnowledgeGraphPanel } from './components/Sidebar/KnowledgeGraphPanel'
+import { AiPanel } from './components/Sidebar/AiPanel'
 import { installBuiltinKnowledgePlugin } from './plugins/builtinKnowledgePlugin'
+import { installBuiltinAiPlugin } from './plugins/builtinAiPlugin'
 
 export default function App() {
     useAutoSave()
@@ -53,8 +55,12 @@ export default function App() {
     }, [colorScheme])
 
     useEffect(() => {
-        const cleanup = installBuiltinKnowledgePlugin()
-        return cleanup
+        const cleanupKnowledge = installBuiltinKnowledgePlugin()
+        const cleanupAi = installBuiltinAiPlugin()
+        return () => {
+            cleanupKnowledge()
+            cleanupAi()
+        }
     }, [])
 
     useEffect(() => {
@@ -90,6 +96,7 @@ export default function App() {
                 <TOCPanel />
                 <BacklinksPanel />
                 <KnowledgeGraphPanel />
+                <AiPanel />
                 <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     <EditorContainer suppressWelcome={suppressWelcome} />
                 </div>

@@ -1,5 +1,6 @@
-import { BookOpen, AlignLeft, ZoomIn, ZoomOut, FileText, List, Link2, Network, Search, RefreshCw } from 'lucide-react'
+import { BookOpen, AlignLeft, ZoomIn, ZoomOut, FileText, List, Link2, Network, Search, RefreshCw, Bot, FileSpreadsheet } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
+import { getDocumentProfileMeta, getExportProfileMeta, getPaperPresetMeta } from '@/utils/paper'
 import './StatusBar.css'
 
 export function StatusBar() {
@@ -18,7 +19,13 @@ export function StatusBar() {
     const setBacklinksVisible = useEditorStore(s => s.setBacklinksVisible)
     const knowledgeGraphVisible = useEditorStore(s => s.knowledgeGraphVisible)
     const setKnowledgeGraphVisible = useEditorStore(s => s.setKnowledgeGraphVisible)
+    const aiPanelVisible = useEditorStore(s => s.aiPanelVisible)
+    const setAiPanelVisible = useEditorStore(s => s.setAiPanelVisible)
     const activeWorkspace = useEditorStore(s => s.activeWorkspace)
+    const paperPreset = useEditorStore(s => s.paperPreset)
+    const customPaperSize = useEditorStore(s => s.customPaperSize)
+    const documentProfile = useEditorStore(s => s.documentProfile)
+    const exportProfile = useEditorStore(s => s.exportProfile)
     const knowledgeIndexStatus = useEditorStore(s => s.knowledgeIndexStatus)
     const knowledgeIndexProcessed = useEditorStore(s => s.knowledgeIndexProcessed)
     const knowledgeIndexTotal = useEditorStore(s => s.knowledgeIndexTotal)
@@ -45,10 +52,15 @@ export function StatusBar() {
     const tocButtonClass = 'statusbar__icon-btn' + (tocVisible ? ' active' : '')
     const backlinksButtonClass = 'statusbar__icon-btn' + (backlinksVisible ? ' active' : '')
     const graphButtonClass = 'statusbar__text-btn' + (knowledgeGraphVisible ? ' active' : '')
+    const aiButtonClass = 'statusbar__text-btn' + (aiPanelVisible ? ' active' : '')
     const wysiwygButtonClass = 'statusbar__icon-btn' + (viewMode === 'wysiwyg' ? ' active' : '')
     const splitButtonClass = 'statusbar__icon-btn' + (viewMode === 'split' ? ' active' : '')
     const indexButtonClass = 'statusbar__btn statusbar__btn--action' + (knowledgeIndexStatus === 'error' ? ' statusbar__btn--danger' : '')
     const statsTitle = 'Characters: ' + charCount + '\nNon-whitespace: ' + nonWhitespace + '\nWords: ' + wordCount + '\nReading time: ' + readingTime + ' min'
+    const paperMeta = getPaperPresetMeta(paperPreset, customPaperSize)
+    const paperLabel = paperMeta.id === 'custom' ? `${paperMeta.label} ${paperMeta.detail}` : paperMeta.label
+    const profileLabel = getDocumentProfileMeta(documentProfile).label
+    const exportLabel = getExportProfileMeta(exportProfile).label
 
     return (
         <div className="statusbar statusbar--fluent">
@@ -64,6 +76,16 @@ export function StatusBar() {
                     <Search size={12} strokeWidth={1.5} style={{ marginRight: 4 }} />
                     Ctrl+P Search
                 </button>
+                <div className="statusbar__btn" title="Current paper preset">
+                    <FileSpreadsheet size={12} strokeWidth={1.5} style={{ marginRight: 4 }} />
+                    {paperLabel}
+                </div>
+                <div className="statusbar__btn" title="Current layout profile">
+                    {profileLabel}
+                </div>
+                <div className="statusbar__btn" title="Current export profile">
+                    {exportLabel}
+                </div>
                 {activeWorkspace && (
                     <button
                         className={indexButtonClass}
@@ -96,6 +118,10 @@ export function StatusBar() {
                         Graph
                     </button>
                 )}
+                <button className={aiButtonClass} title="AI assistant" onClick={() => setAiPanelVisible(!aiPanelVisible)}>
+                    <Bot size={14} />
+                    AI
+                </button>
                 <div className="statusbar__divider" style={{ width: 1, height: 14, backgroundColor: 'var(--border)', margin: '0 4px' }} />
                 <button className={wysiwygButtonClass} title="WYSIWYG mode" onClick={() => setViewMode('wysiwyg')}>
                     <BookOpen size={14} />

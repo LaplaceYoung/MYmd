@@ -3,6 +3,18 @@
    =================================================== */
 
 .editor-container {
+    --paper-width: 800px;
+    --paper-min-height: 980px;
+    --paper-padding-inline: 80px;
+    --paper-padding-top: 72px;
+    --paper-padding-bottom: 96px;
+    --doc-font-family: var(--font-editor);
+    --doc-font-size: var(--text-lg);
+    --doc-line-height: 1.8;
+    --doc-paragraph-spacing: 0.6em;
+    --doc-h1-size: var(--text-3xl);
+    --doc-h2-size: var(--text-2xl);
+    --doc-h3-size: var(--text-xl);
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -26,7 +38,27 @@
     flex: 1;
     overflow-y: auto;
     background: var(--bg-hover);
+    padding: var(--space-4);
+    position: relative;
     /* padding 移出，由内部缩放容器处理 */
+}
+
+.editor-workspace[data-page-guides='on'] {
+    --page-guide-step: calc(var(--paper-min-height) + (var(--space-8) * 2));
+    background-image:
+        linear-gradient(
+            to bottom,
+            color-mix(in srgb, var(--accent) 5%, transparent),
+            transparent 180px
+        ),
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent calc(var(--page-guide-step) - 2px),
+            color-mix(in srgb, var(--accent) 18%, var(--bg-hover) 82%) calc(var(--page-guide-step) - 2px),
+            color-mix(in srgb, var(--accent) 18%, var(--bg-hover) 82%) var(--page-guide-step)
+        );
+    background-attachment: local;
 }
 
 .editor-mode-guide {
@@ -96,11 +128,12 @@
 
 /* 核心编辑“纸张” — 高度由内容擑开，不设任何高度限制 */
 .editor-wysiwyg {
-    width: 800px;
+    width: var(--paper-width);
+    min-height: var(--paper-min-height);
     background: var(--bg-surface);
     box-shadow: var(--shadow-paper);
     border-radius: 2px;
-    padding: 72px 80px 96px;
+    padding: var(--paper-padding-top) var(--paper-padding-inline) var(--paper-padding-bottom);
     margin: 0 auto;
 }
 
@@ -113,21 +146,21 @@
 .editor-wysiwyg .milkdown {
     width: 100%;
     margin: 0;
-    font-family: var(--font-editor);
-    font-size: var(--text-lg);
-    line-height: 1.8;
+    font-family: var(--doc-font-family);
+    font-size: var(--doc-font-size);
+    line-height: var(--doc-line-height);
     color: var(--text-primary);
     caret-color: var(--text-primary);
 }
 
 .editor-wysiwyg .milkdown .editor {
     outline: none;
-    min-height: 900px;
+    min-height: calc(var(--paper-min-height) - var(--paper-padding-top) - var(--paper-padding-bottom));
 }
 
 /* 标题 */
 .editor-wysiwyg .milkdown h1 {
-    font-size: var(--text-3xl);
+    font-size: var(--doc-h1-size);
     font-weight: 700;
     margin: 1.5em 0 0.6em;
     padding-bottom: 0.3em;
@@ -137,7 +170,7 @@
 }
 
 .editor-wysiwyg .milkdown h2 {
-    font-size: var(--text-2xl);
+    font-size: var(--doc-h2-size);
     font-weight: 700;
     margin: 1.3em 0 0.5em;
     padding-bottom: 0.25em;
@@ -147,7 +180,7 @@
 }
 
 .editor-wysiwyg .milkdown h3 {
-    font-size: var(--text-xl);
+    font-size: var(--doc-h3-size);
     font-weight: 600;
     margin: 1.2em 0 0.4em;
     color: var(--text-primary);
@@ -171,7 +204,7 @@
 
 /* 段落 */
 .editor-wysiwyg .milkdown p {
-    margin: 0.6em 0;
+    margin: var(--doc-paragraph-spacing) 0;
 }
 
 /* 强调 */

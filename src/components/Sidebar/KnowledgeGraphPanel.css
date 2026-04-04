@@ -68,6 +68,29 @@
     font-size: 11px;
 }
 
+.knowledge-graph-panel__actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.knowledge-graph-panel__action {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-size: 11px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.knowledge-graph-panel__action:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg-surface));
+}
+
 .knowledge-graph-panel__section {
     display: flex;
     flex-direction: column;

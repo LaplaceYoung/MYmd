@@ -8,6 +8,7 @@ import './KnowledgeGraphPanel.css'
 export function KnowledgeGraphPanel() {
     const knowledgeGraphVisible = useEditorStore(s => s.knowledgeGraphVisible)
     const setKnowledgeGraphVisible = useEditorStore(s => s.setKnowledgeGraphVisible)
+    const openAiPanelWithDraft = useEditorStore(s => s.openAiPanelWithDraft)
     const addTab = useEditorStore(s => s.addTab)
     const markSaved = useEditorStore(s => s.markSaved)
     const pluginSidebarCardsMap = useEditorStore(s => s.pluginSidebarCards)
@@ -38,6 +39,24 @@ export function KnowledgeGraphPanel() {
     }, [filterText, knowledgeGraphVisible])
 
     const edgePreview = useMemo(() => edges.slice(0, 20), [edges])
+
+    const openAiGraphWorkflow = (mode: 'links' | 'cluster') => {
+        const normalizedFilter = filterText.trim()
+        const filterHint = normalizedFilter
+            ? ` Focus on the current graph slice filtered by "${normalizedFilter}".`
+            : ' Focus on the current visible graph slice.'
+        const graphHint = ` The current graph view contains ${nodes.length} nodes and ${edges.length} edges.`
+
+        const instruction = mode === 'links'
+            ? `Suggest missing wiki links, backlink opportunities, and hub-note upgrades for this knowledge graph.${graphHint}${filterHint}`
+            : `Suggest clearer topic clusters, hub notes, and note split opportunities for this knowledge graph.${graphHint}${filterHint}`
+
+        openAiPanelWithDraft({
+            taskMode: 'graph',
+            instruction,
+            includeGraphContext: true,
+        })
+    }
 
     const openNode = async (filePath: string) => {
         try {
@@ -73,6 +92,20 @@ export function KnowledgeGraphPanel() {
                     onChange={e => setFilterText(e.target.value)}
                 />
                 <div className="knowledge-graph-panel__meta">{graphSummary}</div>
+                <div className="knowledge-graph-panel__actions">
+                    <button
+                        className="knowledge-graph-panel__action"
+                        onClick={() => openAiGraphWorkflow('links')}
+                    >
+                        AI Link Plan
+                    </button>
+                    <button
+                        className="knowledge-graph-panel__action"
+                        onClick={() => openAiGraphWorkflow('cluster')}
+                    >
+                        AI Cluster Map
+                    </button>
+                </div>
 
                 <div className="knowledge-graph-panel__section">
                     <div className="knowledge-graph-panel__section-title">Edges</div>

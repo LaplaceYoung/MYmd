@@ -5,6 +5,7 @@ import { SourceEditor } from './SourceEditor'
 import { SearchBar } from './SearchBar'
 import { InsertDialog } from './InsertDialog'
 import { WelcomeView } from './WelcomeView'
+import { getDocumentProfileCssVariables, getPaperCssVariables, shouldShowPageGuides } from '@/utils/paper'
 import {
     analyzeDocumentPerformance,
     LARGE_DOC_PREVIEW_DELAY_MS
@@ -28,6 +29,10 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
     const setViewMode = useEditorStore(s => s.setViewMode)
     const zoom = useEditorStore(s => s.zoom)
     const watermark = useEditorStore(s => s.watermark)
+    const paperPreset = useEditorStore(s => s.paperPreset)
+    const customPaperSize = useEditorStore(s => s.customPaperSize)
+    const documentProfile = useEditorStore(s => s.documentProfile)
+    const exportProfile = useEditorStore(s => s.exportProfile)
     const commandRef = useRef<((cmd: string, payload?: unknown) => void) | null>(null)
     const [previewContent, setPreviewContent] = useState(activeTab?.content ?? '')
     const [showModeGuide, setShowModeGuide] = useState(() => {
@@ -40,6 +45,14 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
         () => analyzeDocumentPerformance(activeTab?.content ?? ''),
         [activeTab?.content]
     )
+    const paperStyle = useMemo(
+        () => ({
+            ...getPaperCssVariables(paperPreset, customPaperSize),
+            ...getDocumentProfileCssVariables(documentProfile)
+        }) as React.CSSProperties,
+        [customPaperSize, documentProfile, paperPreset]
+    )
+    const pageGuides = shouldShowPageGuides(paperPreset, exportProfile) ? 'on' : 'off'
 
     // Shortcuts and file operations
     const { handleNewFile, handleOpenFile, handleOpenRecentFile } = useEditorShortcuts()
@@ -110,7 +123,10 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
         )
     }
 
-    const zoomStyle = { zoom: zoom / 100 } as React.CSSProperties
+    const zoomStyle = {
+        zoom: zoom / 100,
+        ...paperStyle
+    } as React.CSSProperties
 
     return (
         <div className={`editor-container ${watermark ? 'has-watermark' : ''}`}>
@@ -143,7 +159,13 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
                 </div>
             )}
             {viewMode === 'wysiwyg' ? (
-                <div className="editor-workspace">
+                <div
+                    className="editor-workspace"
+                    data-paper-preset={paperPreset}
+                    data-document-profile={documentProfile}
+                    data-export-profile={exportProfile}
+                    data-page-guides={pageGuides}
+                >
                     <div className="editor-zoom-container" style={zoomStyle}>
                         <WysiwygEditor
                             key={activeTab.id}
@@ -179,6 +201,10 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
                     />
                     <div
                         className="editor-split__preview editor-workspace"
+                        data-paper-preset={paperPreset}
+                        data-document-profile={documentProfile}
+                        data-export-profile={exportProfile}
+                        data-page-guides={pageGuides}
                         style={{
                             flex: 100 - splitRatio,
                             transition: isDraggingRef.current ? 'none' : undefined

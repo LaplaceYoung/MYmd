@@ -1,55 +1,90 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { marked } from 'marked'
 import {
-    ClipboardPaste, Copy, Scissors,
-    Bold, Italic, Underline, Strikethrough,
-    List, ListOrdered, IndentDecrease, IndentIncrease,
-    PenTool, Columns2,
-    Table, Image, Link, Code, CodeSquare, Minus,
-    Quote, CheckSquare, FileText, FolderOpen, Save, FilePlus, Download,
-    type LucideIcon
+    ClipboardPaste,
+    Copy,
+    Scissors,
+    Bold,
+    Italic,
+    Underline,
+    Strikethrough,
+    List,
+    ListOrdered,
+    IndentDecrease,
+    IndentIncrease,
+    PenTool,
+    Columns2,
+    Table,
+    Image,
+    Link,
+    Code,
+    CodeSquare,
+    Minus,
+    Quote,
+    CheckSquare,
+    FileText,
+    FolderOpen,
+    Save,
+    FilePlus,
+    Download,
+    Bot,
+    Sparkles,
+    Network,
+    type LucideIcon,
 } from 'lucide-react'
-import { useEditorStore } from '@/stores/editorStore'
 import { Eye, Focus } from 'lucide-react'
-import { TablePicker } from './TablePicker'
-import './Ribbon.css'
-
-// 导入 Tauri API
 import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog'
 import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
+import { useEditorStore } from '@/stores/editorStore'
+import { TablePicker } from './TablePicker'
+import {
+    applyExportPageBreakMode,
+    buildExportHtmlDocument,
+    preprocessMarkdownForExport,
+} from '@/utils/paper'
 import { copyFromEditor, cutFromEditor, pasteToEditor } from '@/utils/editorClipboard'
+import { buildContextualAiDraft } from '@/utils/aiDrafts'
+import './Ribbon.css'
 
-// 检测 Tauri 环境
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 
 interface RibbonGroupProps {
-    title: string;
-    children: React.ReactNode;
+    title: string
+    children: React.ReactNode
 }
 
 const RibbonGroup = ({ title, children }: RibbonGroupProps) => (
     <div className="ribbon-group">
-        <div className="ribbon-group__content">
-            {children}
-        </div>
+        <div className="ribbon-group__content">{children}</div>
         <div className="ribbon-group__title">{title}</div>
     </div>
 )
 
 interface RibbonButtonProps {
-    icon: LucideIcon;
-    label?: string;
-    active?: boolean;
-    onClick?: () => void;
-    large?: boolean;
-    disabled?: boolean;
+    icon: LucideIcon
+    label?: string
+    active?: boolean
+    onClick?: () => void
+    large?: boolean
+    disabled?: boolean
+    dataAiEntry?: string
 }
 
-const RibbonButton = ({ icon: Icon, label, active, onClick, large = false, disabled = false }: RibbonButtonProps) => (
+const RibbonButton = ({
+    icon: Icon,
+    label,
+    active,
+    onClick,
+    large = false,
+    disabled = false,
+    dataAiEntry,
+}: RibbonButtonProps) => (
     <button
         className={`ribbon-btn ${large ? 'ribbon-btn--large' : ''} ${active ? 'active' : ''}`}
         onClick={onClick}
         disabled={disabled}
         title={label}
+        data-ai-entry={dataAiEntry}
     >
         <Icon size={large ? 24 : 16} strokeWidth={large ? 1.5 : 2} />
         {large && label && <span className="ribbon-btn__label">{label}</span>}
@@ -57,73 +92,83 @@ const RibbonButton = ({ icon: Icon, label, active, onClick, large = false, disab
 )
 
 export function Ribbon() {
-    const [activeTab, setActiveTab] = useState('home')
-    const viewMode = useEditorStore(s => s.viewMode)
-    const setViewMode = useEditorStore(s => s.setViewMode)
-    const executeCommand = useEditorStore(s => s.executeCommand)
-    const saveActiveTab = useEditorStore(s => s.saveActiveTab)
-    const saveTabAs = useEditorStore(s => s.saveTabAs)
-    const addTab = useEditorStore(s => s.addTab)
-    const activeMarks = useEditorStore(s => s.activeMarks)
-    const setInsertDialog = useEditorStore(s => s.setInsertDialog)
-    const focusMode = useEditorStore(s => s.focusMode)
-    const setFocusMode = useEditorStore(s => s.setFocusMode)
-    const typewriterMode = useEditorStore(s => s.typewriterMode)
-    const setTypewriterMode = useEditorStore(s => s.setTypewriterMode)
-    const fileExplorerVisible = useEditorStore(s => s.fileExplorerVisible)
-    const setFileExplorerVisible = useEditorStore(s => s.setFileExplorerVisible)
-
-    // 表格选择器
+    const [activeTab, setActiveTab] = useState<'file' | 'home' | 'insert' | 'view'>('home')
     const [showTablePicker, setShowTablePicker] = useState(false)
     const tablePickerRef = useRef<HTMLDivElement>(null)
 
-    // 点击外部关闭表格选择器
+    const viewMode = useEditorStore((s) => s.viewMode)
+    const setViewMode = useEditorStore((s) => s.setViewMode)
+    const executeCommand = useEditorStore((s) => s.executeCommand)
+    const saveActiveTab = useEditorStore((s) => s.saveActiveTab)
+    const saveTabAs = useEditorStore((s) => s.saveTabAs)
+    const addTab = useEditorStore((s) => s.addTab)
+    const activeMarks = useEditorStore((s) => s.activeMarks)
+    const setInsertDialog = useEditorStore((s) => s.setInsertDialog)
+    const focusMode = useEditorStore((s) => s.focusMode)
+    const setFocusMode = useEditorStore((s) => s.setFocusMode)
+    const typewriterMode = useEditorStore((s) => s.typewriterMode)
+    const setTypewriterMode = useEditorStore((s) => s.setTypewriterMode)
+    const fileExplorerVisible = useEditorStore((s) => s.fileExplorerVisible)
+    const setFileExplorerVisible = useEditorStore((s) => s.setFileExplorerVisible)
+    const openAiPanelWithDraft = useEditorStore((s) => s.openAiPanelWithDraft)
+    const paperPreset = useEditorStore((s) => s.paperPreset)
+    const customPaperSize = useEditorStore((s) => s.customPaperSize)
+    const documentProfile = useEditorStore((s) => s.documentProfile)
+    const exportProfile = useEditorStore((s) => s.exportProfile)
+    const exportOptions = useEditorStore((s) => s.exportOptions)
+    const activeWorkspace = useEditorStore((s) => s.activeWorkspace)
+    const activeTabState = useEditorStore((s) => {
+        const id = s.activeTabId
+        return s.tabs.find((tab) => tab.id === id) ?? null
+    })
+
     useEffect(() => {
-        function handleClick(e: MouseEvent) {
-            if (tablePickerRef.current && !tablePickerRef.current.contains(e.target as Node)) {
+        function handleClick(event: MouseEvent) {
+            if (tablePickerRef.current && !tablePickerRef.current.contains(event.target as Node)) {
                 setShowTablePicker(false)
             }
         }
+
         document.addEventListener('mousedown', handleClick)
         return () => document.removeEventListener('mousedown', handleClick)
     }, [])
 
-    // 编辑器命令快捷调用
     const exec = useCallback((cmd: string, payload?: unknown) => {
         executeCommand(cmd, payload)
     }, [executeCommand])
 
-    // 文件操作
     const handleNewFile = useCallback(() => {
         addTab(null, '# 新文档\n\n开始编写...\n')
     }, [addTab])
 
     const handleOpenFile = useCallback(async () => {
         if (!isTauri) {
-            addTab(null, '# 浏览器模式\n\n在 Tauri 环境中可以打开本地文件。\n')
+            addTab(null, '# Browser Mode\n\nOpen local files in the Tauri desktop app.\n')
             return
         }
 
         const selected = await openDialog({
             multiple: true,
-            filters: [{ name: 'Markdown', extensions: ['md', 'txt'] }]
+            filters: [{ name: 'Markdown', extensions: ['md', 'txt'] }],
         })
-        if (selected) {
-            const filePaths = Array.isArray(selected) ? selected : [selected]
-            for (const filePath of filePaths) {
-                try {
-                    const content = await readTextFile(filePath)
-                    const tabId = addTab(filePath, content)
-                    useEditorStore.getState().markSaved(tabId, filePath)
-                } catch (e) {
-                    console.error('Failed to read file:', e)
-                }
+
+        if (!selected) return
+
+        const filePaths = Array.isArray(selected) ? selected : [selected]
+        for (const filePath of filePaths) {
+            try {
+                const content = await readTextFile(filePath)
+                const tabId = addTab(filePath, content)
+                useEditorStore.getState().markSaved(tabId, filePath)
+            } catch (error) {
+                console.error('Failed to read file:', error)
             }
         }
     }, [addTab])
 
     const handleSaveAs = useCallback(async () => {
         if (!isTauri) return
+
         const store = useEditorStore.getState()
         const tab = store.getActiveTab()
         if (!tab) return
@@ -136,103 +181,112 @@ export function Ribbon() {
 
     const handleExportHTML = useCallback(async () => {
         if (!isTauri) return
+
         const tab = useEditorStore.getState().getActiveTab()
         if (!tab) return
 
         try {
-            const defaultName = tab.filePath ? tab.filePath.replace(/\.md$/i, '.html') : (tab.title.replace(/\.md$/i, '') + '.html')
+            const defaultName = tab.filePath
+                ? tab.filePath.replace(/\.md$/i, '.html')
+                : `${tab.title.replace(/\.md$/i, '')}.html`
+
             const filePath = await saveDialog({
                 filters: [{ name: 'HTML Document', extensions: ['html'] }],
-                defaultPath: defaultName
+                defaultPath: defaultName,
             })
-            if (filePath) {
-                const safeContent = tab.content.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')
-                const htmlTemplate = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>${tab.title}</title>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
-    <style>
-        body { box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto; padding: 45px; }
-        @media (prefers-color-scheme: dark) { body { background-color: #0d1117; color: #c9d1d9; } }
-    </style>
-</head>
-<body class="markdown-body">
-    <div id="content"></div>
-    <script>
-        document.getElementById('content').innerHTML = marked.parse(\`${safeContent}\`);
-    </script>
-</body>
-</html>`
-                await writeTextFile(filePath, htmlTemplate)
-            }
-        } catch (e) {
-            console.error('Export failed:', e)
+
+            if (!filePath) return
+
+            const preprocessedMarkdown = preprocessMarkdownForExport(
+                tab.content,
+                exportOptions.pageBreakMode !== 'flow'
+            )
+            const rawBodyHtml = marked.parse(preprocessedMarkdown, { gfm: true }) as string
+            const bodyHtml = applyExportPageBreakMode(rawBodyHtml, exportOptions.pageBreakMode)
+            const htmlTemplate = buildExportHtmlDocument({
+                title: tab.title,
+                bodyHtml,
+                filePath: tab.filePath,
+                exportedAt: new Date().toLocaleString('zh-CN', { hour12: false }),
+                paperPreset,
+                customPaperSize,
+                documentProfile,
+                exportProfile,
+                exportOptions,
+            })
+
+            await writeTextFile(filePath, htmlTemplate)
+        } catch (error) {
+            console.error('Export failed:', error)
         }
-    }, [])
+    }, [customPaperSize, documentProfile, exportOptions, exportProfile, paperPreset])
 
-
-    // 剪贴板操作
     const handleCopy = () => copyFromEditor()
     const handleCut = () => cutFromEditor()
     const handlePaste = () => {
         void pasteToEditor()
     }
 
-    // 检测 mark 是否激活
+    const handleOpenAiEntry = useCallback((mode: 'layout' | 'content' | 'graph') => {
+        const draft = buildContextualAiDraft({
+            mode,
+            title: activeTabState?.title ?? 'Untitled document',
+            paperPreset,
+            customPaperSize,
+            documentProfile,
+            exportProfile,
+            hasWorkspace: Boolean(activeWorkspace),
+        })
+        openAiPanelWithDraft(draft)
+    }, [
+        activeTabState?.title,
+        activeWorkspace,
+        customPaperSize,
+        documentProfile,
+        exportProfile,
+        openAiPanelWithDraft,
+        paperPreset,
+    ])
+
     const isActive = (mark: string) => activeMarks.includes(mark)
 
     return (
         <div className="ribbon">
             <div className="ribbon__tabs">
-                <button
-                    className={`ribbon__tab ${activeTab === 'file' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('file')}
-                >
+                <button className={`ribbon__tab ${activeTab === 'file' ? 'active' : ''}`} onClick={() => setActiveTab('file')}>
                     文件
                 </button>
-                <button
-                    className={`ribbon__tab ${activeTab === 'home' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('home')}
-                >
+                <button className={`ribbon__tab ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
                     开始
                 </button>
-                <button
-                    className={`ribbon__tab ${activeTab === 'insert' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('insert')}
-                >
+                <button className={`ribbon__tab ${activeTab === 'insert' ? 'active' : ''}`} onClick={() => setActiveTab('insert')}>
                     插入
                 </button>
-                <button
-                    className={`ribbon__tab ${activeTab === 'view' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('view')}
-                >
+                <button className={`ribbon__tab ${activeTab === 'view' ? 'active' : ''}`} onClick={() => setActiveTab('view')}>
                     视图
                 </button>
             </div>
 
             <div className="ribbon__panels">
-                {/* 文件选项卡面板 */}
                 {activeTab === 'file' && (
                     <div className="ribbon__panel">
-                        <RibbonGroup title="文件操作">
+                        <RibbonGroup title="文件">
                             <RibbonButton icon={FilePlus} label="新建" onClick={handleNewFile} large />
                             <RibbonButton icon={FolderOpen} label="打开" onClick={handleOpenFile} large />
                             <div className="ribbon-btn-col">
-                                <RibbonButton icon={Save} label="保存" onClick={() => saveActiveTab()} />
-                                <RibbonButton icon={Download} label="另存为" onClick={handleSaveAs} />
+                                <RibbonButton icon={Save} label="保存" onClick={() => void saveActiveTab()} />
+                                <RibbonButton icon={Download} label="另存为" onClick={() => void handleSaveAs()} />
                             </div>
                         </RibbonGroup>
+
                         <div className="ribbon-divider" />
+
                         <RibbonGroup title="导出">
-                            <RibbonButton icon={FileText} label="导出 HTML" onClick={handleExportHTML} large />
+                            <RibbonButton icon={FileText} label="导出 HTML" onClick={() => void handleExportHTML()} large />
                         </RibbonGroup>
                     </div>
                 )}
 
-                {/* 开始选项卡面板 */}
                 {activeTab === 'home' && (
                     <div className="ribbon__panel">
                         <RibbonGroup title="剪贴板">
@@ -270,10 +324,35 @@ export function Ribbon() {
                                 <RibbonButton icon={Quote} label="引用" active={isActive('blockquote')} onClick={() => exec('blockquote')} />
                             </div>
                         </RibbonGroup>
+
+                        <div className="ribbon-divider" />
+
+                        <RibbonGroup title="AI">
+                            <RibbonButton
+                                icon={Bot}
+                                label="AI Layout"
+                                onClick={() => handleOpenAiEntry('layout')}
+                                large
+                                dataAiEntry="layout"
+                            />
+                            <RibbonButton
+                                icon={Sparkles}
+                                label="AI Rewrite"
+                                onClick={() => handleOpenAiEntry('content')}
+                                large
+                                dataAiEntry="content"
+                            />
+                            <RibbonButton
+                                icon={Network}
+                                label="AI Graph"
+                                onClick={() => handleOpenAiEntry('graph')}
+                                large
+                                dataAiEntry="graph"
+                            />
+                        </RibbonGroup>
                     </div>
                 )}
 
-                {/* 插入选项卡面板 */}
                 {activeTab === 'insert' && (
                     <div className="ribbon__panel">
                         <RibbonGroup title="表格">
@@ -302,14 +381,13 @@ export function Ribbon() {
 
                         <div className="ribbon-divider" />
 
-                        <RibbonGroup title="代码与公式">
+                        <RibbonGroup title="结构">
                             <RibbonButton icon={CodeSquare} label="代码块" onClick={() => exec('codeBlock')} large />
                             <RibbonButton icon={Minus} label="分隔线" onClick={() => exec('hr')} large />
                         </RibbonGroup>
                     </div>
                 )}
 
-                {/* 视图选项卡面板 */}
                 {activeTab === 'view' && (
                     <div className="ribbon__panel">
                         <RibbonGroup title="视图模式">
@@ -322,13 +400,15 @@ export function Ribbon() {
                             />
                             <RibbonButton
                                 icon={Columns2}
-                                label="源码 & 预览"
+                                label="源码与预览"
                                 active={viewMode === 'split'}
                                 onClick={() => setViewMode('split')}
                                 large
                             />
                         </RibbonGroup>
+
                         <div className="ribbon-divider" />
+
                         <RibbonGroup title="导航">
                             <RibbonButton
                                 icon={FolderOpen}
@@ -338,7 +418,9 @@ export function Ribbon() {
                                 large
                             />
                         </RibbonGroup>
+
                         <div className="ribbon-divider" />
+
                         <RibbonGroup title="沉浸模式">
                             <RibbonButton
                                 icon={Focus}

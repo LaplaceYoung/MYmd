@@ -30,6 +30,35 @@ export type ThemeMode = 'light' | 'dark' | 'system'
 // 配色方案
 export type ColorScheme = 'default' | 'aurora-green' | 'sunset-orange' | 'lavender' | 'sakura-pink' | 'ocean-cyan' | 'amber-gold' | 'graphite'
 
+export type PaperPreset = 'screen' | 'a4' | 'letter' | 'legal' | 'custom'
+export type DocumentProfile = 'standard' | 'resume' | 'manuscript'
+export type ExportProfile = 'print' | 'share' | 'web'
+export type ExportPageBreakMode = 'flow' | 'manual' | 'sections'
+
+export interface CustomPaperSize {
+    widthMm: number
+    heightMm: number
+}
+
+export interface ExportOptions {
+    showHeader: boolean
+    showFooter: boolean
+    pageBreakMode: ExportPageBreakMode
+}
+
+export interface AiConfig {
+    endpoint: string
+    apiKey: string
+    model: string
+}
+
+export interface AiPanelDraft {
+    taskMode: 'layout' | 'content' | 'graph'
+    instruction: string
+    includeGraphContext: boolean
+    version: number
+}
+
 // 数学公式编辑浮层定位信息
 export interface MathEditRect {
     left: number
@@ -107,6 +136,16 @@ interface EditorState {
     colorScheme: ColorScheme
     /** 编辑器字号 */
     editorFontSize: number
+    /** 纸张预设 */
+    paperPreset: PaperPreset
+    /** 自定义纸张尺寸 */
+    customPaperSize: CustomPaperSize
+    /** 文档布局预设 */
+    documentProfile: DocumentProfile
+    /** 导出预设 */
+    exportProfile: ExportProfile
+    /** 导出细节选项 */
+    exportOptions: ExportOptions
     /** 是否开启拼写检查 */
     spellcheck: boolean
     /** 是否显示水印 */
@@ -125,6 +164,12 @@ interface EditorState {
     activeWorkspace: string | null
     /** 图谱侧栏可见性 */
     knowledgeGraphVisible: boolean
+    /** AI 助手侧栏可见性 */
+    aiPanelVisible: boolean
+    /** AI 接入配置 */
+    aiConfig: AiConfig
+    /** AI 面板的预填草稿 */
+    aiPanelDraft: AiPanelDraft
     /** 知识索引状态 */
     knowledgeIndexStatus: 'idle' | 'indexing' | 'error'
     /** 知识索引已处理文件数 */
@@ -167,6 +212,13 @@ interface EditorState {
     setThemeMode: (mode: ThemeMode) => void
     setColorScheme: (scheme: ColorScheme) => void
     setEditorFontSize: (size: number) => void
+    setPaperPreset: (preset: PaperPreset) => void
+    setCustomPaperSize: (size: Partial<CustomPaperSize>) => void
+    setDocumentProfile: (profile: DocumentProfile) => void
+    setExportProfile: (profile: ExportProfile) => void
+    setExportShowHeader: (enable: boolean) => void
+    setExportShowFooter: (enable: boolean) => void
+    setExportPageBreakMode: (mode: ExportPageBreakMode) => void
     setSpellcheck: (enable: boolean) => void
     setWatermark: (enable: boolean) => void
     setFocusMode: (enable: boolean) => void
@@ -175,6 +227,9 @@ interface EditorState {
     setBacklinksVisible: (visible: boolean) => void
     setFileExplorerVisible: (visible: boolean) => void
     setKnowledgeGraphVisible: (visible: boolean) => void
+    setAiPanelVisible: (visible: boolean) => void
+    openAiPanelWithDraft: (draft: Partial<Omit<AiPanelDraft, 'version'>>) => void
+    setAiConfig: (config: Partial<AiConfig>) => void
     setActiveWorkspace: (path: string | null) => void
     rebuildKnowledgeIndex: () => Promise<void>
     registerPluginCommand: (command: PluginCommand) => void
@@ -215,6 +270,11 @@ interface EditorState {
 let tabCounter = 0
 const SEARCH_HISTORY_STORAGE_KEY = 'mymd.searchHistory'
 const DEFAULT_SEARCH_HISTORY_LIMIT = 10
+const PAPER_SETTINGS_STORAGE_KEY = 'mymd.paperSettings'
+const DEFAULT_CUSTOM_PAPER_SIZE: CustomPaperSize = {
+    widthMm: 180,
+    heightMm: 260,
+}
 
 function loadSearchHistoryFromStorage(): string[] {
     if (typeof window === 'undefined') return []
@@ -236,6 +296,67 @@ function persistSearchHistory(history: string[]) {
     if (typeof window === 'undefined') return
     try {
         window.localStorage.setItem(SEARCH_HISTORY_STORAGE_KEY, JSON.stringify(history))
+    } catch {
+        // ignore persistence failures
+    }
+}
+
+function clampPaperDimensionMm(value: number, fallback: number): number {
+    if (!Number.isFinite(value)) return fallback
+    return Math.max(120, Math.min(420, Math.round(value)))
+}
+
+function isPaperPreset(value: unknown): value is PaperPreset {
+    return value === 'screen' || value === 'a4' || value === 'letter' || value === 'legal' || value === 'custom'
+}
+
+function loadPaperSettingsFromStorage(): { paperPreset: PaperPreset; customPaperSize: CustomPaperSize } {
+    if (typeof window === 'undefined') {
+        return {
+            paperPreset: 'screen',
+            customPaperSize: DEFAULT_CUSTOM_PAPER_SIZE,
+        }
+    }
+
+    try {
+        const raw = window.localStorage.getItem(PAPER_SETTINGS_STORAGE_KEY)
+        if (!raw) {
+            return {
+                paperPreset: 'screen',
+                customPaperSize: DEFAULT_CUSTOM_PAPER_SIZE,
+            }
+        }
+
+        const parsed = JSON.parse(raw) as {
+            paperPreset?: PaperPreset
+            customPaperSize?: Partial<CustomPaperSize>
+        }
+
+        const widthMm = clampPaperDimensionMm(parsed.customPaperSize?.widthMm ?? DEFAULT_CUSTOM_PAPER_SIZE.widthMm, DEFAULT_CUSTOM_PAPER_SIZE.widthMm)
+        const heightMm = clampPaperDimensionMm(parsed.customPaperSize?.heightMm ?? DEFAULT_CUSTOM_PAPER_SIZE.heightMm, DEFAULT_CUSTOM_PAPER_SIZE.heightMm)
+
+        return {
+            paperPreset: isPaperPreset(parsed.paperPreset) ? parsed.paperPreset : 'screen',
+            customPaperSize: {
+                widthMm,
+                heightMm,
+            }
+        }
+    } catch {
+        return {
+            paperPreset: 'screen',
+            customPaperSize: DEFAULT_CUSTOM_PAPER_SIZE,
+        }
+    }
+}
+
+function persistPaperSettings(paperPreset: PaperPreset, customPaperSize: CustomPaperSize) {
+    if (typeof window === 'undefined') return
+    try {
+        window.localStorage.setItem(PAPER_SETTINGS_STORAGE_KEY, JSON.stringify({
+            paperPreset,
+            customPaperSize,
+        }))
     } catch {
         // ignore persistence failures
     }
@@ -263,6 +384,37 @@ function normalizeSavedPath(path: string | null): string | null {
     return normalized.length > 0 ? normalized : null
 }
 
+function getDefaultExportOptionsForProfile(profile: ExportProfile): ExportOptions {
+    if (profile === 'print') {
+        return {
+            showHeader: true,
+            showFooter: true,
+            pageBreakMode: 'sections',
+        }
+    }
+    if (profile === 'share') {
+        return {
+            showHeader: true,
+            showFooter: false,
+            pageBreakMode: 'manual',
+        }
+    }
+    return {
+        showHeader: false,
+        showFooter: false,
+        pageBreakMode: 'flow',
+    }
+}
+
+function getDefaultAiPanelDraft(): AiPanelDraft {
+    return {
+        taskMode: 'layout',
+        instruction: '',
+        includeGraphContext: true,
+        version: 0,
+    }
+}
+
 async function saveTabWithNativeDialog(tab: Tab): Promise<string | null> {
     const savedPath = await invoke<string | null>('save_markdown_via_dialog', {
         defaultFileName: getSaveFileSuggestion(tab),
@@ -274,6 +426,7 @@ async function saveTabWithNativeDialog(tab: Tab): Promise<string | null> {
 
 // 检测 Tauri 环境
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
+const initialPaperSettings = loadPaperSettingsFromStorage()
 
 export const useEditorStore = create<EditorState>((set, get) => ({
     tabs: [],
@@ -292,6 +445,11 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     themeMode: 'system',
     colorScheme: 'default',
     editorFontSize: 16,
+    paperPreset: initialPaperSettings.paperPreset,
+    customPaperSize: initialPaperSettings.customPaperSize,
+    documentProfile: 'standard',
+    exportProfile: 'web',
+    exportOptions: getDefaultExportOptionsForProfile('web'),
     spellcheck: false,
     watermark: false,
     focusMode: false,
@@ -301,6 +459,13 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     fileExplorerVisible: true,
     activeWorkspace: null,
     knowledgeGraphVisible: false,
+    aiPanelVisible: false,
+    aiConfig: {
+        endpoint: 'https://api.openai.com/v1/chat/completions',
+        apiKey: '',
+        model: 'gpt-4.1-mini'
+    },
+    aiPanelDraft: getDefaultAiPanelDraft(),
     knowledgeIndexStatus: 'idle',
     knowledgeIndexProcessed: 0,
     knowledgeIndexTotal: 0,
@@ -510,6 +675,51 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     setEditorFontSize: (size) => set({ editorFontSize: Math.max(10, Math.min(32, size)) }),
 
+    setPaperPreset: (preset) => set((state) => {
+        persistPaperSettings(preset, state.customPaperSize)
+        return { paperPreset: preset }
+    }),
+
+    setCustomPaperSize: (size) => set((state) => {
+        const nextSize: CustomPaperSize = {
+            widthMm: clampPaperDimensionMm(size.widthMm ?? state.customPaperSize.widthMm, state.customPaperSize.widthMm),
+            heightMm: clampPaperDimensionMm(size.heightMm ?? state.customPaperSize.heightMm, state.customPaperSize.heightMm),
+        }
+        persistPaperSettings('custom', nextSize)
+        return {
+            paperPreset: 'custom',
+            customPaperSize: nextSize,
+        }
+    }),
+
+    setDocumentProfile: (profile) => set({ documentProfile: profile }),
+
+    setExportProfile: (profile) => set({
+        exportProfile: profile,
+        exportOptions: getDefaultExportOptionsForProfile(profile),
+    }),
+
+    setExportShowHeader: (enable) => set((state) => ({
+        exportOptions: {
+            ...state.exportOptions,
+            showHeader: enable,
+        }
+    })),
+
+    setExportShowFooter: (enable) => set((state) => ({
+        exportOptions: {
+            ...state.exportOptions,
+            showFooter: enable,
+        }
+    })),
+
+    setExportPageBreakMode: (mode) => set((state) => ({
+        exportOptions: {
+            ...state.exportOptions,
+            pageBreakMode: mode,
+        }
+    })),
+
     setSpellcheck: (enable) => set({ spellcheck: enable }),
 
     setWatermark: (enable) => set({ watermark: enable }),
@@ -524,6 +734,25 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     setFileExplorerVisible: (enable) => set({ fileExplorerVisible: enable }),
 
     setKnowledgeGraphVisible: (visible) => set({ knowledgeGraphVisible: visible }),
+
+    setAiPanelVisible: (visible) => set({ aiPanelVisible: visible }),
+
+    openAiPanelWithDraft: (draft) => set((state) => ({
+        aiPanelVisible: true,
+        aiPanelDraft: {
+            taskMode: draft.taskMode ?? state.aiPanelDraft.taskMode,
+            instruction: draft.instruction ?? state.aiPanelDraft.instruction,
+            includeGraphContext: draft.includeGraphContext ?? state.aiPanelDraft.includeGraphContext,
+            version: state.aiPanelDraft.version + 1,
+        }
+    })),
+
+    setAiConfig: (config) => set((state) => ({
+        aiConfig: {
+            ...state.aiConfig,
+            ...config
+        }
+    })),
 
     setActiveWorkspace: (path) => {
         set({ activeWorkspace: path })

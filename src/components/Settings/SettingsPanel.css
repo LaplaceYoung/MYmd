@@ -42,6 +42,7 @@
 .settings-panel__theme-row {
     display: flex;
     gap: var(--space-3);
+    flex-wrap: wrap;
 }
 
 .settings-panel__theme-btn {
@@ -92,6 +93,66 @@
     min-width: 40px;
 }
 
+.settings-panel__paper-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+.settings-panel__custom-paper-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+.settings-panel__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.settings-panel__field-label {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+}
+
+.settings-panel__paper-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: left;
+}
+
+.settings-panel__paper-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.settings-panel__paper-card.active {
+    border-color: var(--accent);
+    background: var(--accent-muted);
+    color: var(--accent);
+}
+
+.settings-panel__paper-label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+.settings-panel__paper-detail {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+}
+
 .settings-panel__about {
     display: flex;
     align-items: flex-start;
@@ -118,9 +179,9 @@
     font-size: var(--text-sm);
     color: var(--text-secondary);
     margin-top: var(--space-1);
+    line-height: 1.6;
 }
 
-/* ---- 配色方案选择器 ---- */
 .settings-panel__scheme-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -165,4 +226,81 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.settings-panel__text-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    padding: 10px 12px;
+    font-size: var(--text-sm);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.settings-panel__text-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.settings-panel__hint {
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+.settings-panel__toggle-row {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+}
+
+.settings-panel__checkbox-card {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 42px;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+.settings-panel__checkbox-card:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+}
+
+.settings-panel__checkbox-card input {
+    accent-color: var(--accent);
+}
+
+@media (max-width: 960px) {
+    .settings-panel {
+        padding: var(--space-6);
+    }
+
+    .settings-panel__scheme-grid,
+    .settings-panel__paper-grid,
+    .settings-panel__custom-paper-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .settings-panel__scheme-grid,
+    .settings-panel__paper-grid,
+    .settings-panel__custom-paper-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-panel__theme-btn {
+        flex: 1 1 120px;
+    }
 }
