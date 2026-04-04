@@ -1,6 +1,11 @@
 import { BookOpen, AlignLeft, ZoomIn, ZoomOut, FileText, List, Link2, Network, Search, RefreshCw, Bot, FileSpreadsheet } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
-import { getDocumentProfileMeta, getExportProfileMeta, getPaperPresetMeta } from '@/utils/paper'
+import {
+    getDocumentProfileMeta,
+    getExportProfileMeta,
+    getPaperOrientationLabel,
+    getPaperPresetMeta,
+} from '@/utils/paper'
 import './StatusBar.css'
 
 export function StatusBar() {
@@ -23,7 +28,9 @@ export function StatusBar() {
     const setAiPanelVisible = useEditorStore(s => s.setAiPanelVisible)
     const activeWorkspace = useEditorStore(s => s.activeWorkspace)
     const paperPreset = useEditorStore(s => s.paperPreset)
+    const paperOrientation = useEditorStore(s => s.paperOrientation)
     const customPaperSize = useEditorStore(s => s.customPaperSize)
+    const pageMarginMm = useEditorStore(s => s.pageMarginMm)
     const documentProfile = useEditorStore(s => s.documentProfile)
     const exportProfile = useEditorStore(s => s.exportProfile)
     const knowledgeIndexStatus = useEditorStore(s => s.knowledgeIndexStatus)
@@ -57,8 +64,13 @@ export function StatusBar() {
     const splitButtonClass = 'statusbar__icon-btn' + (viewMode === 'split' ? ' active' : '')
     const indexButtonClass = 'statusbar__btn statusbar__btn--action' + (knowledgeIndexStatus === 'error' ? ' statusbar__btn--danger' : '')
     const statsTitle = 'Characters: ' + charCount + '\nNon-whitespace: ' + nonWhitespace + '\nWords: ' + wordCount + '\nReading time: ' + readingTime + ' min'
-    const paperMeta = getPaperPresetMeta(paperPreset, customPaperSize)
-    const paperLabel = paperMeta.id === 'custom' ? `${paperMeta.label} ${paperMeta.detail}` : paperMeta.label
+    const paperMeta = getPaperPresetMeta(paperPreset, customPaperSize, paperOrientation, pageMarginMm)
+    const orientationLabel = getPaperOrientationLabel(paperOrientation)
+    const paperLabel = paperMeta.id === 'screen'
+        ? `${paperMeta.label} · ${pageMarginMm}mm margin`
+        : paperMeta.id === 'custom'
+            ? `${paperMeta.label} ${paperMeta.detail} ${orientationLabel} · ${pageMarginMm}mm`
+            : `${paperMeta.label} ${orientationLabel} · ${pageMarginMm}mm`
     const profileLabel = getDocumentProfileMeta(documentProfile).label
     const exportLabel = getExportProfileMeta(exportProfile).label
 

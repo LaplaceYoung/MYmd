@@ -112,7 +112,9 @@ export function Ribbon() {
     const setFileExplorerVisible = useEditorStore((s) => s.setFileExplorerVisible)
     const openAiPanelWithDraft = useEditorStore((s) => s.openAiPanelWithDraft)
     const paperPreset = useEditorStore((s) => s.paperPreset)
+    const paperOrientation = useEditorStore((s) => s.paperOrientation)
     const customPaperSize = useEditorStore((s) => s.customPaperSize)
+    const pageMarginMm = useEditorStore((s) => s.pageMarginMm)
     const documentProfile = useEditorStore((s) => s.documentProfile)
     const exportProfile = useEditorStore((s) => s.exportProfile)
     const exportOptions = useEditorStore((s) => s.exportOptions)
@@ -209,6 +211,8 @@ export function Ribbon() {
                 filePath: tab.filePath,
                 exportedAt: new Date().toLocaleString('zh-CN', { hour12: false }),
                 paperPreset,
+                paperOrientation,
+                pageMarginMm,
                 customPaperSize,
                 documentProfile,
                 exportProfile,
@@ -219,7 +223,7 @@ export function Ribbon() {
         } catch (error) {
             console.error('Export failed:', error)
         }
-    }, [customPaperSize, documentProfile, exportOptions, exportProfile, paperPreset])
+    }, [customPaperSize, documentProfile, exportOptions, exportProfile, pageMarginMm, paperOrientation, paperPreset])
 
     const handleCopy = () => copyFromEditor()
     const handleCut = () => cutFromEditor()
@@ -232,7 +236,9 @@ export function Ribbon() {
             mode,
             title: activeTabState?.title ?? 'Untitled document',
             paperPreset,
+            paperOrientation,
             customPaperSize,
+            pageMarginMm,
             documentProfile,
             exportProfile,
             hasWorkspace: Boolean(activeWorkspace),
@@ -245,6 +251,8 @@ export function Ribbon() {
         documentProfile,
         exportProfile,
         openAiPanelWithDraft,
+        pageMarginMm,
+        paperOrientation,
         paperPreset,
     ])
 

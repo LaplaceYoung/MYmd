@@ -3,12 +3,18 @@ import { useEditorStore } from '@/stores/editorStore'
 import type {
     ThemeMode,
     ColorScheme,
+    PaperOrientation,
     PaperPreset,
     DocumentProfile,
     ExportProfile,
     ExportPageBreakMode
 } from '@/stores/editorStore'
-import { getDocumentProfileMeta, getExportProfileMeta, getPaperPresetMeta } from '@/utils/paper'
+import {
+    getDocumentProfileMeta,
+    getExportProfileMeta,
+    getPaperOrientationLabel,
+    getPaperPresetMeta,
+} from '@/utils/paper'
 import './SettingsPanel.css'
 
 const COLOR_SCHEMES: { id: ColorScheme; label: string; color: string }[] = [
@@ -48,6 +54,11 @@ const PAGE_BREAK_MODES: { id: ExportPageBreakMode; label: string; detail: string
     { id: 'sections', label: 'Sections', detail: 'Insert page breaks before each H1 section.' },
 ]
 
+const PAPER_ORIENTATIONS: { id: PaperOrientation; label: string; detail: string }[] = [
+    { id: 'portrait', label: getPaperOrientationLabel('portrait'), detail: 'Vertical page flow for documents and print.' },
+    { id: 'landscape', label: getPaperOrientationLabel('landscape'), detail: 'Horizontal page flow for wide layouts and tables.' },
+]
+
 export function SettingsPanel() {
     const themeMode = useEditorStore(s => s.themeMode)
     const setThemeMode = useEditorStore(s => s.setThemeMode)
@@ -56,9 +67,13 @@ export function SettingsPanel() {
     const editorFontSize = useEditorStore(s => s.editorFontSize)
     const setEditorFontSize = useEditorStore(s => s.setEditorFontSize)
     const paperPreset = useEditorStore(s => s.paperPreset)
+    const paperOrientation = useEditorStore(s => s.paperOrientation)
     const customPaperSize = useEditorStore(s => s.customPaperSize)
+    const pageMarginMm = useEditorStore(s => s.pageMarginMm)
     const setPaperPreset = useEditorStore(s => s.setPaperPreset)
+    const setPaperOrientation = useEditorStore(s => s.setPaperOrientation)
     const setCustomPaperSize = useEditorStore(s => s.setCustomPaperSize)
+    const setPageMarginMm = useEditorStore(s => s.setPageMarginMm)
     const documentProfile = useEditorStore(s => s.documentProfile)
     const setDocumentProfile = useEditorStore(s => s.setDocumentProfile)
     const exportProfile = useEditorStore(s => s.exportProfile)
@@ -185,6 +200,49 @@ export function SettingsPanel() {
                     )}
                     <div className="settings-panel__hint">
                         Custom paper size flows through the editor canvas and HTML export together.
+                    </div>
+                </div>
+
+                <div className="settings-panel__group">
+                    <label className="settings-panel__label">
+                        <FileSpreadsheet size={14} />
+                        Paper Orientation
+                    </label>
+                    <div className="settings-panel__paper-grid settings-panel__paper-grid--compact">
+                        {PAPER_ORIENTATIONS.map(orientation => (
+                            <button
+                                key={orientation.id}
+                                className={`settings-panel__paper-card ${paperOrientation === orientation.id ? 'active' : ''}`}
+                                onClick={() => setPaperOrientation(orientation.id)}
+                            >
+                                <span className="settings-panel__paper-label">{orientation.label}</span>
+                                <span className="settings-panel__paper-detail">{orientation.detail}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="settings-panel__group">
+                    <label className="settings-panel__label">
+                        <LayoutTemplate size={14} />
+                        Page Margin
+                    </label>
+                    <div className="settings-panel__custom-paper-grid settings-panel__custom-paper-grid--single">
+                        <label className="settings-panel__field">
+                            <span className="settings-panel__field-label">Uniform page margin (mm)</span>
+                            <input
+                                type="number"
+                                min="8"
+                                max="40"
+                                className="settings-panel__text-input"
+                                aria-label="Page margin"
+                                value={pageMarginMm}
+                                onChange={e => setPageMarginMm(Number(e.target.value))}
+                            />
+                        </label>
+                    </div>
+                    <div className="settings-panel__hint">
+                        Applies to the editor canvas padding and print/export page margin together.
                     </div>
                 </div>
 

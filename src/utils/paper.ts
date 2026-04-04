@@ -4,6 +4,7 @@ import type {
     ExportOptions,
     ExportPageBreakMode,
     ExportProfile,
+    PaperOrientation,
     PaperPreset
 } from '@/stores/editorStore'
 
@@ -193,6 +194,14 @@ export const EXPORT_PROFILE_META: Record<ExportProfile, ExportProfileMeta> = {
     }
 }
 
+const BUILTIN_PAPER_DIMENSIONS_MM: Record<Exclude<PaperPreset, 'screen' | 'custom'>, { widthMm: number; heightMm: number }> = {
+    a4: { widthMm: 210, heightMm: 297 },
+    letter: { widthMm: 216, heightMm: 279 },
+    legal: { widthMm: 216, heightMm: 356 },
+}
+
+const DEFAULT_PAGE_MARGIN_MM = 16
+
 function mmToPx(mm: number): string {
     return `${Math.round((mm * 96) / 25.4)}px`
 }
@@ -204,25 +213,77 @@ function clampCustomPaperSize(size: CustomPaperSize | undefined): CustomPaperSiz
     }
 }
 
-export function getPaperPresetMeta(preset: PaperPreset, customPaperSize?: CustomPaperSize): PaperPresetMeta {
-    if (preset !== 'custom') {
-        return PAPER_PRESET_META[preset] ?? PAPER_PRESET_META.screen
+function clampPageMarginMm(pageMarginMm: number | undefined) {
+    return Math.max(8, Math.min(40, Math.round(pageMarginMm ?? DEFAULT_PAGE_MARGIN_MM)))
+}
+
+function resolvePaperDimensionsMm(
+    preset: PaperPreset,
+    customPaperSize: CustomPaperSize | undefined,
+    paperOrientation: PaperOrientation
+) {
+    if (preset === 'screen') return null
+
+    const baseDimensions = preset === 'custom'
+        ? clampCustomPaperSize(customPaperSize)
+        : BUILTIN_PAPER_DIMENSIONS_MM[preset]
+
+    if (!baseDimensions) return null
+
+    if (paperOrientation === 'landscape') {
+        return {
+            widthMm: baseDimensions.heightMm,
+            heightMm: baseDimensions.widthMm,
+        }
     }
 
-    const size = clampCustomPaperSize(customPaperSize)
+    return {
+        widthMm: baseDimensions.widthMm,
+        heightMm: baseDimensions.heightMm,
+    }
+}
+
+export function getPaperOrientationLabel(orientation: PaperOrientation) {
+    return orientation === 'landscape' ? 'Landscape' : 'Portrait'
+}
+
+export function getPaperPresetMeta(
+    preset: PaperPreset,
+    customPaperSize?: CustomPaperSize,
+    paperOrientation: PaperOrientation = 'portrait',
+    pageMarginMm: number = DEFAULT_PAGE_MARGIN_MM
+): PaperPresetMeta {
+    const marginPx = mmToPx(clampPageMarginMm(pageMarginMm))
+
+    if (preset === 'screen') {
+        return {
+            ...PAPER_PRESET_META.screen,
+            paddingInline: marginPx,
+            paddingTop: marginPx,
+            paddingBottom: marginPx,
+            exportPadding: marginPx,
+        }
+    }
+
+    const size = resolvePaperDimensionsMm(preset, customPaperSize, paperOrientation)
+    if (!size) {
+        return PAPER_PRESET_META.screen
+    }
+
+    const baseMeta = PAPER_PRESET_META[preset]
 
     return {
-        id: 'custom',
-        label: 'Custom',
+        id: preset,
+        label: baseMeta.label,
         detail: `${size.widthMm} x ${size.heightMm} mm`,
         pageSize: `${size.widthMm}mm ${size.heightMm}mm`,
         pageWidth: mmToPx(size.widthMm),
         pageMinHeight: mmToPx(size.heightMm),
-        paddingInline: PAPER_PRESET_META.a4.paddingInline,
-        paddingTop: PAPER_PRESET_META.a4.paddingTop,
-        paddingBottom: PAPER_PRESET_META.a4.paddingBottom,
+        paddingInline: marginPx,
+        paddingTop: marginPx,
+        paddingBottom: marginPx,
         exportMaxWidth: mmToPx(size.widthMm),
-        exportPadding: PAPER_PRESET_META.a4.exportPadding,
+        exportPadding: marginPx,
     }
 }
 
@@ -247,8 +308,13 @@ export function shouldShowPageGuides(preset: PaperPreset, profile: ExportProfile
     return preset !== 'screen' && getExportProfileMeta(profile).pageGuides
 }
 
-export function getPaperCssVariables(preset: PaperPreset, customPaperSize?: CustomPaperSize): Record<string, string> {
-    const meta = getPaperPresetMeta(preset, customPaperSize)
+export function getPaperCssVariables(
+    preset: PaperPreset,
+    customPaperSize?: CustomPaperSize,
+    paperOrientation: PaperOrientation = 'portrait',
+    pageMarginMm: number = DEFAULT_PAGE_MARGIN_MM
+): Record<string, string> {
+    const meta = getPaperPresetMeta(preset, customPaperSize, paperOrientation, pageMarginMm)
     return {
         '--paper-width': meta.pageWidth,
         '--paper-min-height': meta.pageMinHeight,
@@ -275,16 +341,19 @@ export function buildExportHtmlStyle(
     preset: PaperPreset,
     profile: DocumentProfile,
     exportProfile: ExportProfile,
-    customPaperSize?: CustomPaperSize
+    customPaperSize?: CustomPaperSize,
+    paperOrientation: PaperOrientation = 'portrait',
+    pageMarginMm: number = DEFAULT_PAGE_MARGIN_MM
 ) {
-    const meta = getPaperPresetMeta(preset, customPaperSize)
+    const meta = getPaperPresetMeta(preset, customPaperSize, paperOrientation, pageMarginMm)
     const profileMeta = getDocumentProfileMeta(profile)
     const exportMeta = getExportProfileMeta(exportProfile)
+    const resolvedPageMarginMm = clampPageMarginMm(pageMarginMm)
     const pageRule = exportProfile === 'web'
-        ? '@page { margin: 12mm; }'
+        ? `@page { margin: ${resolvedPageMarginMm}mm; }`
         : meta.pageSize === 'auto'
-            ? `@page { margin: ${exportMeta.printMargin}; }`
-            : `@page { size: ${meta.pageSize}; margin: ${exportMeta.printMargin}; }`
+            ? `@page { margin: ${resolvedPageMarginMm}mm; }`
+            : `@page { size: ${meta.pageSize}; margin: ${resolvedPageMarginMm}mm; }`
     const bodyWidth = exportProfile === 'web' ? '1080px' : meta.exportMaxWidth
     const bodyMinHeight = exportProfile === 'web' ? 'auto' : meta.pageMinHeight
     const bodyPadding = exportProfile === 'web' ? exportMeta.screenPadding : meta.exportPadding
@@ -507,6 +576,8 @@ export function buildExportHtmlDocument(options: {
     filePath: string | null
     exportedAt: string
     paperPreset: PaperPreset
+    paperOrientation?: PaperOrientation
+    pageMarginMm?: number
     customPaperSize?: CustomPaperSize
     documentProfile: DocumentProfile
     exportProfile: ExportProfile
@@ -527,7 +598,14 @@ export function buildExportHtmlDocument(options: {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${safeTitle}</title>
     <style>
-        ${buildExportHtmlStyle(options.paperPreset, options.documentProfile, options.exportProfile, options.customPaperSize)}
+        ${buildExportHtmlStyle(
+            options.paperPreset,
+            options.documentProfile,
+            options.exportProfile,
+            options.customPaperSize,
+            options.paperOrientation,
+            options.pageMarginMm
+        )}
     </style>
 </head>
 <body class="markdown-body" data-export-profile="${options.exportProfile}" data-page-break-mode="${resolvedOptions.pageBreakMode}">

@@ -30,7 +30,9 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
     const zoom = useEditorStore(s => s.zoom)
     const watermark = useEditorStore(s => s.watermark)
     const paperPreset = useEditorStore(s => s.paperPreset)
+    const paperOrientation = useEditorStore(s => s.paperOrientation)
     const customPaperSize = useEditorStore(s => s.customPaperSize)
+    const pageMarginMm = useEditorStore(s => s.pageMarginMm)
     const documentProfile = useEditorStore(s => s.documentProfile)
     const exportProfile = useEditorStore(s => s.exportProfile)
     const commandRef = useRef<((cmd: string, payload?: unknown) => void) | null>(null)
@@ -47,10 +49,10 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
     )
     const paperStyle = useMemo(
         () => ({
-            ...getPaperCssVariables(paperPreset, customPaperSize),
+            ...getPaperCssVariables(paperPreset, customPaperSize, paperOrientation, pageMarginMm),
             ...getDocumentProfileCssVariables(documentProfile)
         }) as React.CSSProperties,
-        [customPaperSize, documentProfile, paperPreset]
+        [customPaperSize, documentProfile, pageMarginMm, paperOrientation, paperPreset]
     )
     const pageGuides = shouldShowPageGuides(paperPreset, exportProfile) ? 'on' : 'off'
 
@@ -162,6 +164,7 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
                 <div
                     className="editor-workspace"
                     data-paper-preset={paperPreset}
+                    data-paper-orientation={paperOrientation}
                     data-document-profile={documentProfile}
                     data-export-profile={exportProfile}
                     data-page-guides={pageGuides}
@@ -202,6 +205,7 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
                     <div
                         className="editor-split__preview editor-workspace"
                         data-paper-preset={paperPreset}
+                        data-paper-orientation={paperOrientation}
                         data-document-profile={documentProfile}
                         data-export-profile={exportProfile}
                         data-page-guides={pageGuides}

@@ -31,6 +31,7 @@ export type ThemeMode = 'light' | 'dark' | 'system'
 export type ColorScheme = 'default' | 'aurora-green' | 'sunset-orange' | 'lavender' | 'sakura-pink' | 'ocean-cyan' | 'amber-gold' | 'graphite'
 
 export type PaperPreset = 'screen' | 'a4' | 'letter' | 'legal' | 'custom'
+export type PaperOrientation = 'portrait' | 'landscape'
 export type DocumentProfile = 'standard' | 'resume' | 'manuscript'
 export type ExportProfile = 'print' | 'share' | 'web'
 export type ExportPageBreakMode = 'flow' | 'manual' | 'sections'
@@ -138,8 +139,12 @@ interface EditorState {
     editorFontSize: number
     /** 纸张预设 */
     paperPreset: PaperPreset
+    /** 纸张方向 */
+    paperOrientation: PaperOrientation
     /** 自定义纸张尺寸 */
     customPaperSize: CustomPaperSize
+    /** 页面边距（毫米） */
+    pageMarginMm: number
     /** 文档布局预设 */
     documentProfile: DocumentProfile
     /** 导出预设 */
@@ -213,7 +218,9 @@ interface EditorState {
     setColorScheme: (scheme: ColorScheme) => void
     setEditorFontSize: (size: number) => void
     setPaperPreset: (preset: PaperPreset) => void
+    setPaperOrientation: (orientation: PaperOrientation) => void
     setCustomPaperSize: (size: Partial<CustomPaperSize>) => void
+    setPageMarginMm: (marginMm: number) => void
     setDocumentProfile: (profile: DocumentProfile) => void
     setExportProfile: (profile: ExportProfile) => void
     setExportShowHeader: (enable: boolean) => void
@@ -275,6 +282,7 @@ const DEFAULT_CUSTOM_PAPER_SIZE: CustomPaperSize = {
     widthMm: 180,
     heightMm: 260,
 }
+const DEFAULT_PAGE_MARGIN_MM = 16
 
 function loadSearchHistoryFromStorage(): string[] {
     if (typeof window === 'undefined') return []
@@ -310,11 +318,27 @@ function isPaperPreset(value: unknown): value is PaperPreset {
     return value === 'screen' || value === 'a4' || value === 'letter' || value === 'legal' || value === 'custom'
 }
 
-function loadPaperSettingsFromStorage(): { paperPreset: PaperPreset; customPaperSize: CustomPaperSize } {
+function isPaperOrientation(value: unknown): value is PaperOrientation {
+    return value === 'portrait' || value === 'landscape'
+}
+
+function clampPageMarginMm(value: number, fallback: number): number {
+    if (!Number.isFinite(value)) return fallback
+    return Math.max(8, Math.min(40, Math.round(value)))
+}
+
+function loadPaperSettingsFromStorage(): {
+    paperPreset: PaperPreset
+    paperOrientation: PaperOrientation
+    customPaperSize: CustomPaperSize
+    pageMarginMm: number
+} {
     if (typeof window === 'undefined') {
         return {
             paperPreset: 'screen',
+            paperOrientation: 'portrait',
             customPaperSize: DEFAULT_CUSTOM_PAPER_SIZE,
+            pageMarginMm: DEFAULT_PAGE_MARGIN_MM,
         }
     }
 
@@ -323,39 +347,55 @@ function loadPaperSettingsFromStorage(): { paperPreset: PaperPreset; customPaper
         if (!raw) {
             return {
                 paperPreset: 'screen',
+                paperOrientation: 'portrait',
                 customPaperSize: DEFAULT_CUSTOM_PAPER_SIZE,
+                pageMarginMm: DEFAULT_PAGE_MARGIN_MM,
             }
         }
 
         const parsed = JSON.parse(raw) as {
             paperPreset?: PaperPreset
+            paperOrientation?: PaperOrientation
             customPaperSize?: Partial<CustomPaperSize>
+            pageMarginMm?: number
         }
 
         const widthMm = clampPaperDimensionMm(parsed.customPaperSize?.widthMm ?? DEFAULT_CUSTOM_PAPER_SIZE.widthMm, DEFAULT_CUSTOM_PAPER_SIZE.widthMm)
         const heightMm = clampPaperDimensionMm(parsed.customPaperSize?.heightMm ?? DEFAULT_CUSTOM_PAPER_SIZE.heightMm, DEFAULT_CUSTOM_PAPER_SIZE.heightMm)
+        const pageMarginMm = clampPageMarginMm(parsed.pageMarginMm ?? DEFAULT_PAGE_MARGIN_MM, DEFAULT_PAGE_MARGIN_MM)
 
         return {
             paperPreset: isPaperPreset(parsed.paperPreset) ? parsed.paperPreset : 'screen',
+            paperOrientation: isPaperOrientation(parsed.paperOrientation) ? parsed.paperOrientation : 'portrait',
             customPaperSize: {
                 widthMm,
                 heightMm,
-            }
+            },
+            pageMarginMm,
         }
     } catch {
         return {
             paperPreset: 'screen',
+            paperOrientation: 'portrait',
             customPaperSize: DEFAULT_CUSTOM_PAPER_SIZE,
+            pageMarginMm: DEFAULT_PAGE_MARGIN_MM,
         }
     }
 }
 
-function persistPaperSettings(paperPreset: PaperPreset, customPaperSize: CustomPaperSize) {
+function persistPaperSettings(
+    paperPreset: PaperPreset,
+    customPaperSize: CustomPaperSize,
+    paperOrientation: PaperOrientation,
+    pageMarginMm: number
+) {
     if (typeof window === 'undefined') return
     try {
         window.localStorage.setItem(PAPER_SETTINGS_STORAGE_KEY, JSON.stringify({
             paperPreset,
+            paperOrientation,
             customPaperSize,
+            pageMarginMm,
         }))
     } catch {
         // ignore persistence failures
@@ -446,7 +486,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     colorScheme: 'default',
     editorFontSize: 16,
     paperPreset: initialPaperSettings.paperPreset,
+    paperOrientation: initialPaperSettings.paperOrientation,
     customPaperSize: initialPaperSettings.customPaperSize,
+    pageMarginMm: initialPaperSettings.pageMarginMm,
     documentProfile: 'standard',
     exportProfile: 'web',
     exportOptions: getDefaultExportOptionsForProfile('web'),
@@ -676,8 +718,13 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     setEditorFontSize: (size) => set({ editorFontSize: Math.max(10, Math.min(32, size)) }),
 
     setPaperPreset: (preset) => set((state) => {
-        persistPaperSettings(preset, state.customPaperSize)
+        persistPaperSettings(preset, state.customPaperSize, state.paperOrientation, state.pageMarginMm)
         return { paperPreset: preset }
+    }),
+
+    setPaperOrientation: (orientation) => set((state) => {
+        persistPaperSettings(state.paperPreset, state.customPaperSize, orientation, state.pageMarginMm)
+        return { paperOrientation: orientation }
     }),
 
     setCustomPaperSize: (size) => set((state) => {
@@ -685,10 +732,18 @@ export const useEditorStore = create<EditorState>((set, get) => ({
             widthMm: clampPaperDimensionMm(size.widthMm ?? state.customPaperSize.widthMm, state.customPaperSize.widthMm),
             heightMm: clampPaperDimensionMm(size.heightMm ?? state.customPaperSize.heightMm, state.customPaperSize.heightMm),
         }
-        persistPaperSettings('custom', nextSize)
+        persistPaperSettings('custom', nextSize, state.paperOrientation, state.pageMarginMm)
         return {
             paperPreset: 'custom',
             customPaperSize: nextSize,
+        }
+    }),
+
+    setPageMarginMm: (marginMm) => set((state) => {
+        const nextMargin = clampPageMarginMm(marginMm, state.pageMarginMm)
+        persistPaperSettings(state.paperPreset, state.customPaperSize, state.paperOrientation, nextMargin)
+        return {
+            pageMarginMm: nextMargin,
         }
     }),
 

@@ -3,11 +3,13 @@ import type {
     CustomPaperSize,
     DocumentProfile,
     ExportProfile,
+    PaperOrientation,
     PaperPreset,
 } from '@/stores/editorStore'
 import {
     getDocumentProfileMeta,
     getExportProfileMeta,
+    getPaperOrientationLabel,
     getPaperPresetMeta,
 } from '@/utils/paper'
 
@@ -15,17 +17,25 @@ export interface BuildContextualAiDraftInput {
     mode: AiPanelDraft['taskMode']
     title: string
     paperPreset: PaperPreset
+    paperOrientation?: PaperOrientation
     customPaperSize?: CustomPaperSize
+    pageMarginMm?: number
     documentProfile: DocumentProfile
     exportProfile: ExportProfile
     hasWorkspace: boolean
 }
 
 export function buildContextualAiDraft(input: BuildContextualAiDraftInput): Omit<AiPanelDraft, 'version'> {
-    const paperMeta = getPaperPresetMeta(input.paperPreset, input.customPaperSize)
-    const paperLabel = paperMeta.id === 'custom'
-        ? `${paperMeta.label} (${paperMeta.detail})`
-        : paperMeta.label
+    const paperMeta = getPaperPresetMeta(
+        input.paperPreset,
+        input.customPaperSize,
+        input.paperOrientation,
+        input.pageMarginMm
+    )
+    const orientationLabel = getPaperOrientationLabel(input.paperOrientation ?? 'portrait')
+    const paperLabel = paperMeta.id === 'screen'
+        ? `${paperMeta.label} (${orientationLabel}, ${input.pageMarginMm ?? 16}mm margin)`
+        : `${paperMeta.label} ${orientationLabel} (${paperMeta.detail}, ${input.pageMarginMm ?? 16}mm margin)`
     const profileLabel = getDocumentProfileMeta(input.documentProfile).label
     const exportLabel = getExportProfileMeta(input.exportProfile).label
     const title = input.title.trim() || 'Untitled document'

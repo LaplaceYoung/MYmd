@@ -15,12 +15,14 @@
 - Added AI session history snapshots so generated or manually curated results can be reloaded within the current editing session.
 - Added persistent AI history management so session snapshots now survive reloads and can be deleted individually or cleared in bulk.
 - Added AI history labels, favorites, favorite-first ordering, and inline search so snapshot recall is now usable across repeated editing loops.
+- Added paper orientation and unified page margin controls so settings now drive editor canvas padding, status bar visibility, and export page geometry together.
 
 ## Current Capability Audit
 
 ### Stable and usable
 
 - Paper size, layout profile, and export profile now form a complete visible chain.
+- Paper orientation and page margin now persist and affect both the editor canvas and export HTML instead of being fixed internals.
 - Export header/footer and page-break strategy now form a configurable export chain instead of being hidden in profile defaults.
 - File explorer CRUD is usable for local-first editing workflows.
 - Global search, in-document search, and recent-document flows are already connected.
@@ -33,7 +35,7 @@
 ### Present but not yet product-complete
 
 - AI panel now supports diff preview, block-level apply, restore-original, persistent history reload, labels, favorites, and history filtering, but it still lacks reusable saved prompt libraries and cross-document grouping or exportable prompt/result assets.
-- Paper size now supports a custom width/height path, but it still lacks orientation, margin controls, and separate editor-vs-export paper profiles.
+- Paper size now supports custom width/height, orientation, and unified margin controls, but it still lacks separate editor-vs-export paper profiles and richer preset management.
 - Knowledge graph is still a lightweight relationship surface, not an interactive graph workspace.
 - AI graph suggestions still apply as guided drafts, not as structured graph mutations or approve-per-link actions.
 - Ribbon AI entries still open draft-based workflows; they do not yet expose structured “apply headings / apply links / accept rewrite block-by-block” operations.
@@ -68,7 +70,7 @@
 
 ### P0
 
-- Extend the custom paper path into a fuller paper system with orientation, saved presets, and clearer status-bar/settings affordances.
+- Extend the paper system beyond size/orientation/margin into saved presets, asymmetric margins, and separate editor-vs-export paper profiles.
 - Extend wikilink/backlink coverage from file rename to directory move and source-jump behavior.
 - Add a true Tauri workspace E2E for move -> rewrite -> reindex -> backlink visibility -> jump behavior.
 - Add paged preview or PDF-oriented verification on top of the new export controls.

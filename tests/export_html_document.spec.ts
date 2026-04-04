@@ -64,6 +64,24 @@ test('supports custom paper sizes in export styles', () => {
     expect(html).toContain('max-width: 680px;')
 })
 
+test('supports paper orientation and custom page margins in export styles', () => {
+    const html = buildExportHtmlDocument({
+        title: 'Landscape Sheet',
+        bodyHtml: '<h1>Sheet</h1><p>Body</p>',
+        filePath: null,
+        exportedAt: '2026-04-04 20:12:00',
+        paperPreset: 'a4',
+        paperOrientation: 'landscape',
+        pageMarginMm: 20,
+        documentProfile: 'standard',
+        exportProfile: 'print',
+    })
+
+    expect(html).toContain('@page { size: 297mm 210mm; margin: 20mm; }')
+    expect(html).toContain('max-width: 1123px;')
+    expect(html).toContain('padding: 76px;')
+})
+
 test('converts explicit page-break markers in markdown before export', () => {
     const markdown = [
         '# First',
