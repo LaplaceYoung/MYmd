@@ -1,52 +1,103 @@
 import { readFile, writeFile, mkdir, exists } from '@tauri-apps/plugin-fs'
 
-/**
- * 确保目录存在，如果不存在则创建
- * 注意：由于 plugin-fs 不支持递归创建（未配置 recursive 参数时），
- * 这里做简单包装。实际项目中可能需要级联创建。
- */
 async function ensureDir(dirPath: string) {
     if (!await exists(dirPath)) {
-        await mkdir(dirPath)
+        await mkdir(dirPath, { recursive: true })
     }
 }
 
-/**
- * 将外部图片复制到当前 Markdown 文件同级目录的 assets 文件夹中
- * @param sourceImgPath 源图片绝对路径
- * @param activeTabFilePath 当前正打开编辑的 Markdown 文件的绝对路径
- * @returns 复制后的图片相对路径（如：assets/image-123.png），失败返回 null
- */
-export async function copyImageToLocalAssets(sourceImgPath: string, activeTabFilePath: string): Promise<string | null> {
+function getParentDir(filePath: string): string | null {
+    const lastSlashIndex = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'))
+    if (lastSlashIndex === -1) return null
+    return filePath.substring(0, lastSlashIndex)
+}
+
+function sanitizeFileSegment(value: string): string {
+    return value
+        .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '-')
+        .replace(/\s+/g, '-')
+        .trim()
+}
+
+function extensionFromMime(mimeType?: string): string | null {
+    switch ((mimeType || '').toLowerCase()) {
+        case 'image/png':
+            return 'png'
+        case 'image/jpeg':
+            return 'jpg'
+        case 'image/gif':
+            return 'gif'
+        case 'image/webp':
+            return 'webp'
+        case 'image/svg+xml':
+            return 'svg'
+        case 'image/bmp':
+            return 'bmp'
+        default:
+            return null
+    }
+}
+
+function buildAssetFileName(preferredName?: string, mimeType?: string): string {
+    const originalName = preferredName?.trim() || ''
+    const baseName = originalName.replace(/\.[^.]+$/, '')
+    const sanitizedBase = sanitizeFileSegment(baseName) || 'image'
+    const explicitExt = originalName.includes('.') ? originalName.split('.').pop()?.toLowerCase() : null
+    const ext = explicitExt || extensionFromMime(mimeType) || 'png'
+    const stamp = `${Date.now()}-${Math.floor(Math.random() * 1000)}`
+    return `${sanitizedBase}-${stamp}.${ext}`
+}
+
+async function writeImageBytesToLocalAssets(
+    fileData: Uint8Array,
+    activeTabFilePath: string,
+    preferredName?: string,
+    mimeType?: string
+): Promise<string | null> {
     if (!activeTabFilePath) {
         console.warn('Current document has not been saved yet. Cannot determine relative path.')
         return null
     }
 
     try {
-        // 1. 获取当前 md 文件的目录路径
-        const lastSlashIndex = Math.max(activeTabFilePath.lastIndexOf('/'), activeTabFilePath.lastIndexOf('\\'))
-        if (lastSlashIndex === -1) return null
+        const docDir = getParentDir(activeTabFilePath)
+        if (!docDir) return null
 
-        const docDir = activeTabFilePath.substring(0, lastSlashIndex)
         const assetsDir = `${docDir}/assets`
-
-        // 2. 确保 assets 目录存在
         await ensureDir(assetsDir)
 
-        // 3. 构建新的目标文件路径并保证文件名唯一以防覆盖
-        const ext = sourceImgPath.split('.').pop() || 'png'
-        const randomName = `${Date.now()}-${Math.floor(Math.random() * 1000)}.${ext}`
-        const targetPath = `${assetsDir}/${randomName}`
-
-        // 4. 读取原始文件并写入到新目标路径 (使用二进制复制)
-        const fileData = await readFile(sourceImgPath)
+        const fileName = buildAssetFileName(preferredName, mimeType)
+        const targetPath = `${assetsDir}/${fileName}`
         await writeFile(targetPath, fileData)
 
-        // 5. 返回相对于 md 文件的路径
-        return `assets/${randomName}`
+        return `assets/${fileName}`
+    } catch (e) {
+        console.error('Failed to persist image into local assets:', e)
+        return null
+    }
+}
+
+export async function copyImageToLocalAssets(sourceImgPath: string, activeTabFilePath: string): Promise<string | null> {
+    try {
+        const fileData = await readFile(sourceImgPath)
+        const preferredName = sourceImgPath.split(/[\\/]/).pop()
+        return await writeImageBytesToLocalAssets(fileData, activeTabFilePath, preferredName)
     } catch (e) {
         console.error('Failed to copy image:', e)
+        return null
+    }
+}
+
+export async function saveBlobImageToLocalAssets(
+    blob: Blob,
+    activeTabFilePath: string,
+    preferredName?: string
+): Promise<string | null> {
+    try {
+        const fileData = new Uint8Array(await blob.arrayBuffer())
+        return await writeImageBytesToLocalAssets(fileData, activeTabFilePath, preferredName, blob.type)
+    } catch (e) {
+        console.error('Failed to save clipboard image:', e)
         return null
     }
 }
