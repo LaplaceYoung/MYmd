@@ -4,8 +4,12 @@ import { SearchQuery, setSearchQuery, findNext, findPrevious, replaceNext, repla
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
 import { autocompletion, type Completion, type CompletionContext } from '@codemirror/autocomplete'
+import { EditorView } from '@codemirror/view'
 import { useEditorStore } from '@/stores/editorStore'
 import { queryKnowledge } from '@/knowledge/service'
+import { copyImageToLocalAssets, saveBlobImageToLocalAssets } from '@/utils/fileUtils'
+import { extractImageFileFromDataTransfer, readImageFromClipboardApi } from '@/utils/editorClipboard'
+import { convertFileSrc } from '@tauri-apps/api/core'
 
 interface SourceEditorProps {
     tabId: string
@@ -42,6 +46,59 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
     const focusMode = useEditorStore(s => s.focusMode)
     const typewriterMode = useEditorStore(s => s.typewriterMode)
     const editorRef = useRef<ReactCodeMirrorRef>(null)
+
+    const blobToDataUrl = useCallback((blob: Blob) => {
+        return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '')
+            reader.onerror = () => reject(reader.error ?? new Error('Failed to read image blob'))
+            reader.readAsDataURL(blob)
+        })
+    }, [])
+
+    const insertImageMarkdown = useCallback((src: string, alt?: string) => {
+        const view = editorRef.current?.view
+        if (!view || !src) return false
+
+        const label = (alt || '').trim()
+        const insertion = `![${label}](${src})`
+        const from = view.state.selection.main.from
+        const to = view.state.selection.main.to
+        view.dispatch({
+            changes: { from, to, insert: insertion },
+            selection: { anchor: from + insertion.length }
+        })
+        return true
+    }, [])
+
+    const resolveInsertableImageSrc = useCallback(async (file: File, sourcePath?: string) => {
+        const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
+        const activeTab = useEditorStore.getState().getActiveTab()
+
+        if (isTauri && activeTab?.filePath) {
+            if (sourcePath) {
+                try {
+                    const relativePath = await copyImageToLocalAssets(sourcePath, activeTab.filePath)
+                    if (relativePath) return relativePath
+                } catch (err) {
+                    console.warn('Failed to copy dropped image to assets:', err)
+                }
+            }
+
+            try {
+                const relativePath = await saveBlobImageToLocalAssets(file, activeTab.filePath, file.name)
+                if (relativePath) return relativePath
+            } catch (err) {
+                console.warn('Failed to persist pasted image to assets:', err)
+            }
+        }
+
+        if (sourcePath) {
+            return isTauri ? convertFileSrc(sourcePath) : sourcePath
+        }
+
+        return await blobToDataUrl(file)
+    }, [blobToDataUrl])
 
     const completeWikilink = useCallback(async (context: CompletionContext) => {
         const before = context.matchBefore(/\[\[[^\]\n]*$/)
@@ -193,7 +250,54 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
                 }}
                 extensions={[
                     markdown({ base: markdownLanguage, codeLanguages: languages }),
-                    autocompletion({ override: [completeWikilink] })
+                    autocompletion({ override: [completeWikilink] }),
+                    EditorView.domEventHandlers({
+                        drop: (_event, view) => {
+                            const event = _event as DragEvent
+                            const files = event.dataTransfer?.files
+                            const file = files?.[0]
+                            if (!file || !file.type.startsWith('image/')) return false
+
+                            void (async () => {
+                                const tauriFile = file as File & { path?: string }
+                                const finalUrl = await resolveInsertableImageSrc(file, tauriFile.path)
+                                if (finalUrl && view === editorRef.current?.view) {
+                                    insertImageMarkdown(finalUrl, file.name)
+                                }
+                            })()
+
+                            event.preventDefault()
+                            return true
+                        },
+                        paste: (_event, view) => {
+                            const event = _event as ClipboardEvent
+                            const clipboardData = event.clipboardData
+                            const immediateImageFile = extractImageFileFromDataTransfer(clipboardData)
+                            const hasTextPayload = Boolean(
+                                clipboardData &&
+                                Array.from(clipboardData.types).some(type => type.startsWith('text/'))
+                            )
+
+                            if (!immediateImageFile && hasTextPayload) {
+                                return false
+                            }
+
+                            void (async () => {
+                                const file =
+                                    immediateImageFile ??
+                                    (hasTextPayload ? null : await readImageFromClipboardApi())
+                                if (!file) return
+
+                                const finalUrl = await resolveInsertableImageSrc(file)
+                                if (finalUrl && view === editorRef.current?.view) {
+                                    insertImageMarkdown(finalUrl, file.name || 'pasted-image')
+                                }
+                            })()
+
+                            event.preventDefault()
+                            return true
+                        }
+                    })
                 ]}
                 onChange={onChange}
                 theme={isDark ? 'dark' : 'light'}

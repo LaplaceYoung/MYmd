@@ -378,6 +378,18 @@ export function Ribbon() {
                                     />
                                 )}
                             </div>
+                            <div className="ribbon-btn-col">
+                                <div className="ribbon-btn-row">
+                                    <RibbonButton icon={Table} label="上方插行" onClick={() => exec('tableAddRowBefore')} />
+                                    <RibbonButton icon={Table} label="下方插行" onClick={() => exec('tableAddRowAfter')} />
+                                    <RibbonButton icon={Table} label="删除行" onClick={() => exec('tableDeleteRow')} />
+                                </div>
+                                <div className="ribbon-btn-row">
+                                    <RibbonButton icon={Table} label="左侧插列" onClick={() => exec('tableAddColBefore')} />
+                                    <RibbonButton icon={Table} label="右侧插列" onClick={() => exec('tableAddColAfter')} />
+                                    <RibbonButton icon={Table} label="删除列" onClick={() => exec('tableDeleteCol')} />
+                                </div>
+                            </div>
                         </RibbonGroup>
 
                         <div className="ribbon-divider" />

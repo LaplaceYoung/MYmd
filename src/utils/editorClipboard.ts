@@ -9,6 +9,60 @@ const EDITABLE_SELECTOR = [
 let lastEditableTarget: HTMLElement | null = null
 let trackingInitialized = false
 
+function extensionFromImageMime(mimeType: string): string {
+    switch (mimeType.toLowerCase()) {
+        case 'image/jpeg':
+            return 'jpg'
+        case 'image/gif':
+            return 'gif'
+        case 'image/webp':
+            return 'webp'
+        case 'image/svg+xml':
+            return 'svg'
+        case 'image/bmp':
+            return 'bmp'
+        default:
+            return 'png'
+    }
+}
+
+export function extractImageFileFromDataTransfer(dataTransfer: DataTransfer | null): File | null {
+    if (!dataTransfer) return null
+
+    const imageItem = Array.from(dataTransfer.items).find(item => item.type.startsWith('image/'))
+    const fromItems = imageItem?.getAsFile()
+    if (fromItems) return fromItems
+
+    const fromFiles = Array.from(dataTransfer.files).find(file => file.type.startsWith('image/'))
+    return fromFiles ?? null
+}
+
+export async function readImageFromClipboardApi(): Promise<File | null> {
+    if (typeof navigator === 'undefined' || !navigator.clipboard?.read) {
+        return null
+    }
+
+    try {
+        const items = await navigator.clipboard.read()
+        for (const item of items) {
+            const imageType = item.types.find(type => type.startsWith('image/'))
+            if (!imageType) continue
+
+            const blob = await item.getType(imageType)
+            if (!blob) continue
+
+            const ext = extensionFromImageMime(blob.type || imageType)
+            return new File([blob], `pasted-image.${ext}`, {
+                type: blob.type || imageType,
+            })
+        }
+    } catch {
+        // Browser or OS clipboard permissions can reject; caller should fallback.
+    }
+
+    return null
+}
+
 function isEditableElement(el: HTMLElement | null): boolean {
     if (!el) return false
 
@@ -175,6 +229,23 @@ export async function pasteToEditor(): Promise<boolean> {
         }
     } catch {
         // Fallback to browser/Tauri paste command below.
+    }
+
+    const imageFile = await readImageFromClipboardApi()
+    if (imageFile && typeof DataTransfer !== 'undefined') {
+        try {
+            const dataTransfer = new DataTransfer()
+            dataTransfer.items.add(imageFile)
+            const pasteEvent = new ClipboardEvent('paste', {
+                clipboardData: dataTransfer,
+                bubbles: true,
+                cancelable: true,
+            })
+            target.dispatchEvent(pasteEvent)
+            return true
+        } catch {
+            // Fall through to execCommand paste.
+        }
     }
 
     return document.execCommand('paste')

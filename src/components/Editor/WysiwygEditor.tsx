@@ -18,10 +18,11 @@ import { mathEditPlugin } from './plugins/mathEditPlugin'
 import { diagramViewPlugin } from './plugins/diagramPlugin'
 import { createActiveBlockPlugin } from './plugins/activeBlockPlugin'
 import { EditorContextMenu } from './EditorContextMenu'
-import { copyImageToLocalAssets } from '@/utils/fileUtils'
+import { copyImageToLocalAssets, saveBlobImageToLocalAssets } from '@/utils/fileUtils'
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { dirname, join } from '@tauri-apps/api/path'
-import { rememberEditableTarget } from '@/utils/editorClipboard'
+import { deleteColumn, deleteRow } from '@milkdown/kit/prose/tables'
+import { extractImageFileFromDataTransfer, readImageFromClipboardApi, rememberEditableTarget } from '@/utils/editorClipboard'
 
 // commonmark 命令
 import {
@@ -44,6 +45,10 @@ import {
 import {
     toggleStrikethroughCommand,
     insertTableCommand,
+    addRowBeforeCommand,
+    addRowAfterCommand,
+    addColBeforeCommand,
+    addColAfterCommand,
 } from '@milkdown/kit/preset/gfm'
 
 // history 命令
@@ -78,6 +83,15 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
     const lastEditorMarkdownRef = useRef(content)
     const isUpdatingRef = useRef(false)
     const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null)
+
+    const blobToDataUrl = useCallback((blob: Blob) => {
+        return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '')
+            reader.onerror = () => reject(reader.error ?? new Error('Failed to read image blob'))
+            reader.readAsDataURL(blob)
+        })
+    }, [])
 
     // 检测当前选区的活跃 marks
     const detectActiveMarks = useCallback((editor: Editor) => {
@@ -178,49 +192,72 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                         dom.addEventListener('mouseup', () => detectActiveMarks(editor!))
                         dom.addEventListener('keyup', () => detectActiveMarks(editor!))
 
-                        // 处理文件拖拽和粘贴
+                        const resolveInsertableImageSrc = async (file: File, sourcePath?: string) => {
+                            const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
+                            const state = useEditorStore.getState()
+                            const activeTab = state.getActiveTab()
+
+                            if (isTauri && activeTab?.filePath) {
+                                if (sourcePath) {
+                                    try {
+                                        const relativePath = await copyImageToLocalAssets(sourcePath, activeTab.filePath)
+                                        if (relativePath) return relativePath
+                                    } catch (err) {
+                                        console.warn('Failed to copy dropped image to assets:', err)
+                                    }
+                                }
+
+                                try {
+                                    const relativePath = await saveBlobImageToLocalAssets(file, activeTab.filePath, file.name)
+                                    if (relativePath) return relativePath
+                                } catch (err) {
+                                    console.warn('Failed to persist pasted image to assets:', err)
+                                }
+                            }
+
+                            if (sourcePath) {
+                                return isTauri ? convertFileSrc(sourcePath) : sourcePath
+                            }
+
+                            return await blobToDataUrl(file)
+                        }
+
                         const handleFileEvent = async (e: Event, files: FileList | null) => {
                             if (!files || files.length === 0) return
 
                             const file = files[0]
                             if (!file.type.startsWith('image/')) return
 
-                            // 在 Tauri 环境中, `file.path` 可以获得文件绝对路径 (如果是由原生丢进去的)
                             const tauriFile = file as File & { path?: string }
                             const sourcePath = tauriFile.path
 
-                            if (!sourcePath) return // Web API file drop doesn't expose system paths without Tauri specific handling, fallback to normal paste
-
                             e.preventDefault()
-
-                            const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
-                            const state = useEditorStore.getState()
-                            const activeTab = state.getActiveTab()
-
-                            let finalUrl = ''
-
-                            if (isTauri && activeTab && activeTab.filePath) {
-                                try {
-                                    const relativePath = await copyImageToLocalAssets(sourcePath, activeTab.filePath)
-                                    finalUrl = relativePath || convertFileSrc(sourcePath)
-                                } catch (err) {
-                                    console.warn('Failed to copy image to assets:', err)
-                                    finalUrl = convertFileSrc(sourcePath)
-                                }
-                            } else {
-                                finalUrl = isTauri ? convertFileSrc(sourcePath) : sourcePath
-                            }
+                            const finalUrl = await resolveInsertableImageSrc(file, sourcePath)
 
                             if (finalUrl) {
-                                // Execute insert Image command
                                 editor?.action(callCommand(insertImageCommand.key, { src: finalUrl, alt: file.name }))
                             }
                         }
 
                         dom.addEventListener('drop', (e) => handleFileEvent(e, (e as DragEvent).dataTransfer?.files || null))
-                        // We do not intercept paste right now because ProseMirror automatically tries to read the File APIs 
-                        // But Tauri's system clipboard for native paths requires special rust handling.
-                        // The user can use InsertDialog or drag and drop for now.
+                        dom.addEventListener('paste', async (e) => {
+                            const clipboardEvent = e as ClipboardEvent
+                            const clipboardData = clipboardEvent.clipboardData
+                            const hasTextPayload = Boolean(
+                                clipboardData &&
+                                Array.from(clipboardData.types).some(type => type.startsWith('text/'))
+                            )
+                            const file =
+                                extractImageFileFromDataTransfer(clipboardData) ??
+                                (hasTextPayload ? null : await readImageFromClipboardApi())
+                            if (!file) return
+
+                            e.preventDefault()
+                            const finalUrl = await resolveInsertableImageSrc(file)
+                            if (finalUrl) {
+                                editor?.action(callCommand(insertImageCommand.key, { src: finalUrl, alt: file.name || 'pasted-image' }))
+                            }
+                        }, true)
                     }
                 })
             }
@@ -231,42 +268,74 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
         // 监听生成的 DOM，动态替换相对路径的图片以便在 Tauri 下合法显示
         let observer: MutationObserver | null = null
         if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
-            observer = new MutationObserver(async (mutations) => {
+            const resolveRelativeImages = async (mutations: MutationRecord[] = []) => {
                 const state = useEditorStore.getState()
                 const t = state.tabs.find(x => x.id === tabId)
                 if (!t || !t.filePath) return
+                if (!containerRef.current) return
 
                 const baseDir = await dirname(t.filePath)
+                const shouldResolveRelativeImage = (src: string) =>
+                    !!src &&
+                    !src.startsWith('http://') &&
+                    !src.startsWith('https://') &&
+                    !src.startsWith('data:') &&
+                    !src.startsWith('blob:') &&
+                    !src.startsWith('asset://')
+
+                const resolveImageElement = async (img: HTMLImageElement) => {
+                    const currentAttr = img.getAttribute('src')?.trim() || ''
+                    if (shouldResolveRelativeImage(currentAttr)) {
+                        img.dataset.mymdOriginalSrc = currentAttr
+                    }
+
+                    const originalSrc = img.dataset.mymdOriginalSrc || currentAttr
+                    if (!shouldResolveRelativeImage(originalSrc)) return
+
+                    try {
+                        const absPath = await join(baseDir, originalSrc)
+                        const localUrl = convertFileSrc(absPath)
+                        if (img.getAttribute('src') !== localUrl) {
+                            img.setAttribute('src', localUrl)
+                        }
+                    } catch (e) {
+                        console.warn('Failed to resolve relative image path:', e)
+                    }
+                }
+
+                const existingImages = Array.from(containerRef.current.querySelectorAll('img'))
+                await Promise.all(existingImages.map(img => resolveImageElement(img as HTMLImageElement)))
 
                 for (const mutation of mutations) {
+                    if (mutation.type === 'attributes' && mutation.target instanceof HTMLImageElement) {
+                        await resolveImageElement(mutation.target)
+                        continue
+                    }
+
                     if (mutation.type === 'childList') {
+                        const imageTasks: Promise<void>[] = []
                         mutation.addedNodes.forEach((node) => {
                             if (node.nodeType === Node.ELEMENT_NODE) {
                                 const element = node as HTMLElement
                                 // 查找新增节点及其子节点中的图片
                                 const images = element.tagName === 'IMG' ? [element as HTMLImageElement] : Array.from(element.querySelectorAll('img'))
 
-                                images.forEach(async (img) => {
-                                    const src = img.getAttribute('src')
-                                    // 仅处理相对路径（不以 http/https/data 开头，且不是通过资产协议的绝对路径）
-                                    if (src && !src.startsWith('http') && !src.startsWith('data:') && !src.startsWith('asset://')) {
-                                        try {
-                                            const absPath = await join(baseDir, src)
-                                            const localUrl = convertFileSrc(absPath)
-                                            // 替换用于显示的 src，但不要修改 Milkdown 内部的 ProseMirror 状态，从而保持原文档的纯粹的相对路径
-                                            img.src = localUrl
-                                        } catch (e) {
-                                            console.warn('Failed to resolve relative image path:', e)
-                                        }
-                                    }
+                                images.forEach((img) => {
+                                    imageTasks.push(resolveImageElement(img as HTMLImageElement))
                                 })
                             }
                         })
+                        await Promise.all(imageTasks)
                     }
                 }
+            }
+
+            observer = new MutationObserver((mutations) => {
+                void resolveRelativeImages(mutations)
             })
 
-            observer.observe(containerRef.current, { childList: true, subtree: true })
+            observer.observe(containerRef.current, { childList: true, attributes: true, attributeFilter: ['src'], subtree: true })
+            void resolveRelativeImages()
         }
 
         return () => {
@@ -421,6 +490,32 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                     editor.action(callCommand(insertTableCommand.key, tableData || { row: 3, col: 3 }))
                     break
                 }
+                case 'tableAddRowBefore':
+                    editor.action(callCommand(addRowBeforeCommand.key))
+                    break
+                case 'tableAddRowAfter':
+                    editor.action(callCommand(addRowAfterCommand.key))
+                    break
+                case 'tableAddColBefore':
+                    editor.action(callCommand(addColBeforeCommand.key))
+                    break
+                case 'tableAddColAfter':
+                    editor.action(callCommand(addColAfterCommand.key))
+                    break
+                case 'tableDeleteRow':
+                    editor.action(ctx => {
+                        const view = ctx.get(editorViewCtx)
+                        deleteRow(view.state, view.dispatch)
+                        view.focus()
+                    })
+                    break
+                case 'tableDeleteCol':
+                    editor.action(ctx => {
+                        const view = ctx.get(editorViewCtx)
+                        deleteColumn(view.state, view.dispatch)
+                        view.focus()
+                    })
+                    break
 
                 // 撤销/恢复
                 case 'undo':
