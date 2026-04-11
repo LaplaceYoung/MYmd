@@ -5,6 +5,7 @@ import { getKnowledgeGraph } from '@/knowledge/service'
 import {
     getAiTaskPresets,
     requestAiSuggestion,
+    verifyAiConnection,
     type AiPromptPreset,
     type AiTaskMode,
     type RequestAiSuggestionResult,
@@ -31,16 +32,28 @@ const TASK_OPTIONS: Array<{
     icon: typeof Wand2
 }> = [
     {
-        id: 'layout',
-        label: 'Layout Polish',
-        description: 'Improve heading hierarchy, spacing, lists, and print readiness.',
+        id: 'writing',
+        label: 'Writing',
+        description: 'Generate complete drafts from your outline or rough notes.',
+        icon: Sparkles
+    },
+    {
+        id: 'polish',
+        label: 'Polish',
+        description: 'Polish tone, clarity, and fluency while preserving facts.',
         icon: Wand2
     },
     {
-        id: 'content',
-        label: 'Content Rewrite',
-        description: 'Tighten language, improve flow, and reduce redundancy.',
-        icon: Sparkles
+        id: 'modify',
+        label: 'Modify',
+        description: 'Make targeted revisions without rewriting the whole document.',
+        icon: RotateCcw
+    },
+    {
+        id: 'layout',
+        label: 'Layout',
+        description: 'Improve heading hierarchy, spacing, lists, and print readiness.',
+        icon: Wand2
     },
     {
         id: 'graph',
@@ -55,6 +68,7 @@ export function AiPanel() {
     const setAiPanelVisible = useEditorStore(s => s.setAiPanelVisible)
     const aiConfig = useEditorStore(s => s.aiConfig)
     const aiPanelDraft = useEditorStore(s => s.aiPanelDraft)
+    const tabs = useEditorStore(s => s.tabs)
     const updateContent = useEditorStore(s => s.updateContent)
     const activeWorkspace = useEditorStore(s => s.activeWorkspace)
     const activeTab = useEditorStore(s => {
@@ -62,7 +76,7 @@ export function AiPanel() {
         return s.tabs.find(tab => tab.id === id) ?? null
     })
 
-    const [taskMode, setTaskMode] = useState<AiTaskMode>('layout')
+    const [taskMode, setTaskMode] = useState<AiTaskMode>('writing')
     const [instruction, setInstruction] = useState('')
     const [includeGraphContext, setIncludeGraphContext] = useState(true)
     const [isRunning, setIsRunning] = useState(false)
@@ -77,22 +91,31 @@ export function AiPanel() {
     const [editingHistoryId, setEditingHistoryId] = useState<string | null>(null)
     const [editingHistoryLabel, setEditingHistoryLabel] = useState('')
     const [historyQuery, setHistoryQuery] = useState('')
+    const [resultTargetTabId, setResultTargetTabId] = useState<string | null>(null)
+
+    const resultTargetTab = useMemo(() => {
+        if (!resultTargetTabId) return activeTab
+        return tabs.find(tab => tab.id === resultTargetTabId) ?? null
+    }, [activeTab, resultTargetTabId, tabs])
 
     const placeholder = useMemo(() => {
+        if (taskMode === 'writing') return 'Example: write a complete PRD draft from this outline.'
+        if (taskMode === 'polish') return 'Example: polish this into concise professional English/Chinese.'
+        if (taskMode === 'modify') return 'Example: keep structure, but change this to focus on interview outcomes.'
         if (taskMode === 'layout') return 'Example: make this document fit an A4 proposal or resume layout.'
         if (taskMode === 'graph') return 'Example: add wiki links, topic hubs, and note split suggestions.'
         return 'Example: rewrite this into a sharper product proposal while keeping the facts.'
     }, [taskMode])
     const presets = useMemo(() => getAiTaskPresets(taskMode), [taskMode])
     const diffPreview = useMemo(() => {
-        if (!activeTab || !result.trim() || taskMode === 'graph') return null
-        return buildAiDiffPreview(activeTab.content, result)
-    }, [activeTab?.content, result, taskMode])
+        if (!resultTargetTab || !result.trim() || taskMode === 'graph') return null
+        return buildAiDiffPreview(resultTargetTab.content, result)
+    }, [result, resultTargetTab, taskMode])
     const visibleHistory = useMemo(
         () => filterAiHistoryEntries(sortAiHistoryEntries(history), historyQuery),
         [history, historyQuery]
     )
-    const replaceDisabled = !result.trim() || !activeTab || (diffPreview ? !diffPreview.hasChanges : false)
+    const replaceDisabled = !result.trim() || !resultTargetTab || (diffPreview ? !diffPreview.hasChanges : false)
 
     useEffect(() => {
         setActivePresetId(null)
@@ -104,11 +127,13 @@ export function AiPanel() {
 
     useEffect(() => {
         if (!aiPanelVisible) return
-        setTaskMode(aiPanelDraft.taskMode)
+        setTaskMode(aiPanelDraft.taskMode === 'content' ? 'writing' : aiPanelDraft.taskMode)
         setInstruction(aiPanelDraft.instruction)
         setIncludeGraphContext(aiPanelDraft.includeGraphContext)
         setActivePresetId(null)
+        setResultTargetTabId(activeTab?.id ?? null)
     }, [
+        activeTab?.id,
         aiPanelDraft.includeGraphContext,
         aiPanelDraft.instruction,
         aiPanelDraft.taskMode,
@@ -144,8 +169,21 @@ export function AiPanel() {
         setStatusText('Preparing request...')
         setRequestMeta(null)
         setOriginalSnapshot(null)
+        setResultTargetTabId(activeTab.id)
 
         try {
+            if (!aiConfig.endpoint.trim() || !aiConfig.model.trim() || !aiConfig.apiKey.trim()) {
+                throw new Error('Configure endpoint, model, and API key in Settings first.')
+            }
+
+            if (aiConfig.model.includes('DeepSeek-R1-Distill-Qwen-7B')) {
+                setStatusText('Testing provider connection...')
+                await verifyAiConnection({
+                    config: aiConfig,
+                    timeoutMs: 20_000,
+                })
+            }
+
             let graphContext = ''
             if (includeGraphContext && activeWorkspace) {
                 const graph = await getKnowledgeGraph('', 24)
@@ -195,29 +233,42 @@ export function AiPanel() {
         }
     }
 
+    const resolveApplyTab = () => {
+        if (resultTargetTab) return resultTargetTab
+        if (activeTab) return activeTab
+        setError('Target document is no longer available.')
+        return null
+    }
+
     const handleApplyReplace = () => {
-        if (!activeTab || !result.trim()) return
-        setOriginalSnapshot((current) => current ?? activeTab.content)
-        updateContent(activeTab.id, result)
+        if (!result.trim()) return
+        const applyTab = resolveApplyTab()
+        if (!applyTab) return
+        setOriginalSnapshot((current) => current ?? applyTab.content)
+        updateContent(applyTab.id, result)
     }
 
     const handleApplyAppend = () => {
-        if (!activeTab || !result.trim()) return
-        setOriginalSnapshot((current) => current ?? activeTab.content)
-        updateContent(activeTab.id, `${activeTab.content.trim()}\n\n---\n\n${result.trim()}\n`)
+        if (!result.trim()) return
+        const applyTab = resolveApplyTab()
+        if (!applyTab) return
+        setOriginalSnapshot((current) => current ?? applyTab.content)
+        updateContent(applyTab.id, `${applyTab.content.trim()}\n\n---\n\n${result.trim()}\n`)
     }
 
     const handleApplyBlock = (blockIndex: number) => {
-        if (!activeTab || !result.trim()) return
-        const nextContent = applyAiDiffBlock(activeTab.content, result, blockIndex)
-        if (nextContent === activeTab.content) return
-        setOriginalSnapshot((current) => current ?? activeTab.content)
-        updateContent(activeTab.id, nextContent)
+        if (!result.trim()) return
+        const applyTab = resolveApplyTab()
+        if (!applyTab) return
+        const nextContent = applyAiDiffBlock(applyTab.content, result, blockIndex)
+        if (nextContent === applyTab.content) return
+        setOriginalSnapshot((current) => current ?? applyTab.content)
+        updateContent(applyTab.id, nextContent)
     }
 
     const handleRestoreOriginal = () => {
-        if (!activeTab || originalSnapshot === null) return
-        updateContent(activeTab.id, originalSnapshot)
+        if (!resultTargetTab || originalSnapshot === null) return
+        updateContent(resultTargetTab.id, originalSnapshot)
         setOriginalSnapshot(null)
     }
 
@@ -239,7 +290,7 @@ export function AiPanel() {
     }
 
     const handleLoadHistory = (entry: AiHistoryEntry) => {
-        setTaskMode(entry.taskMode)
+        setTaskMode(entry.taskMode === 'content' ? 'writing' : entry.taskMode)
         setInstruction(entry.instruction)
         setResult(entry.result)
         setActivePresetId(null)
@@ -280,7 +331,7 @@ export function AiPanel() {
         setEditingHistoryLabel('')
     }
 
-    const restoreDisabled = !activeTab || originalSnapshot === null || activeTab.content === originalSnapshot
+    const restoreDisabled = !resultTargetTab || originalSnapshot === null || resultTargetTab.content === originalSnapshot
 
     return (
         <div className="ai-panel">
@@ -296,7 +347,7 @@ export function AiPanel() {
 
             <div className="ai-panel__content">
                 <div className="ai-panel__intro">
-                    Run human-in-the-loop suggestions for layout, content, or graph structure.
+                    Run human-in-the-loop suggestions for writing, polish, revision, layout, and graph structure.
                 </div>
 
                 <div className="ai-panel__task-grid">
@@ -383,7 +434,7 @@ export function AiPanel() {
                             <RotateCcw size={14} />
                             <span>Retry</span>
                         </button>
-                        <button className="ai-panel__ghost" onClick={handleApplyAppend} disabled={!result.trim() || !activeTab}>
+                        <button className="ai-panel__ghost" onClick={handleApplyAppend} disabled={!result.trim() || !resultTargetTab}>
                             Append
                         </button>
                         <button
@@ -433,7 +484,7 @@ export function AiPanel() {
                                             <button
                                                 className="ai-panel__ghost ai-panel__diff-apply"
                                                 onClick={() => handleApplyBlock(index)}
-                                                disabled={!activeTab}
+                                                disabled={!resultTargetTab}
                                             >
                                                 Apply Block
                                             </button>

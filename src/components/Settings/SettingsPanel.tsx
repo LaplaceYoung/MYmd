@@ -1,4 +1,5 @@
-import { Monitor, Moon, Sun, Type, Info, Palette, FileSpreadsheet, Bot, KeyRound, Link2, LayoutTemplate } from 'lucide-react'
+import { useState } from 'react'
+import { Monitor, Moon, Sun, Type, Info, Palette, FileSpreadsheet, Bot, KeyRound, Link2, LayoutTemplate, CheckCircle2, LoaderCircle } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
 import type {
     ThemeMode,
@@ -15,6 +16,7 @@ import {
     getPaperOrientationLabel,
     getPaperPresetMeta,
 } from '@/utils/paper'
+import { verifyAiConnection } from '@/utils/ai'
 import './SettingsPanel.css'
 
 const COLOR_SCHEMES: { id: ColorScheme; label: string; color: string }[] = [
@@ -70,10 +72,14 @@ export function SettingsPanel() {
     const paperOrientation = useEditorStore(s => s.paperOrientation)
     const customPaperSize = useEditorStore(s => s.customPaperSize)
     const pageMarginMm = useEditorStore(s => s.pageMarginMm)
+    const autoExpandPaperForWideTables = useEditorStore(s => s.autoExpandPaperForWideTables)
+    const maxAutoPaperWidthPx = useEditorStore(s => s.maxAutoPaperWidthPx)
     const setPaperPreset = useEditorStore(s => s.setPaperPreset)
     const setPaperOrientation = useEditorStore(s => s.setPaperOrientation)
     const setCustomPaperSize = useEditorStore(s => s.setCustomPaperSize)
     const setPageMarginMm = useEditorStore(s => s.setPageMarginMm)
+    const setAutoExpandPaperForWideTables = useEditorStore(s => s.setAutoExpandPaperForWideTables)
+    const setMaxAutoPaperWidthPx = useEditorStore(s => s.setMaxAutoPaperWidthPx)
     const documentProfile = useEditorStore(s => s.documentProfile)
     const setDocumentProfile = useEditorStore(s => s.setDocumentProfile)
     const exportProfile = useEditorStore(s => s.exportProfile)
@@ -84,12 +90,46 @@ export function SettingsPanel() {
     const setExportPageBreakMode = useEditorStore(s => s.setExportPageBreakMode)
     const aiConfig = useEditorStore(s => s.aiConfig)
     const setAiConfig = useEditorStore(s => s.setAiConfig)
+    const [aiProbeRunning, setAiProbeRunning] = useState(false)
+    const [aiProbeMessage, setAiProbeMessage] = useState('')
 
     const themes: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
         { mode: 'light', icon: Sun, label: 'Light' },
         { mode: 'dark', icon: Moon, label: 'Dark' },
         { mode: 'system', icon: Monitor, label: 'System' }
     ]
+
+    const applySiliconFlowPreset = () => {
+        setAiConfig({
+            endpoint: 'https://api.siliconflow.cn/v1/chat/completions',
+            model: 'deepseek-ai/DeepSeek-R1-Distill-Qwen-7B',
+        })
+        setAiProbeMessage('SiliconFlow preset applied.')
+    }
+
+    const handleAiProbe = async () => {
+        if (!aiConfig.endpoint.trim() || !aiConfig.model.trim() || !aiConfig.apiKey.trim()) {
+            setAiProbeMessage('Please fill endpoint/model/api key first.')
+            return
+        }
+        setAiProbeRunning(true)
+        setAiProbeMessage('Testing AI connection...')
+        try {
+            const text = await verifyAiConnection({
+                config: aiConfig,
+                timeoutMs: 20_000,
+            })
+            if (text.includes('CONNECTION_OK')) {
+                setAiProbeMessage('Connection OK.')
+            } else {
+                setAiProbeMessage(`Connected, unexpected echo: ${text.slice(0, 40)}`)
+            }
+        } catch (error) {
+            setAiProbeMessage(error instanceof Error ? error.message : 'Connection failed')
+        } finally {
+            setAiProbeRunning(false)
+        }
+    }
 
     return (
         <div className="settings-panel">
@@ -248,6 +288,41 @@ export function SettingsPanel() {
 
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
+                        <LayoutTemplate size={14} />
+                        Wide Table Handling
+                    </label>
+                    <div className="settings-panel__toggle-row">
+                        <label className="settings-panel__checkbox-card">
+                            <input
+                                type="checkbox"
+                                checked={autoExpandPaperForWideTables}
+                                onChange={e => setAutoExpandPaperForWideTables(e.target.checked)}
+                            />
+                            <span>Auto expand paper for wide tables</span>
+                        </label>
+                    </div>
+                    <div className="settings-panel__custom-paper-grid settings-panel__custom-paper-grid--single">
+                        <label className="settings-panel__field">
+                            <span className="settings-panel__field-label">Max auto paper width (px)</span>
+                            <input
+                                type="number"
+                                min="900"
+                                max="2800"
+                                className="settings-panel__text-input"
+                                aria-label="Max auto paper width"
+                                value={maxAutoPaperWidthPx}
+                                onChange={e => setMaxAutoPaperWidthPx(Number(e.target.value))}
+                                disabled={!autoExpandPaperForWideTables}
+                            />
+                        </label>
+                    </div>
+                    <div className="settings-panel__hint">
+                        Keeps wide tables readable by increasing paper width up to the configured ceiling.
+                    </div>
+                </div>
+
+                <div className="settings-panel__group">
+                    <label className="settings-panel__label">
                         <Type size={14} />
                         Layout Profile
                     </label>
@@ -336,6 +411,18 @@ export function SettingsPanel() {
                 <h3 className="settings-panel__section-title">AI Access</h3>
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
+                        <Bot size={14} />
+                        Quick Provider
+                    </label>
+                    <div className="settings-panel__toggle-row">
+                        <button className="settings-panel__theme-btn settings-panel__theme-btn--inline" onClick={applySiliconFlowPreset}>
+                            <Bot size={16} strokeWidth={1.5} />
+                            <span>Use SiliconFlow DeepSeek 7B</span>
+                        </button>
+                    </div>
+                </div>
+                <div className="settings-panel__group">
+                    <label className="settings-panel__label">
                         <Link2 size={14} />
                         Endpoint
                     </label>
@@ -343,7 +430,7 @@ export function SettingsPanel() {
                         className="settings-panel__text-input"
                         value={aiConfig.endpoint}
                         onChange={e => setAiConfig({ endpoint: e.target.value })}
-                        placeholder="https://api.openai.com/v1/chat/completions"
+                        placeholder="https://api.siliconflow.cn/v1/chat/completions"
                     />
                 </div>
                 <div className="settings-panel__group">
@@ -355,7 +442,7 @@ export function SettingsPanel() {
                         className="settings-panel__text-input"
                         value={aiConfig.model}
                         onChange={e => setAiConfig({ model: e.target.value })}
-                        placeholder="gpt-4.1-mini"
+                        placeholder="deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
                     />
                 </div>
                 <div className="settings-panel__group">
@@ -371,8 +458,17 @@ export function SettingsPanel() {
                         placeholder="sk-..."
                     />
                     <div className="settings-panel__hint">
-                        Uses an OpenAI-compatible Chat Completions endpoint. You can later switch to a proxy or self-hosted model.
+                        Uses an OpenAI-compatible Chat Completions endpoint. Your key is kept local only.
                     </div>
+                </div>
+                <div className="settings-panel__group">
+                    <div className="settings-panel__toggle-row">
+                        <button className="settings-panel__theme-btn settings-panel__theme-btn--inline" onClick={() => void handleAiProbe()} disabled={aiProbeRunning}>
+                            {aiProbeRunning ? <LoaderCircle size={16} className="settings-panel__spin" /> : <CheckCircle2 size={16} strokeWidth={1.5} />}
+                            <span>{aiProbeRunning ? 'Testing...' : 'Test AI Connection'}</span>
+                        </button>
+                    </div>
+                    {aiProbeMessage && <div className="settings-panel__hint">{aiProbeMessage}</div>}
                 </div>
             </div>
 

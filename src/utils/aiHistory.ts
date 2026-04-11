@@ -37,7 +37,14 @@ function getDefaultStorage(): StorageWriter | null {
 }
 
 function isAiTaskMode(value: unknown): value is AiTaskMode {
-    return value === 'layout' || value === 'content' || value === 'graph'
+    return (
+        value === 'writing' ||
+        value === 'polish' ||
+        value === 'modify' ||
+        value === 'layout' ||
+        value === 'content' ||
+        value === 'graph'
+    )
 }
 
 function isAiHistorySource(value: unknown): value is AiHistoryEntry['source'] {

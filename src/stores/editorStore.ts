@@ -1,6 +1,7 @@
 ﻿import { create } from 'zustand'
 import { invoke } from '@tauri-apps/api/core'
 import { indexKnowledgeDocument, rebuildWorkspaceIndex } from '@/knowledge/service'
+import PQueue from 'p-queue'
 // 单个标签页
 export interface Tab {
     /** 唯一标识 */
@@ -22,7 +23,7 @@ export type ViewMode = 'wysiwyg' | 'split'
 export type CommandExecutor = (cmd: string, payload?: unknown) => void
 
 // 插入弹窗类型
-export type InsertDialogType = 'link' | 'image' | null
+export type InsertDialogType = 'link' | 'image' | 'audio' | 'video' | 'embed' | null
 
 // 主题类型
 export type ThemeMode = 'light' | 'dark' | 'system'
@@ -54,7 +55,7 @@ export interface AiConfig {
 }
 
 export interface AiPanelDraft {
-    taskMode: 'layout' | 'content' | 'graph'
+    taskMode: 'writing' | 'polish' | 'modify' | 'layout' | 'graph' | 'content'
     instruction: string
     includeGraphContext: boolean
     version: number
@@ -145,6 +146,10 @@ interface EditorState {
     customPaperSize: CustomPaperSize
     /** 页面边距（毫米） */
     pageMarginMm: number
+    /** ????????????? */
+    autoExpandPaperForWideTables: boolean
+    /** ???????????px? */
+    maxAutoPaperWidthPx: number
     /** 文档布局预设 */
     documentProfile: DocumentProfile
     /** 导出预设 */
@@ -221,6 +226,8 @@ interface EditorState {
     setPaperOrientation: (orientation: PaperOrientation) => void
     setCustomPaperSize: (size: Partial<CustomPaperSize>) => void
     setPageMarginMm: (marginMm: number) => void
+    setAutoExpandPaperForWideTables: (enable: boolean) => void
+    setMaxAutoPaperWidthPx: (widthPx: number) => void
     setDocumentProfile: (profile: DocumentProfile) => void
     setExportProfile: (profile: ExportProfile) => void
     setExportShowHeader: (enable: boolean) => void
@@ -238,7 +245,7 @@ interface EditorState {
     openAiPanelWithDraft: (draft: Partial<Omit<AiPanelDraft, 'version'>>) => void
     setAiConfig: (config: Partial<AiConfig>) => void
     setActiveWorkspace: (path: string | null) => void
-    rebuildKnowledgeIndex: () => Promise<void>
+    rebuildKnowledgeIndex: (options?: { signal?: AbortSignal }) => Promise<void>
     registerPluginCommand: (command: PluginCommand) => void
     unregisterPluginCommand: (id: string) => void
     runPluginCommand: (id: string, payload?: unknown) => void
@@ -283,6 +290,8 @@ const DEFAULT_CUSTOM_PAPER_SIZE: CustomPaperSize = {
     heightMm: 260,
 }
 const DEFAULT_PAGE_MARGIN_MM = 16
+const DEFAULT_AUTO_EXPAND_PAPER_FOR_WIDE_TABLES = true
+const DEFAULT_MAX_AUTO_PAPER_WIDTH_PX = 1600
 
 function loadSearchHistoryFromStorage(): string[] {
     if (typeof window === 'undefined') return []
@@ -327,11 +336,18 @@ function clampPageMarginMm(value: number, fallback: number): number {
     return Math.max(8, Math.min(40, Math.round(value)))
 }
 
+function clampMaxAutoPaperWidthPx(value: number, fallback: number): number {
+    if (!Number.isFinite(value)) return fallback
+    return Math.max(900, Math.min(2800, Math.round(value)))
+}
+
 function loadPaperSettingsFromStorage(): {
     paperPreset: PaperPreset
     paperOrientation: PaperOrientation
     customPaperSize: CustomPaperSize
     pageMarginMm: number
+    autoExpandPaperForWideTables: boolean
+    maxAutoPaperWidthPx: number
 } {
     if (typeof window === 'undefined') {
         return {
@@ -339,6 +355,8 @@ function loadPaperSettingsFromStorage(): {
             paperOrientation: 'portrait',
             customPaperSize: DEFAULT_CUSTOM_PAPER_SIZE,
             pageMarginMm: DEFAULT_PAGE_MARGIN_MM,
+            autoExpandPaperForWideTables: DEFAULT_AUTO_EXPAND_PAPER_FOR_WIDE_TABLES,
+            maxAutoPaperWidthPx: DEFAULT_MAX_AUTO_PAPER_WIDTH_PX,
         }
     }
 
@@ -350,6 +368,8 @@ function loadPaperSettingsFromStorage(): {
                 paperOrientation: 'portrait',
                 customPaperSize: DEFAULT_CUSTOM_PAPER_SIZE,
                 pageMarginMm: DEFAULT_PAGE_MARGIN_MM,
+                autoExpandPaperForWideTables: DEFAULT_AUTO_EXPAND_PAPER_FOR_WIDE_TABLES,
+                maxAutoPaperWidthPx: DEFAULT_MAX_AUTO_PAPER_WIDTH_PX,
             }
         }
 
@@ -358,11 +378,20 @@ function loadPaperSettingsFromStorage(): {
             paperOrientation?: PaperOrientation
             customPaperSize?: Partial<CustomPaperSize>
             pageMarginMm?: number
+            autoExpandPaperForWideTables?: boolean
+            maxAutoPaperWidthPx?: number
         }
 
         const widthMm = clampPaperDimensionMm(parsed.customPaperSize?.widthMm ?? DEFAULT_CUSTOM_PAPER_SIZE.widthMm, DEFAULT_CUSTOM_PAPER_SIZE.widthMm)
         const heightMm = clampPaperDimensionMm(parsed.customPaperSize?.heightMm ?? DEFAULT_CUSTOM_PAPER_SIZE.heightMm, DEFAULT_CUSTOM_PAPER_SIZE.heightMm)
         const pageMarginMm = clampPageMarginMm(parsed.pageMarginMm ?? DEFAULT_PAGE_MARGIN_MM, DEFAULT_PAGE_MARGIN_MM)
+        const autoExpandPaperForWideTables = typeof parsed.autoExpandPaperForWideTables === 'boolean'
+            ? parsed.autoExpandPaperForWideTables
+            : DEFAULT_AUTO_EXPAND_PAPER_FOR_WIDE_TABLES
+        const maxAutoPaperWidthPx = clampMaxAutoPaperWidthPx(
+            parsed.maxAutoPaperWidthPx ?? DEFAULT_MAX_AUTO_PAPER_WIDTH_PX,
+            DEFAULT_MAX_AUTO_PAPER_WIDTH_PX
+        )
 
         return {
             paperPreset: isPaperPreset(parsed.paperPreset) ? parsed.paperPreset : 'screen',
@@ -372,6 +401,8 @@ function loadPaperSettingsFromStorage(): {
                 heightMm,
             },
             pageMarginMm,
+            autoExpandPaperForWideTables,
+            maxAutoPaperWidthPx,
         }
     } catch {
         return {
@@ -379,6 +410,8 @@ function loadPaperSettingsFromStorage(): {
             paperOrientation: 'portrait',
             customPaperSize: DEFAULT_CUSTOM_PAPER_SIZE,
             pageMarginMm: DEFAULT_PAGE_MARGIN_MM,
+            autoExpandPaperForWideTables: DEFAULT_AUTO_EXPAND_PAPER_FOR_WIDE_TABLES,
+            maxAutoPaperWidthPx: DEFAULT_MAX_AUTO_PAPER_WIDTH_PX,
         }
     }
 }
@@ -387,7 +420,9 @@ function persistPaperSettings(
     paperPreset: PaperPreset,
     customPaperSize: CustomPaperSize,
     paperOrientation: PaperOrientation,
-    pageMarginMm: number
+    pageMarginMm: number,
+    autoExpandPaperForWideTables: boolean,
+    maxAutoPaperWidthPx: number
 ) {
     if (typeof window === 'undefined') return
     try {
@@ -396,6 +431,8 @@ function persistPaperSettings(
             paperOrientation,
             customPaperSize,
             pageMarginMm,
+            autoExpandPaperForWideTables,
+            maxAutoPaperWidthPx,
         }))
     } catch {
         // ignore persistence failures
@@ -448,7 +485,7 @@ function getDefaultExportOptionsForProfile(profile: ExportProfile): ExportOption
 
 function getDefaultAiPanelDraft(): AiPanelDraft {
     return {
-        taskMode: 'layout',
+        taskMode: 'writing',
         instruction: '',
         includeGraphContext: true,
         version: 0,
@@ -467,6 +504,8 @@ async function saveTabWithNativeDialog(tab: Tab): Promise<string | null> {
 // 检测 Tauri 环境
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 const initialPaperSettings = loadPaperSettingsFromStorage()
+const knowledgeIndexQueue = new PQueue({ concurrency: 1, autoStart: true })
+let activeKnowledgeIndexController: AbortController | null = null
 
 export const useEditorStore = create<EditorState>((set, get) => ({
     tabs: [],
@@ -489,6 +528,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     paperOrientation: initialPaperSettings.paperOrientation,
     customPaperSize: initialPaperSettings.customPaperSize,
     pageMarginMm: initialPaperSettings.pageMarginMm,
+    autoExpandPaperForWideTables: initialPaperSettings.autoExpandPaperForWideTables,
+    maxAutoPaperWidthPx: initialPaperSettings.maxAutoPaperWidthPx,
     documentProfile: 'standard',
     exportProfile: 'web',
     exportOptions: getDefaultExportOptionsForProfile('web'),
@@ -503,9 +544,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     knowledgeGraphVisible: false,
     aiPanelVisible: false,
     aiConfig: {
-        endpoint: 'https://api.openai.com/v1/chat/completions',
+        endpoint: 'https://api.siliconflow.cn/v1/chat/completions',
         apiKey: '',
-        model: 'gpt-4.1-mini'
+        model: 'deepseek-ai/DeepSeek-R1-Distill-Qwen-7B'
     },
     aiPanelDraft: getDefaultAiPanelDraft(),
     knowledgeIndexStatus: 'idle',
@@ -718,12 +759,26 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     setEditorFontSize: (size) => set({ editorFontSize: Math.max(10, Math.min(32, size)) }),
 
     setPaperPreset: (preset) => set((state) => {
-        persistPaperSettings(preset, state.customPaperSize, state.paperOrientation, state.pageMarginMm)
+        persistPaperSettings(
+            preset,
+            state.customPaperSize,
+            state.paperOrientation,
+            state.pageMarginMm,
+            state.autoExpandPaperForWideTables,
+            state.maxAutoPaperWidthPx
+        )
         return { paperPreset: preset }
     }),
 
     setPaperOrientation: (orientation) => set((state) => {
-        persistPaperSettings(state.paperPreset, state.customPaperSize, orientation, state.pageMarginMm)
+        persistPaperSettings(
+            state.paperPreset,
+            state.customPaperSize,
+            orientation,
+            state.pageMarginMm,
+            state.autoExpandPaperForWideTables,
+            state.maxAutoPaperWidthPx
+        )
         return { paperOrientation: orientation }
     }),
 
@@ -732,7 +787,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
             widthMm: clampPaperDimensionMm(size.widthMm ?? state.customPaperSize.widthMm, state.customPaperSize.widthMm),
             heightMm: clampPaperDimensionMm(size.heightMm ?? state.customPaperSize.heightMm, state.customPaperSize.heightMm),
         }
-        persistPaperSettings('custom', nextSize, state.paperOrientation, state.pageMarginMm)
+        persistPaperSettings(
+            'custom',
+            nextSize,
+            state.paperOrientation,
+            state.pageMarginMm,
+            state.autoExpandPaperForWideTables,
+            state.maxAutoPaperWidthPx
+        )
         return {
             paperPreset: 'custom',
             customPaperSize: nextSize,
@@ -741,9 +803,45 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     setPageMarginMm: (marginMm) => set((state) => {
         const nextMargin = clampPageMarginMm(marginMm, state.pageMarginMm)
-        persistPaperSettings(state.paperPreset, state.customPaperSize, state.paperOrientation, nextMargin)
+        persistPaperSettings(
+            state.paperPreset,
+            state.customPaperSize,
+            state.paperOrientation,
+            nextMargin,
+            state.autoExpandPaperForWideTables,
+            state.maxAutoPaperWidthPx
+        )
         return {
             pageMarginMm: nextMargin,
+        }
+    }),
+
+    setAutoExpandPaperForWideTables: (enable) => set((state) => {
+        persistPaperSettings(
+            state.paperPreset,
+            state.customPaperSize,
+            state.paperOrientation,
+            state.pageMarginMm,
+            enable,
+            state.maxAutoPaperWidthPx
+        )
+        return {
+            autoExpandPaperForWideTables: enable,
+        }
+    }),
+
+    setMaxAutoPaperWidthPx: (widthPx) => set((state) => {
+        const nextWidth = clampMaxAutoPaperWidthPx(widthPx, state.maxAutoPaperWidthPx)
+        persistPaperSettings(
+            state.paperPreset,
+            state.customPaperSize,
+            state.paperOrientation,
+            state.pageMarginMm,
+            state.autoExpandPaperForWideTables,
+            nextWidth
+        )
+        return {
+            maxAutoPaperWidthPx: nextWidth,
         }
     }),
 
@@ -811,6 +909,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     setActiveWorkspace: (path) => {
         set({ activeWorkspace: path })
+
+        activeKnowledgeIndexController?.abort()
+        knowledgeIndexQueue.clear()
+
         if (!path) {
             set({
                 knowledgeIndexStatus: 'idle',
@@ -820,12 +922,32 @@ export const useEditorStore = create<EditorState>((set, get) => ({
             })
             return
         }
-        void get().rebuildKnowledgeIndex()
+
+        const controller = new AbortController()
+        activeKnowledgeIndexController = controller
+
+        void knowledgeIndexQueue
+            .add(async () => {
+                const state = get()
+                if (state.activeWorkspace !== path) return
+                await state.rebuildKnowledgeIndex({ signal: controller.signal })
+            })
+            .catch((error) => {
+                if (controller.signal.aborted) return
+                const message = error instanceof Error ? error.message : 'Knowledge indexing failed'
+                set({
+                    knowledgeIndexStatus: 'error',
+                    knowledgeIndexError: message
+                })
+            })
     },
 
-    rebuildKnowledgeIndex: async () => {
+    rebuildKnowledgeIndex: async (options) => {
         const workspacePath = get().activeWorkspace
         if (!workspacePath) return
+
+        const signal = options?.signal ?? activeKnowledgeIndexController?.signal
+        if (signal?.aborted) return
 
         set({
             knowledgeIndexStatus: 'indexing',
@@ -836,6 +958,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
         try {
             await rebuildWorkspaceIndex(workspacePath, {
+                signal,
+                progressStep: 20,
                 onStart: ({ total }) => {
                     set({
                         knowledgeIndexStatus: 'indexing',
@@ -860,6 +984,16 @@ export const useEditorStore = create<EditorState>((set, get) => ({
                     })
                 },
                 onError: ({ message, processed, total }) => {
+                    if (signal?.aborted || message === 'Knowledge indexing cancelled') {
+                        set({
+                            knowledgeIndexStatus: 'idle',
+                            knowledgeIndexProcessed: processed,
+                            knowledgeIndexTotal: total,
+                            knowledgeIndexError: null
+                        })
+                        return
+                    }
+
                     set({
                         knowledgeIndexStatus: 'error',
                         knowledgeIndexProcessed: processed,
@@ -869,6 +1003,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
                 }
             })
         } catch (error) {
+            if (signal?.aborted) {
+                set({
+                    knowledgeIndexStatus: 'idle',
+                    knowledgeIndexError: null
+                })
+                return
+            }
+
             const message = error instanceof Error ? error.message : 'Knowledge indexing failed'
             set({
                 knowledgeIndexStatus: 'error',

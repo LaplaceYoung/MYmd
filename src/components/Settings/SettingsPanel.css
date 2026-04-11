@@ -62,6 +62,12 @@
     min-width: 100px;
 }
 
+.settings-panel__theme-btn--inline {
+    flex-direction: row;
+    justify-content: center;
+    min-width: 240px;
+}
+
 .settings-panel__theme-btn:hover {
     border-color: var(--accent);
     color: var(--text-primary);
@@ -71,6 +77,24 @@
     border-color: var(--accent);
     background: var(--accent-muted);
     color: var(--accent);
+}
+
+.settings-panel__theme-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.settings-panel__spin {
+    animation: settingsSpin 0.9s linear infinite;
+}
+
+@keyframes settingsSpin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .settings-panel__font-size-row {

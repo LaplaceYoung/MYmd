@@ -10,7 +10,7 @@ const MANIFEST: ReadonlyPluginManifest = {
     id: 'builtin-ai',
     name: 'AI Assistant',
     version: '0.1.0',
-    description: 'Built-in AI editing entry for layout, content and knowledge graph improvements.'
+    description: 'Built-in AI editing entry for writing, polish, modification, layout and knowledge graph improvements.'
 }
 
 let installed = false
@@ -32,9 +32,9 @@ export function installBuiltinAiPlugin() {
     )
 
     cleanupFns.push(
-        registerReadonlyPluginSidebarCard(MANIFEST, {
+                registerReadonlyPluginSidebarCard(MANIFEST, {
             title: 'AI Writing Assistant',
-            description: 'Open a human-in-the-loop AI panel for layout polish, rewriting and graph suggestions.',
+            description: 'Open a human-in-the-loop AI panel for writing/polish/modify/layout/graph suggestions.',
             actionLabel: 'Open AI',
             onAction: () => {
                 useEditorStore.getState().setAiPanelVisible(true)
@@ -46,7 +46,7 @@ export function installBuiltinAiPlugin() {
         registerReadonlyPluginSearchProvider(MANIFEST, {
             search: async (query) => {
                 const normalized = query.toLowerCase()
-                if (!'ai assistant rewrite layout graph polish'.split(' ').some(token => normalized.includes(token))) {
+                if (!'ai assistant rewrite layout graph polish writing modify'.split(' ').some(token => normalized.includes(token))) {
                     return []
                 }
 
@@ -54,7 +54,7 @@ export function installBuiltinAiPlugin() {
                     {
                         id: 'open-ai-panel',
                         title: 'Open AI Assistant',
-                        subtitle: 'Layout polish / rewrite / graph enhancement',
+                        subtitle: 'Writing / polish / modify / layout / graph',
                         onSelect: () => {
                             useEditorStore.getState().setAiPanelVisible(true)
                         }
