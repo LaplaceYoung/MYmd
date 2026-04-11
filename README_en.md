@@ -1,148 +1,64 @@
-<div align="center">
-  <img src="src/assets/logo.svg" height="120" alt="MYmd Logo" />
-  <h1>MYmd</h1>
-  <p>Local-first Markdown desktop editor built with Tauri</p>
+# MYmd
 
-  <p>
-    <a href="https://github.com/LaplaceYoung/MYmd/releases"><img src="https://img.shields.io/github/v/release/LaplaceYoung/MYmd?color=blue&style=flat-square" alt="Release"></a>
-    <a href="https://github.com/LaplaceYoung/MYmd/stargazers"><img src="https://img.shields.io/github/stars/LaplaceYoung/MYmd?style=flat-square" alt="Stars"></a>
-    <a href="https://github.com/LaplaceYoung/MYmd/blob/main/LICENSE"><img src="https://img.shields.io/github/license/LaplaceYoung/MYmd?color=green&style=flat-square" alt="License"></a>
-  </p>
-</div>
+Local-first desktop Markdown editor built with **React 19 + TypeScript + Tauri + Milkdown + CodeMirror + Zustand**.
 
-<br/>
+[中文说明](./README.md)
 
-[Read in English](README_en.md) | [阅读中文](README.md)
+## Core Features
 
-MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor with WYSIWYG, source, and split views, designed for high-frequency writing and structured content workflows.
+- Multi-tab editing, open/save/save-as/export HTML, auto-save
+- Unsaved-close confirmation, workspace explorer, TOC, search/replace
+- KaTeX, Mermaid, syntax highlighting, theme/font/layout settings
+- Focus mode, typewriter mode, custom title bar controls
 
-## Version
+## AI Assistant (Upgraded)
 
-- Current version: `v1.4.3`
-- Target platform: `Windows x64`
-- Latest releases: <https://github.com/LaplaceYoung/MYmd/releases>
-- Landing page: <https://laplaceyoung.github.io/MYmd/>
+- Default SiliconFlow OpenAI-compatible endpoint:
+  - `https://api.siliconflow.cn/v1/chat/completions`
+  - `deepseek-ai/DeepSeek-R1-Distill-Qwen-7B`
+- Five AI task modes:
+  - Writing
+  - Polish
+  - Modify
+  - Layout
+  - Smart Graph
+- New settings actions:
+  - One-click SiliconFlow preset
+  - AI connection probe
 
-## Screenshots
+> API keys stay local and should never be committed.
 
-### Welcome Overview
+## Competitive Gap Analysis
 
-![Welcome overview](docs/screenshots/welcome-overview.png)
+Comparison against Obsidian / Typora / Joplin / Cherry Markdown:
+`docs/competitive-gap-analysis-2026-04.md`
 
-### Top Search Dropdown (Transparency Fix Applied)
-
-![Top search dropdown](docs/screenshots/top-search-dropdown.png)
-
-### Global Search Modal
-
-![Global search modal](docs/screenshots/global-search-modal.png)
-
-### Split Editor with Live Preview (Mermaid Included)
-
-![Split editor and live preview](docs/screenshots/split-editor-preview.png)
-
-## Feature Overview
-
-### Editing Experience
-
-- Multi-tab editing for fast context switching.
-- Three editing views: WYSIWYG, Source, and Split.
-- Focus Mode and Typewriter Mode for distraction-reduced writing.
-- Unsaved-change detection with close confirmation.
-
-### File Workflow
-
-- New, open, save, save-as, and HTML export.
-- Global auto-save (only for files already persisted to disk).
-- Workspace file explorer for navigation and open actions.
-- File association support for `.md` and `.markdown`.
-
-### Content Capabilities
-
-- Built-in KaTeX math rendering.
-- Built-in Mermaid diagram rendering.
-- Syntax highlighting powered by Prism/Refractor.
-- TOC sidebar and global search/replace.
-
-### Desktop Integration
-
-- Native Tauri window runtime with custom title bar controls.
-- Single-instance behavior: file args from second launches are forwarded to the running window.
-- Startup open-file flow avoids welcome-page flicker before CLI file loading finishes.
-
-## v1.4.3 Highlights
-
-1. Restored the Welcome page to the previous concise Word-style layout and removed the redundant onboarding-heavy variant.
-2. Fixed global search modal transparency by switching to an opaque themed panel background and a stronger backdrop mask.
-3. Kept title-bar top search dropdown readability improvements and verified no background blending regression.
-4. Refreshed README screenshots for welcome page, top search dropdown, and global search modal.
-5. Completed release validation with `npm run typecheck`, `npm run build`, and `npm run tauri build`.
-
-## Tech Stack
-| Layer | Technology |
-| --- | --- |
-| UI | React 19, TypeScript, Tailwind CSS |
-| Editor | Milkdown, ProseMirror, CodeMirror 6 |
-| State | Zustand |
-| Desktop Runtime | Tauri v2 |
-| Native Side | Rust |
-| Build | Vite, Tauri CLI |
-
-## Quick Start
-
-### Requirements
-
-- Node.js 20+
-- Rust 1.77.2+
-- Windows 10/11 (NSIS packaging)
-
-### Local Development
+## Build & Verification
 
 ```bash
-git clone https://github.com/LaplaceYoung/MYmd.git
-cd MYmd
 npm install
-npm run dev
+npm run typecheck
+npx playwright test tests/ai_runtime.spec.ts
+npm run build
 ```
 
-### Desktop Build
+## Desktop Packaging
+
+### Tauri
 
 ```bash
-npm run build
-npm run tauri build
+npm run build:tauri
 ```
 
-### Release Automation
+### Electron
 
-- Pushing a `v*` tag triggers GitHub Actions to build and upload installers to GitHub Releases.
-- Workflow file: `.github/workflows/release-tag.yml`
-
-## Installer Artifacts
-
-After a Tauri build on this machine, artifacts are generated in:
-
-- `E:\EnvConfig\rust_target\release\bundle\nsis\MYmd_1.4.3_x64-setup.exe`
-- `E:\EnvConfig\rust_target\release\bundle\msi\MYmd_1.4.3_x64_en-US.msi`
-
-Project distribution folder (tracked):
-
-- `release/MYmd_1.4.3_x64-setup.exe`
-
-## Project Structure
-
-```text
-MYmd/
-|- src/                 # React frontend
-|- src-tauri/           # Tauri + Rust backend
-|- docs/                # Product and project docs
-|- templates/           # Built-in template examples
-|- release/             # Release artifacts (latest installer)
-|- tests/               # Automation and debug scripts
-|- README.md            # Chinese README
-`- README_en.md         # English README
+```bash
+npm run build:electron
 ```
+
+Output (Windows):
+- `release/electron/win-unpacked/`
 
 ## License
 
-MIT License
-
+[MIT](./LICENSE)

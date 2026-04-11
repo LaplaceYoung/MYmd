@@ -1,0 +1,31 @@
+{
+  "appId": "com.mymd.desktop",
+  "productName": "MYmd",
+  "files": [
+    "dist/**",
+    "electron/**",
+    "package.json"
+  ],
+  "directories": {
+    "buildResources": "resources",
+    "output": "release/electron"
+  },
+  "extraMetadata": {
+    "main": "electron/main.cjs"
+  },
+  "asar": true,
+  "win": {
+    "icon": "resources/icon.png",
+    "signAndEditExecutable": false,
+    "verifyUpdateCodeSignature": false,
+    "target": [
+      {
+        "target": "dir",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "artifactName": "MYmd-Electron-${version}-${arch}.${ext}"
+  }
+}
