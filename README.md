@@ -67,3 +67,11 @@ npm run build:electron
 ## License
 
 [MIT](./LICENSE)
+
+## 最新发布（v1.4.3-hotfix5）
+
+发布资产目录：`release/v1.4.3-hotfix5/`
+
+- `MYmd_1.4.3_x64-setup.exe`（Tauri NSIS 安装包）
+- `MYmd_1.4.3_x64_en-US.msi`（Tauri MSI 安装包）
+- `MYmd-Electron-1.4.3-x64-portable.zip`（Electron 便携版）

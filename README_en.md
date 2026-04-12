@@ -62,3 +62,11 @@ Output (Windows):
 ## License
 
 [MIT](./LICENSE)
+
+## Latest Release (v1.4.3-hotfix5)
+
+Release assets: `release/v1.4.3-hotfix5/`
+
+- `MYmd_1.4.3_x64-setup.exe` (Tauri NSIS installer)
+- `MYmd_1.4.3_x64_en-US.msi` (Tauri MSI installer)
+- `MYmd-Electron-1.4.3-x64-portable.zip` (Electron portable build)
