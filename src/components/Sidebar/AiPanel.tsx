@@ -1,16 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Bot, Sparkles, Wand2, Network, LoaderCircle, X, Copy, Check, RotateCcw } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
+import { useI18n } from '@/i18n'
 import { getKnowledgeGraph } from '@/knowledge/service'
 import {
     getAiTaskPresets,
     requestAiSuggestion,
     verifyAiConnection,
+    type AiOutputShape,
     type AiPromptPreset,
     type AiTaskMode,
     type RequestAiSuggestionResult,
 } from '@/utils/ai'
 import { applyAiDiffBlock, buildAiDiffPreview } from '@/utils/aiDiff'
+import { buildScenarioAiDraft, getAiScenarioCards } from '@/utils/aiDrafts'
 import {
     clearAiHistory,
     deleteAiHistoryEntry,
@@ -25,59 +28,30 @@ import {
 } from '@/utils/aiHistory'
 import './AiPanel.css'
 
-const TASK_OPTIONS: Array<{
-    id: AiTaskMode
-    label: string
-    description: string
-    icon: typeof Wand2
-}> = [
-    {
-        id: 'writing',
-        label: 'Writing',
-        description: 'Generate complete drafts from your outline or rough notes.',
-        icon: Sparkles
-    },
-    {
-        id: 'polish',
-        label: 'Polish',
-        description: 'Polish tone, clarity, and fluency while preserving facts.',
-        icon: Wand2
-    },
-    {
-        id: 'modify',
-        label: 'Modify',
-        description: 'Make targeted revisions without rewriting the whole document.',
-        icon: RotateCcw
-    },
-    {
-        id: 'layout',
-        label: 'Layout',
-        description: 'Improve heading hierarchy, spacing, lists, and print readiness.',
-        icon: Wand2
-    },
-    {
-        id: 'graph',
-        label: 'Graph Enrichment',
-        description: 'Suggest links, topic clusters, and related note structure.',
-        icon: Network
-    }
-]
-
 export function AiPanel() {
+    const { t } = useI18n()
     const aiPanelVisible = useEditorStore(s => s.aiPanelVisible)
     const setAiPanelVisible = useEditorStore(s => s.setAiPanelVisible)
     const aiConfig = useEditorStore(s => s.aiConfig)
     const aiPanelDraft = useEditorStore(s => s.aiPanelDraft)
     const tabs = useEditorStore(s => s.tabs)
     const updateContent = useEditorStore(s => s.updateContent)
+    const addTab = useEditorStore(s => s.addTab)
     const activeWorkspace = useEditorStore(s => s.activeWorkspace)
     const activeTab = useEditorStore(s => {
         const id = s.activeTabId
         return s.tabs.find(tab => tab.id === id) ?? null
     })
+    const paperPreset = useEditorStore(s => s.paperPreset)
+    const paperOrientation = useEditorStore(s => s.paperOrientation)
+    const customPaperSize = useEditorStore(s => s.customPaperSize)
+    const pageMarginMm = useEditorStore(s => s.pageMarginMm)
+    const documentProfile = useEditorStore(s => s.documentProfile)
+    const exportProfile = useEditorStore(s => s.exportProfile)
 
     const [taskMode, setTaskMode] = useState<AiTaskMode>('writing')
     const [instruction, setInstruction] = useState('')
+    const [outputShape, setOutputShape] = useState<AiOutputShape>('full')
     const [includeGraphContext, setIncludeGraphContext] = useState(true)
     const [isRunning, setIsRunning] = useState(false)
     const [error, setError] = useState('')
@@ -98,15 +72,28 @@ export function AiPanel() {
         return tabs.find(tab => tab.id === resultTargetTabId) ?? null
     }, [activeTab, resultTargetTabId, tabs])
 
+    const taskOptions: Array<{
+        id: AiTaskMode
+        label: string
+        description: string
+        icon: typeof Wand2
+    }> = useMemo(() => ([
+        { id: 'writing', label: t('ai.taskWriting'), description: t('ai.taskWritingDesc'), icon: Sparkles },
+        { id: 'polish', label: t('ai.taskPolish'), description: t('ai.taskPolishDesc'), icon: Wand2 },
+        { id: 'modify', label: t('ai.taskModify'), description: t('ai.taskModifyDesc'), icon: RotateCcw },
+        { id: 'layout', label: t('ai.taskLayout'), description: t('ai.taskLayoutDesc'), icon: Wand2 },
+        { id: 'graph', label: t('ai.taskGraph'), description: t('ai.taskGraphDesc'), icon: Network },
+    ]), [t])
     const placeholder = useMemo(() => {
-        if (taskMode === 'writing') return 'Example: write a complete PRD draft from this outline.'
-        if (taskMode === 'polish') return 'Example: polish this into concise professional English/Chinese.'
-        if (taskMode === 'modify') return 'Example: keep structure, but change this to focus on interview outcomes.'
-        if (taskMode === 'layout') return 'Example: make this document fit an A4 proposal or resume layout.'
-        if (taskMode === 'graph') return 'Example: add wiki links, topic hubs, and note split suggestions.'
-        return 'Example: rewrite this into a sharper product proposal while keeping the facts.'
-    }, [taskMode])
+        if (taskMode === 'writing') return t('ai.placeholderWriting')
+        if (taskMode === 'polish') return t('ai.placeholderPolish')
+        if (taskMode === 'modify') return t('ai.placeholderModify')
+        if (taskMode === 'layout') return t('ai.placeholderLayout')
+        if (taskMode === 'graph') return t('ai.placeholderGraph')
+        return t('ai.placeholderWriting')
+    }, [taskMode, t])
     const presets = useMemo(() => getAiTaskPresets(taskMode), [taskMode])
+    const scenarioCards = useMemo(() => getAiScenarioCards(), [])
     const diffPreview = useMemo(() => {
         if (!resultTargetTab || !result.trim() || taskMode === 'graph') return null
         return buildAiDiffPreview(resultTargetTab.content, result)
@@ -129,6 +116,7 @@ export function AiPanel() {
         if (!aiPanelVisible) return
         setTaskMode(aiPanelDraft.taskMode === 'content' ? 'writing' : aiPanelDraft.taskMode)
         setInstruction(aiPanelDraft.instruction)
+        setOutputShape('full')
         setIncludeGraphContext(aiPanelDraft.includeGraphContext)
         setActivePresetId(null)
         setResultTargetTabId(activeTab?.id ?? null)
@@ -147,18 +135,55 @@ export function AiPanel() {
 
     if (!aiPanelVisible) return null
 
+    const translateRuntimeStatus = (message: string) => {
+        if (message === 'Sending request...') {
+            return t('ai.statusSending')
+        }
+        if (message === 'Streaming complete.') {
+            return t('ai.statusStreamingComplete')
+        }
+        if (message === 'Generation complete.') {
+            return t('ai.statusGenerationComplete')
+        }
+        if (message === 'Streaming yielded empty content. Retrying without stream...') {
+            return t('ai.statusFallbackEmpty')
+        }
+        if (message.startsWith('Retrying request (')) {
+            const matched = message.match(/\((\d+)\/(\d+)\)/)
+            if (matched) {
+                return t('ai.statusRetrying', { attempt: matched[1], total: matched[2] })
+            }
+        }
+        if (message.endsWith('. Retrying...')) {
+            return t('ai.statusRetryingSimple', {
+                message: message.slice(0, -'. Retrying...'.length),
+            })
+        }
+        if (message.endsWith('. Falling back to non-stream mode...')) {
+            return t('ai.statusFallbackNoStream', {
+                message: message.slice(0, -'. Falling back to non-stream mode...'.length),
+            })
+        }
+        return message
+    }
+
+    const getPresetLabel = (preset: AiPromptPreset) => t(`ai.preset.${preset.id}`)
+    const getPresetInstruction = (preset: AiPromptPreset) => t(`ai.presetInstruction.${preset.id}`)
+    const getHistoryModeLabel = (mode: AiHistoryEntry['taskMode']) => t(`ai.taskMode.${mode}`)
+    const getHistorySourceLabel = (source: AiHistoryEntry['source']) => t(`ai.source.${source}`)
+
     const applyPreset = (preset: AiPromptPreset) => {
-        setInstruction(preset.instruction)
+        setInstruction(getPresetInstruction(preset))
         setActivePresetId(preset.id)
     }
 
     const handleRun = async () => {
         if (!activeTab) {
-            setError('No active document.')
+            setError(t('ai.noActiveDocument'))
             return
         }
         if (!aiConfig.endpoint.trim() || !aiConfig.model.trim() || !aiConfig.apiKey.trim()) {
-            setError('Configure endpoint, model, and API key in Settings first.')
+            setError(t('ai.configureFirst'))
             return
         }
 
@@ -166,18 +191,18 @@ export function AiPanel() {
         setError('')
         setCopied(false)
         setResult('')
-        setStatusText('Preparing request...')
+        setStatusText(t('ai.statusPreparing'))
         setRequestMeta(null)
         setOriginalSnapshot(null)
         setResultTargetTabId(activeTab.id)
 
         try {
             if (!aiConfig.endpoint.trim() || !aiConfig.model.trim() || !aiConfig.apiKey.trim()) {
-                throw new Error('Configure endpoint, model, and API key in Settings first.')
+                throw new Error(t('ai.configureFirst'))
             }
 
             if (aiConfig.model.includes('DeepSeek-R1-Distill-Qwen-7B')) {
-                setStatusText('Testing provider connection...')
+                setStatusText(t('ai.statusTestingProvider'))
                 await verifyAiConnection({
                     config: aiConfig,
                     timeoutMs: 20_000,
@@ -199,6 +224,7 @@ export function AiPanel() {
             const nextResult = await requestAiSuggestion({
                 config: aiConfig,
                 taskMode,
+                outputShape,
                 instruction,
                 title: activeTab.title,
                 content: activeTab.content,
@@ -206,7 +232,7 @@ export function AiPanel() {
                 timeoutMs: 45_000,
                 maxRetries: 1,
                 preferStreaming: true,
-                onStatus: (message) => setStatusText(message),
+                onStatus: (message) => setStatusText(translateRuntimeStatus(message)),
                 onChunk: (_chunk, accumulated) => setResult(accumulated),
             })
 
@@ -216,18 +242,18 @@ export function AiPanel() {
                 instruction,
                 result: nextResult.text,
                 source: 'generated',
-                documentTitle: activeTab.title || 'Untitled document',
+                documentTitle: activeTab.title || t('ai.untitledDocument'),
             }))
             setRequestMeta(nextResult)
             setStatusText(
                 nextResult.attempts > 1
-                    ? `Completed after ${nextResult.attempts} attempts.`
+                    ? t('ai.statusCompletedAttempts', { count: nextResult.attempts })
                     : nextResult.streamed
-                        ? 'Streaming complete.'
-                        : 'Generation complete.'
+                        ? t('ai.statusStreamingComplete')
+                        : t('ai.statusGenerationComplete')
             )
         } catch (requestError) {
-            setError(requestError instanceof Error ? requestError.message : 'AI request failed')
+            setError(requestError instanceof Error ? requestError.message : t('settings.connectionFailed'))
         } finally {
             setIsRunning(false)
         }
@@ -236,7 +262,7 @@ export function AiPanel() {
     const resolveApplyTab = () => {
         if (resultTargetTab) return resultTargetTab
         if (activeTab) return activeTab
-        setError('Target document is no longer available.')
+        setError(t('ai.targetMissing'))
         return null
     }
 
@@ -285,8 +311,44 @@ export function AiPanel() {
             instruction,
             result,
             source: 'saved',
-            documentTitle: activeTab?.title ?? 'Untitled document',
+            documentTitle: activeTab?.title ?? t('ai.untitledDocument'),
         }))
+    }
+
+    const handleApplyScenario = (scenarioId: ReturnType<typeof getAiScenarioCards>[number]['id']) => {
+        const draft = buildScenarioAiDraft(scenarioId, {
+            title: activeTab?.title ?? t('ai.untitledDocument'),
+            paperPreset,
+            paperOrientation,
+            customPaperSize,
+            pageMarginMm,
+            documentProfile,
+            exportProfile,
+            hasWorkspace: Boolean(activeWorkspace),
+        })
+        setTaskMode(draft.taskMode === 'content' ? 'writing' : draft.taskMode)
+        setInstruction(draft.instruction)
+        setIncludeGraphContext(draft.includeGraphContext)
+        setActivePresetId(null)
+    }
+
+    const handleOpenInNewTab = () => {
+        if (!result.trim()) return
+        const nextTabId = addTab(null, result)
+        useEditorStore.setState((state) => ({
+            tabs: state.tabs.map((tab) => (
+                tab.id === nextTabId
+                    ? {
+                        ...tab,
+                        title: t('ai.draftTabTitle'),
+                        isDirty: true,
+                    }
+                    : tab
+            )),
+            activeTabId: nextTabId,
+        }))
+        setOriginalSnapshot(null)
+        setResultTargetTabId(nextTabId)
     }
 
     const handleLoadHistory = (entry: AiHistoryEntry) => {
@@ -332,13 +394,27 @@ export function AiPanel() {
     }
 
     const restoreDisabled = !resultTargetTab || originalSnapshot === null || resultTargetTab.content === originalSnapshot
+    const getScenarioLabel = (id: string) => {
+        if (id === 'resume-project') return t('ai.scenarioResumeProject')
+        if (id === 'weekly-brief') return t('ai.scenarioWeeklyBrief')
+        if (id === 'readme-refresh') return t('ai.scenarioReadmeRefresh')
+        if (id === 'publish-article') return t('ai.scenarioPublishArticle')
+        return t('ai.scenarioKnowledgeCards')
+    }
+    const getScenarioDesc = (id: string) => {
+        if (id === 'resume-project') return t('ai.scenarioResumeProjectDesc')
+        if (id === 'weekly-brief') return t('ai.scenarioWeeklyBriefDesc')
+        if (id === 'readme-refresh') return t('ai.scenarioReadmeRefreshDesc')
+        if (id === 'publish-article') return t('ai.scenarioPublishArticleDesc')
+        return t('ai.scenarioKnowledgeCardsDesc')
+    }
 
     return (
         <div className="ai-panel">
             <div className="ai-panel__header">
                 <div className="ai-panel__title">
                     <Bot size={16} />
-                    <span>AI Assistant</span>
+                    <span>{t('ai.title')}</span>
                 </div>
                 <button className="ai-panel__close" onClick={() => setAiPanelVisible(false)}>
                     <X size={16} />
@@ -347,11 +423,27 @@ export function AiPanel() {
 
             <div className="ai-panel__content">
                 <div className="ai-panel__intro">
-                    Run human-in-the-loop suggestions for writing, polish, revision, layout, and graph structure.
+                    {t('ai.intro')}
+                </div>
+
+                <div className="ai-panel__field">
+                    <label className="ai-panel__label">{t('ai.quickScenarios')}</label>
+                    <div className="ai-panel__scenario-grid">
+                        {scenarioCards.map((card) => (
+                            <button
+                                key={card.id}
+                                className="ai-panel__scenario-card"
+                                onClick={() => handleApplyScenario(card.id)}
+                            >
+                                <div className="ai-panel__scenario-label">{getScenarioLabel(card.id)}</div>
+                                <div className="ai-panel__scenario-desc">{getScenarioDesc(card.id)}</div>
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="ai-panel__task-grid">
-                    {TASK_OPTIONS.map(option => {
+                    {taskOptions.map(option => {
                         const Icon = option.icon
                         return (
                             <button
@@ -370,7 +462,7 @@ export function AiPanel() {
                 </div>
 
                 <div className="ai-panel__field">
-                    <label className="ai-panel__label">Instruction</label>
+                    <label className="ai-panel__label">{t('ai.instruction')}</label>
                     <div className="ai-panel__preset-row">
                         {presets.map(preset => (
                             <button
@@ -378,7 +470,7 @@ export function AiPanel() {
                                 className={`ai-panel__preset ${activePresetId === preset.id ? 'active' : ''}`}
                                 onClick={() => applyPreset(preset)}
                             >
-                                {preset.label}
+                                {getPresetLabel(preset)}
                             </button>
                         ))}
                     </div>
@@ -390,22 +482,40 @@ export function AiPanel() {
                     />
                 </div>
 
+                <div className="ai-panel__field">
+                    <label className="ai-panel__label">{t('ai.outputShape')}</label>
+                    <div className="ai-panel__preset-row">
+                        <button
+                            className={`ai-panel__preset ${outputShape === 'full' ? 'active' : ''}`}
+                            onClick={() => setOutputShape('full')}
+                        >
+                            {t('ai.outputFull')}
+                        </button>
+                        <button
+                            className={`ai-panel__preset ${outputShape === 'outline' ? 'active' : ''}`}
+                            onClick={() => setOutputShape('outline')}
+                        >
+                            {t('ai.outputOutline')}
+                        </button>
+                    </div>
+                </div>
+
                 <label className="ai-panel__checkbox">
                     <input
                         type="checkbox"
                         checked={includeGraphContext}
                         onChange={e => setIncludeGraphContext(e.target.checked)}
                     />
-                    <span>Include graph context</span>
+                    <span>{t('ai.includeGraph')}</span>
                 </label>
 
                 <div className="ai-panel__hint">
-                    Streams when supported, times out after 45s, and retries once on transient failures.
+                    {t('ai.hint')}
                 </div>
 
                 <button className="ai-panel__run" onClick={() => void handleRun()} disabled={isRunning || !activeTab}>
                     {isRunning ? <LoaderCircle size={15} className="ai-panel__spin" /> : <Bot size={15} />}
-                    <span>{isRunning ? (statusText || 'Generating...') : 'Generate Suggestion'}</span>
+                    <span>{isRunning ? (statusText || t('ai.generating')) : t('ai.generate')}</span>
                 </button>
 
                 {error && <div className="ai-panel__error">{error}</div>}
@@ -414,45 +524,52 @@ export function AiPanel() {
                         {statusText && <span className="ai-panel__status-pill">{statusText}</span>}
                         {requestMeta && (
                             <span className="ai-panel__meta-pill">
-                                {requestMeta.streamed ? 'streamed' : 'single response'}
+                                {requestMeta.streamed ? t('ai.statusStreamed') : t('ai.statusSingleResponse')}
                             </span>
                         )}
                         {requestMeta && requestMeta.attempts > 1 && (
-                            <span className="ai-panel__meta-pill">{requestMeta.attempts} attempts</span>
+                            <span className="ai-panel__meta-pill">{t('ai.metaAttempts', { count: requestMeta.attempts })}</span>
                         )}
                     </div>
                 )}
 
                 <div className="ai-panel__result-header">
-                    <span>Result</span>
+                    <span>{t('ai.result')}</span>
                     <div className="ai-panel__result-actions">
                         <button className="ai-panel__ghost" onClick={() => void handleCopy()} disabled={!result.trim()}>
                             {copied ? <Check size={14} /> : <Copy size={14} />}
-                            <span>{copied ? 'Copied' : 'Copy'}</span>
+                            <span>{copied ? t('ai.copied') : t('ai.copy')}</span>
                         </button>
                         <button className="ai-panel__ghost" onClick={() => void handleRun()} disabled={isRunning || !activeTab}>
                             <RotateCcw size={14} />
-                            <span>Retry</span>
+                            <span>{t('ai.retry')}</span>
                         </button>
                         <button className="ai-panel__ghost" onClick={handleApplyAppend} disabled={!result.trim() || !resultTargetTab}>
-                            Append
+                            {t('ai.append')}
+                        </button>
+                        <button
+                            className="ai-panel__ghost ai-panel__ghost--new-tab"
+                            onClick={handleOpenInNewTab}
+                            disabled={!result.trim()}
+                        >
+                            {t('ai.newDraft')}
                         </button>
                         <button
                             className="ai-panel__ghost ai-panel__ghost--snapshot"
                             onClick={handleSaveSnapshot}
                             disabled={!result.trim()}
                         >
-                            Save Snapshot
+                            {t('ai.saveSnapshot')}
                         </button>
                         <button
                             className="ai-panel__ghost ai-panel__ghost--restore"
                             onClick={handleRestoreOriginal}
                             disabled={restoreDisabled}
                         >
-                            Restore
+                            {t('ai.restore')}
                         </button>
                         <button className="ai-panel__primary" onClick={handleApplyReplace} disabled={replaceDisabled}>
-                            Replace
+                            {t('ai.replace')}
                         </button>
                     </div>
                 </div>
@@ -460,15 +577,15 @@ export function AiPanel() {
                 {diffPreview && (
                     <div className="ai-panel__diff-card">
                         <div className="ai-panel__diff-header">
-                            <span className="ai-panel__diff-title">Change Preview</span>
+                            <span className="ai-panel__diff-title">{t('ai.changePreview')}</span>
                             <div className="ai-panel__diff-pills">
-                                <span className="ai-panel__diff-pill">{diffPreview.changedLines} changed</span>
-                                <span className="ai-panel__diff-pill">{diffPreview.addedLines} added</span>
-                                <span className="ai-panel__diff-pill">{diffPreview.removedLines} removed</span>
+                                <span className="ai-panel__diff-pill">{t('ai.diffChanged', { count: diffPreview.changedLines })}</span>
+                                <span className="ai-panel__diff-pill">{t('ai.diffAdded', { count: diffPreview.addedLines })}</span>
+                                <span className="ai-panel__diff-pill">{t('ai.diffRemoved', { count: diffPreview.removedLines })}</span>
                             </div>
                         </div>
                         {!diffPreview.hasChanges && (
-                            <div className="ai-panel__diff-empty">No document changes detected.</div>
+                            <div className="ai-panel__diff-empty">{t('ai.noChanges')}</div>
                         )}
                         {diffPreview.previewBlocks.length > 0 && (
                             <div className="ai-panel__diff-blocks">
@@ -478,7 +595,7 @@ export function AiPanel() {
                                         className="ai-panel__diff-block"
                                     >
                                         <div className="ai-panel__diff-range">
-                                            Before L{block.beforeStartLine} -&gt; After L{block.afterStartLine}
+                                            {t('ai.diffRange', { before: block.beforeStartLine, after: block.afterStartLine })}
                                         </div>
                                         <div className="ai-panel__diff-actions">
                                             <button
@@ -486,7 +603,7 @@ export function AiPanel() {
                                                 onClick={() => handleApplyBlock(index)}
                                                 disabled={!resultTargetTab}
                                             >
-                                                Apply Block
+                                                {t('ai.applyBlock')}
                                             </button>
                                         </div>
                                         {block.removed.map((line, lineIndex) => (
@@ -494,7 +611,7 @@ export function AiPanel() {
                                                 key={`removed-${lineIndex}`}
                                                 className="ai-panel__diff-line ai-panel__diff-line--removed"
                                             >
-                                                - {line || '(blank line)'}
+                                                - {line || t('ai.blankLine')}
                                             </div>
                                         ))}
                                         {block.added.map((line, lineIndex) => (
@@ -502,14 +619,14 @@ export function AiPanel() {
                                                 key={`added-${lineIndex}`}
                                                 className="ai-panel__diff-line ai-panel__diff-line--added"
                                             >
-                                                + {line || '(blank line)'}
+                                                + {line || t('ai.blankLine')}
                                             </div>
                                         ))}
                                     </div>
                                 ))}
                                 {diffPreview.truncated && (
                                     <div className="ai-panel__diff-more">
-                                        Showing the first {diffPreview.previewBlocks.length} change block(s).
+                                        {t('ai.diffMore', { count: diffPreview.previewBlocks.length })}
                                     </div>
                                 )}
                             </div>
@@ -519,7 +636,7 @@ export function AiPanel() {
 
                 {taskMode === 'graph' && result.trim() && (
                     <div className="ai-panel__diff-note">
-                        Graph suggestions are guidance-first. Review links and clusters before applying them to the document.
+                        {t('ai.graphNote')}
                     </div>
                 )}
 
@@ -527,18 +644,18 @@ export function AiPanel() {
                     className="ai-panel__result"
                     value={result}
                     onChange={e => setResult(e.target.value)}
-                    placeholder="Generated Markdown will appear here. You can edit it before applying."
+                    placeholder={t('ai.resultPlaceholder')}
                 />
 
                 {history.length > 0 && (
                     <div className="ai-panel__history">
                         <div className="ai-panel__history-header">
                             <div className="ai-panel__history-header-copy">
-                                <span className="ai-panel__history-title">Session History</span>
+                                <span className="ai-panel__history-title">{t('ai.history')}</span>
                                 <span className="ai-panel__history-count">
                                     {visibleHistory.length === history.length
-                                        ? `${history.length} items`
-                                        : `${visibleHistory.length} of ${history.length} items`}
+                                        ? t('ai.historyItems', { count: history.length })
+                                        : t('ai.historyItemsFiltered', { shown: visibleHistory.length, total: history.length })}
                                 </span>
                             </div>
                             <div className="ai-panel__history-header-actions">
@@ -546,13 +663,13 @@ export function AiPanel() {
                                     className="ai-panel__history-search"
                                     value={historyQuery}
                                     onChange={(event) => setHistoryQuery(event.target.value)}
-                                    placeholder="Search history"
+                                    placeholder={t('ai.historySearch')}
                                 />
                                 <button
                                     className="ai-panel__ghost ai-panel__history-clear"
                                     onClick={handleClearHistory}
                                 >
-                                    Clear
+                                    {t('ai.clear')}
                                 </button>
                             </div>
                         </div>
@@ -560,8 +677,8 @@ export function AiPanel() {
                             {visibleHistory.map((entry) => (
                                 <div key={entry.id} className="ai-panel__history-item">
                                     <div className="ai-panel__history-meta">
-                                        <span className="ai-panel__history-badge">{entry.taskMode}</span>
-                                        <span className="ai-panel__history-badge">{entry.source}</span>
+                                        <span className="ai-panel__history-badge">{getHistoryModeLabel(entry.taskMode)}</span>
+                                        <span className="ai-panel__history-badge">{getHistorySourceLabel(entry.source)}</span>
                                         <span className="ai-panel__history-time">{entry.createdAt}</span>
                                     </div>
                                     <div className="ai-panel__history-heading">
@@ -580,13 +697,13 @@ export function AiPanel() {
                                                 className="ai-panel__ghost ai-panel__history-favorite"
                                                 onClick={() => handleToggleFavorite(entry.id)}
                                             >
-                                                {entry.favorite ? 'Unfavorite' : 'Favorite'}
+                                                {entry.favorite ? t('ai.unfavorite') : t('ai.favorite')}
                                             </button>
                                             <button
                                                 className="ai-panel__ghost ai-panel__history-rename"
                                                 onClick={() => handleStartRename(entry.id, entry.label)}
                                             >
-                                                Rename
+                                                {t('ai.rename')}
                                             </button>
                                         </div>
                                     </div>
@@ -596,19 +713,19 @@ export function AiPanel() {
                                                 className="ai-panel__history-label-input"
                                                 value={editingHistoryLabel}
                                                 onChange={(event) => setEditingHistoryLabel(event.target.value)}
-                                                placeholder="Add a custom label"
+                                                placeholder={t('ai.addLabel')}
                                             />
                                             <button
                                                 className="ai-panel__ghost ai-panel__history-save-label"
                                                 onClick={() => handleSaveRename(entry.id)}
                                             >
-                                                Save
+                                                {t('common.save')}
                                             </button>
                                             <button
                                                 className="ai-panel__ghost ai-panel__history-cancel-label"
                                                 onClick={handleCancelRename}
                                             >
-                                                Cancel
+                                                {t('common.cancel')}
                                             </button>
                                         </div>
                                     )}
@@ -618,20 +735,20 @@ export function AiPanel() {
                                             className="ai-panel__ghost ai-panel__history-load"
                                             onClick={() => handleLoadHistory(entry)}
                                         >
-                                            Load
+                                            {t('ai.load')}
                                         </button>
                                         <button
                                             className="ai-panel__ghost ai-panel__history-delete"
                                             onClick={() => handleDeleteHistory(entry.id)}
                                         >
-                                            Delete
+                                            {t('ai.delete')}
                                         </button>
                                     </div>
                                 </div>
                             ))}
                             {visibleHistory.length === 0 && (
                                 <div className="ai-panel__history-empty">
-                                    No history matches the current search.
+                                    {t('ai.noHistoryMatches')}
                                 </div>
                             )}
                         </div>

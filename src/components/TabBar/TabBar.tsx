@@ -1,8 +1,10 @@
-import { X, Plus } from 'lucide-react'
+﻿import { X, Plus } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
+import { useI18n } from '@/i18n'
 import './TabBar.css'
 
 export function TabBar() {
+    const { t } = useI18n()
     const tabs = useEditorStore(s => s.tabs)
     const activeTabId = useEditorStore(s => s.activeTabId)
     const setActiveTab = useEditorStore(s => s.setActiveTab)
@@ -25,7 +27,7 @@ export function TabBar() {
                             e.stopPropagation()
                             requestCloseTab(tab.id)
                         }}
-                        title="关闭标签"
+                        title={t('tab.close')}
                     >
                         <X size={12} />
                     </button>
@@ -34,7 +36,7 @@ export function TabBar() {
             <button
                 className="tabbar__add"
                 onClick={() => addTab(null)}
-                title="新建标签"
+                title={t('tab.new')}
             >
                 <Plus size={16} />
             </button>

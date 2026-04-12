@@ -1,17 +1,16 @@
-import { BookOpen, AlignLeft, ZoomIn, ZoomOut, FileText, List, Link2, Network, Search, RefreshCw, Bot, FileSpreadsheet } from 'lucide-react'
+﻿import { BookOpen, AlignLeft, ZoomIn, ZoomOut, FileText, List, Link2, Network, Search, RefreshCw, Bot, FileSpreadsheet } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
+import { useI18n } from '@/i18n'
 import {
-    getDocumentProfileMeta,
-    getExportProfileMeta,
-    getPaperOrientationLabel,
     getPaperPresetMeta,
 } from '@/utils/paper'
 import './StatusBar.css'
 
 export function StatusBar() {
+    const { t } = useI18n()
     const activeTab = useEditorStore(s => {
         const id = s.activeTabId
-        return s.tabs.find(t => t.id === id)
+        return s.tabs.find(tab => tab.id === id)
     })
 
     const zoom = useEditorStore(s => s.zoom)
@@ -42,18 +41,42 @@ export function StatusBar() {
 
     if (!activeTab) return <div className="statusbar statusbar--fluent" />
 
+    const getLocalizedPaperLabel = () => {
+        if (paperPreset === 'screen') return t('settings.paperScreen')
+        if (paperPreset === 'custom') return t('settings.paperCustom')
+        return paperPreset.toUpperCase()
+    }
+
+    const getLocalizedOrientationLabel = () => (
+        paperOrientation === 'landscape'
+            ? t('settings.orientationLandscape')
+            : t('settings.orientationPortrait')
+    )
+
+    const getLocalizedProfileLabel = () => {
+        if (documentProfile === 'resume') return t('settings.profileResume')
+        if (documentProfile === 'manuscript') return t('settings.profileManuscript')
+        return t('settings.profileStandard')
+    }
+
+    const getLocalizedExportLabel = () => {
+        if (exportProfile === 'share') return t('settings.exportShare')
+        if (exportProfile === 'web') return t('settings.exportWeb')
+        return t('settings.exportPrint')
+    }
+
     const charCount = activeTab.content.length
     const nonWhitespace = activeTab.content.replace(/\s/g, '').length
     const wordCount = activeTab.content.trim().split(/\s+/).filter(Boolean).length
     const readingTime = Math.max(1, Math.ceil(charCount / 400))
 
-    let indexLabel = 'No workspace'
+    let indexLabel = t('status.noWorkspace')
     if (knowledgeIndexStatus === 'indexing') {
-        indexLabel = 'Indexing ' + knowledgeIndexProcessed + '/' + (knowledgeIndexTotal || '?')
+        indexLabel = t('status.indexing', { processed: knowledgeIndexProcessed, total: knowledgeIndexTotal || '?' })
     } else if (knowledgeIndexStatus === 'error') {
-        indexLabel = 'Index failed, click to retry'
+        indexLabel = t('status.indexFailed')
     } else if (activeWorkspace) {
-        indexLabel = 'Indexed ' + (knowledgeIndexTotal || knowledgeIndexProcessed || 0) + ' files'
+        indexLabel = t('status.indexed', { count: knowledgeIndexTotal || knowledgeIndexProcessed || 0 })
     }
 
     const tocButtonClass = 'statusbar__icon-btn' + (tocVisible ? ' active' : '')
@@ -63,46 +86,50 @@ export function StatusBar() {
     const wysiwygButtonClass = 'statusbar__icon-btn' + (viewMode === 'wysiwyg' ? ' active' : '')
     const splitButtonClass = 'statusbar__icon-btn' + (viewMode === 'split' ? ' active' : '')
     const indexButtonClass = 'statusbar__btn statusbar__btn--action' + (knowledgeIndexStatus === 'error' ? ' statusbar__btn--danger' : '')
-    const statsTitle = 'Characters: ' + charCount + '\nNon-whitespace: ' + nonWhitespace + '\nWords: ' + wordCount + '\nReading time: ' + readingTime + ' min'
+    const statsTitle = [
+        t('status.characters', { count: charCount }),
+        t('status.nonWhitespace', { count: nonWhitespace }),
+        t('status.wordCount', { count: wordCount }),
+        t('status.readingTime', { count: readingTime }),
+    ].join('\n')
+
     const paperMeta = getPaperPresetMeta(paperPreset, customPaperSize, paperOrientation, pageMarginMm)
-    const orientationLabel = getPaperOrientationLabel(paperOrientation)
+    const orientationLabel = getLocalizedOrientationLabel()
     const paperLabel = paperMeta.id === 'screen'
-        ? `${paperMeta.label} · ${pageMarginMm}mm margin`
-        : paperMeta.id === 'custom'
-            ? `${paperMeta.label} ${paperMeta.detail} ${orientationLabel} · ${pageMarginMm}mm`
-            : `${paperMeta.label} ${orientationLabel} · ${pageMarginMm}mm`
-    const profileLabel = getDocumentProfileMeta(documentProfile).label
-    const exportLabel = getExportProfileMeta(exportProfile).label
+        ? t('status.paperScreen', { label: getLocalizedPaperLabel(), margin: pageMarginMm })
+        : t('status.paperPreset', { label: getLocalizedPaperLabel(), orientation: orientationLabel, margin: pageMarginMm })
+    const profileLabel = getLocalizedProfileLabel()
+    const exportLabel = getLocalizedExportLabel()
 
     return (
         <div className="statusbar statusbar--fluent">
             <div className="statusbar__left">
                 <div className="statusbar__btn tooltip" title={statsTitle}>
-                    {wordCount} words | ~{readingTime} min read
+                    {t('status.wordsRead', { words: wordCount, minutes: readingTime })}
                 </div>
                 <div className="statusbar__btn">
                     <FileText size={12} strokeWidth={1.5} style={{ marginRight: 4 }} />
-                    {activeTab.filePath ? 'Saved to disk' : 'Unsaved'}
+                    {activeTab.filePath ? t('status.saved') : t('status.unsaved')}
                 </div>
                 <button className="statusbar__btn statusbar__btn--action" onClick={() => openGlobalSearch()} title="Ctrl+P">
                     <Search size={12} strokeWidth={1.5} style={{ marginRight: 4 }} />
-                    Ctrl+P Search
+                    {t('status.search')}
                 </button>
-                <div className="statusbar__btn" title="Current paper preset">
+                <div className="statusbar__btn" title={t('status.currentPaperPreset')}>
                     <FileSpreadsheet size={12} strokeWidth={1.5} style={{ marginRight: 4 }} />
                     {paperLabel}
                 </div>
-                <div className="statusbar__btn" title="Current layout profile">
+                <div className="statusbar__btn" title={t('status.currentLayoutProfile')}>
                     {profileLabel}
                 </div>
-                <div className="statusbar__btn" title="Current export profile">
+                <div className="statusbar__btn" title={t('status.currentExportProfile')}>
                     {exportLabel}
                 </div>
                 {activeWorkspace && (
                     <button
                         className={indexButtonClass}
                         onClick={() => void rebuildKnowledgeIndex()}
-                        title={knowledgeIndexError ?? 'Rebuild workspace knowledge index'}
+                        title={knowledgeIndexError ?? t('status.rebuildIndex')}
                     >
                         <RefreshCw size={12} strokeWidth={1.5} style={{ marginRight: 4 }} />
                         {indexLabel}
@@ -113,38 +140,38 @@ export function StatusBar() {
             <div className="statusbar__spacer" />
 
             <div className="statusbar__right">
-                <button className={tocButtonClass} title="Table of contents" onClick={() => setTocVisible(!tocVisible)}>
+                <button className={tocButtonClass} title={t('status.toc')} onClick={() => setTocVisible(!tocVisible)}>
                     <List size={14} />
                 </button>
                 <button
                     className={backlinksButtonClass}
-                    title="Backlinks"
+                    title={t('status.backlinks')}
                     onClick={() => setBacklinksVisible(!backlinksVisible)}
                     disabled={!activeTab.filePath}
                 >
                     <Link2 size={14} />
                 </button>
                 {activeWorkspace && (
-                    <button className={graphButtonClass} title="Advanced knowledge graph" onClick={() => setKnowledgeGraphVisible(!knowledgeGraphVisible)}>
+                    <button className={graphButtonClass} title={t('status.graph')} onClick={() => setKnowledgeGraphVisible(!knowledgeGraphVisible)}>
                         <Network size={14} />
-                        Graph
+                        {t('status.graphLabel')}
                     </button>
                 )}
-                <button className={aiButtonClass} title="AI assistant" onClick={() => setAiPanelVisible(!aiPanelVisible)}>
+                <button className={aiButtonClass} title={t('status.ai')} onClick={() => setAiPanelVisible(!aiPanelVisible)}>
                     <Bot size={14} />
-                    AI
+                    {t('status.aiLabel')}
                 </button>
                 <div className="statusbar__divider" style={{ width: 1, height: 14, backgroundColor: 'var(--border)', margin: '0 4px' }} />
-                <button className={wysiwygButtonClass} title="WYSIWYG mode" onClick={() => setViewMode('wysiwyg')}>
+                <button className={wysiwygButtonClass} title={t('status.wysiwyg')} onClick={() => setViewMode('wysiwyg')}>
                     <BookOpen size={14} />
                 </button>
-                <button className={splitButtonClass} title="Split mode" onClick={() => setViewMode('split')}>
+                <button className={splitButtonClass} title={t('status.split')} onClick={() => setViewMode('split')}>
                     <AlignLeft size={14} />
                 </button>
 
                 <div className="statusbar__zoom-controls">
                     <span className="statusbar__zoom-label">{zoom}%</span>
-                    <button className="statusbar__zoom-btn" title="Zoom out" onClick={() => setZoom(zoom - 10)}>
+                    <button className="statusbar__zoom-btn" title={t('status.zoomOut')} onClick={() => setZoom(zoom - 10)}>
                         <ZoomOut size={14} />
                     </button>
                     <div className="statusbar__slider-container">
@@ -153,12 +180,12 @@ export function StatusBar() {
                             min="10"
                             max="500"
                             value={zoom}
-                            onChange={e => setZoom(Number(e.target.value))}
+                            onChange={event => setZoom(Number(event.target.value))}
                             className="statusbar__slider"
-                            title="Zoom"
+                            title={t('status.zoom')}
                         />
                     </div>
-                    <button className="statusbar__zoom-btn" title="Zoom in" onClick={() => setZoom(zoom + 10)}>
+                    <button className="statusbar__zoom-btn" title={t('status.zoomIn')} onClick={() => setZoom(zoom + 10)}>
                         <ZoomIn size={14} />
                     </button>
                 </div>

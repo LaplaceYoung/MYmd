@@ -1,5 +1,4 @@
-﻿import { useState, useRef, useEffect, useMemo } from 'react'
-import {
+﻿import {
     Search,
     ChevronRight,
     FilePlus,
@@ -11,14 +10,33 @@ import {
     List,
     FolderTree,
     Type,
-    SpellCheck
+    SpellCheck,
+    type LucideIcon,
 } from 'lucide-react'
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { useEditorStore } from '@/stores/editorStore'
 import { useEditorShortcuts } from '@/components/Editor/hooks/useEditorShortcuts'
+import { useI18n } from '@/i18n'
+
+interface SearchAction {
+    id: string
+    text: string
+    description: string
+    icon: ReactNode
+    action: () => void
+    section: 'primary' | 'recent' | 'workspace' | 'preferences'
+    arrow: boolean
+}
+
+function buildIcon(Icon: LucideIcon) {
+    return <Icon size={16} />
+}
 
 export function TopSearchMenu() {
+    const { t } = useI18n()
     const [isFocused, setIsFocused] = useState(false)
     const [inputValue, setInputValue] = useState('')
+    const [activeIndex, setActiveIndex] = useState(0)
     const inputRef = useRef<HTMLInputElement>(null)
     const dropdownRef = useRef<HTMLDivElement>(null)
     const setSearchVisible = useEditorStore(s => s.setSearchVisible)
@@ -41,29 +59,37 @@ export function TopSearchMenu() {
 
     const activeTab = useEditorStore(s => {
         const id = s.activeTabId
-        return s.tabs.find(t => t.id === id)
+        return s.tabs.find(tab => tab.id === id)
     })
 
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.altKey && e.key.toLowerCase() === 'q') {
-                e.preventDefault()
+        const handleGlobalKeyDown = (event: KeyboardEvent) => {
+            const normalizedKey = event.key.toLowerCase()
+            if ((event.ctrlKey || event.metaKey) && normalizedKey === 'k') {
+                event.preventDefault()
+                inputRef.current?.focus()
+                return
+            }
+            if (event.altKey && normalizedKey === 'q') {
+                event.preventDefault()
                 inputRef.current?.focus()
             }
         }
-        window.addEventListener('keydown', handleKeyDown)
-        return () => window.removeEventListener('keydown', handleKeyDown)
+
+        window.addEventListener('keydown', handleGlobalKeyDown)
+        return () => window.removeEventListener('keydown', handleGlobalKeyDown)
     }, [])
 
     useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
+        const handleClickOutside = (event: MouseEvent) => {
             if (
                 dropdownRef.current &&
-                !dropdownRef.current.contains(e.target as Node) &&
+                !dropdownRef.current.contains(event.target as Node) &&
                 inputRef.current &&
-                !inputRef.current.contains(e.target as Node)
+                !inputRef.current.contains(event.target as Node)
             ) {
                 setIsFocused(false)
+                setActiveIndex(0)
             }
         }
 
@@ -75,6 +101,7 @@ export function TopSearchMenu() {
 
     const closeMenu = () => {
         setIsFocused(false)
+        setActiveIndex(0)
         inputRef.current?.blur()
     }
 
@@ -83,189 +110,230 @@ export function TopSearchMenu() {
         closeMenu()
     }
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            e.preventDefault()
-            handleSearchKnowledge()
-        }
-    }
-
-    const actions = useMemo(() => {
-        const primary = [
+    const actions = useMemo<SearchAction[]>(() => {
+        const primary: SearchAction[] = [
             {
                 id: 'search-knowledge',
-                text: inputValue.trim() ? `搜索 “${inputValue.trim()}”` : '打开全局搜索',
-                description: inputValue.trim() ? '在笔记、标题、标签与扩展结果中检索。' : 'Ctrl+P 搜知识库内容。',
-                icon: <Search size={16} />,
+                text: inputValue.trim() ? t('search.searchFor', { query: inputValue.trim() }) : t('search.openGlobal'),
+                description: t('search.searchDesc'),
+                icon: buildIcon(Search),
                 action: handleSearchKnowledge,
                 section: 'primary',
-                arrow: true
+                arrow: true,
             },
             {
                 id: 'new-note',
-                text: '新建文档',
-                description: '从空白页开始写。',
-                icon: <FilePlus size={16} />,
+                text: t('search.newFile'),
+                description: t('search.newDesc'),
+                icon: buildIcon(FilePlus),
                 action: () => {
                     handleNewFile()
                     closeMenu()
                 },
                 section: 'primary',
-                arrow: false
+                arrow: false,
             },
             {
                 id: 'open-file',
-                text: '打开本地文件',
-                description: '继续已有 Markdown 文档。',
-                icon: <FolderOpen size={16} />,
+                text: t('search.openFile'),
+                description: t('search.openDesc'),
+                icon: buildIcon(FolderOpen),
                 action: () => {
                     void handleOpenFile()
                     closeMenu()
                 },
                 section: 'primary',
-                arrow: false
-            }
+                arrow: false,
+            },
         ]
 
-        const recent = recentFiles.slice(0, 3).map(file => ({
+        const recent: SearchAction[] = recentFiles.slice(0, 3).map(file => ({
             id: `recent:${file.path}`,
-            text: `继续 ${file.title}`,
+            text: t('search.resumeFile', { title: file.title }),
             description: file.path,
-            icon: <FileText size={16} />,
+            icon: buildIcon(FileText),
             action: () => {
                 void handleOpenRecentFile(file.path)
                 closeMenu()
             },
             section: 'recent',
-            arrow: false
+            arrow: false,
         }))
 
-        const workspaceActions = [
+        const workspaceActions: SearchAction[] = [
             {
                 id: 'search-current',
-                text: '在当前文档中查找',
-                description: 'Ctrl+F 搜当前文件内容。',
-                icon: <PanelsTopLeft size={16} />,
+                text: t('search.searchCurrent'),
+                description: t('search.searchCurrentDesc'),
+                icon: buildIcon(PanelsTopLeft),
                 action: () => {
                     setSearchVisible(true)
                     closeMenu()
                 },
                 section: 'workspace',
-                arrow: true
+                arrow: true,
             },
             {
                 id: 'toggle-backlinks',
-                text: backlinksVisible ? '隐藏反向链接' : '显示反向链接',
-                description: '查看哪些文档引用当前笔记。',
-                icon: <Link2 size={16} />,
+                text: backlinksVisible ? t('search.hideBacklinks') : t('search.showBacklinks'),
+                description: t('search.backlinksDesc'),
+                icon: buildIcon(Link2),
                 action: () => {
                     setBacklinksVisible(!backlinksVisible)
                     closeMenu()
                 },
                 section: 'workspace',
-                arrow: false
+                arrow: false,
             },
             {
                 id: 'toggle-toc',
-                text: tocVisible ? '隐藏目录' : '显示目录',
-                description: '快速浏览当前文档结构。',
-                icon: <List size={16} />,
+                text: tocVisible ? t('search.hideToc') : t('search.showToc'),
+                description: t('search.tocDesc'),
+                icon: buildIcon(List),
                 action: () => {
                     setTocVisible(!tocVisible)
                     closeMenu()
                 },
                 section: 'workspace',
-                arrow: false
+                arrow: false,
             },
             {
                 id: 'toggle-explorer',
-                text: fileExplorerVisible ? '隐藏文件树' : '显示文件树',
-                description: activeWorkspace ? '浏览当前工作区。' : '打开后可浏览工作区文档。',
-                icon: <FolderTree size={16} />,
+                text: fileExplorerVisible ? t('search.hideExplorer') : t('search.showExplorer'),
+                description: activeWorkspace ? t('search.explorerDescWorkspace') : t('search.explorerDescNoWorkspace'),
+                icon: buildIcon(FolderTree),
                 action: () => {
                     setFileExplorerVisible(!fileExplorerVisible)
                     closeMenu()
                 },
                 section: 'workspace',
-                arrow: false
+                arrow: false,
             },
             {
                 id: 'toggle-graph',
-                text: knowledgeGraphVisible ? '隐藏知识图谱' : '打开知识图谱',
-                description: activeWorkspace ? '高级视图：查看文档链接网络。' : '仅在工作区内容较多时才需要。',
-                icon: <Network size={16} />,
+                text: knowledgeGraphVisible ? t('search.hideGraph') : t('search.showGraph'),
+                description: activeWorkspace ? t('search.graphDescWorkspace') : t('search.graphDescNoWorkspace'),
+                icon: buildIcon(Network),
                 action: () => {
                     setKnowledgeGraphVisible(!knowledgeGraphVisible)
                     closeMenu()
                 },
                 section: 'workspace',
-                arrow: false
+                arrow: false,
             },
             {
                 id: 'toggle-watermark',
-                text: watermark ? '关闭水印' : '打开水印',
-                description: '调整编辑器展示样式。',
-                icon: <Type size={16} />,
+                text: watermark ? t('search.disableWatermark') : t('search.enableWatermark'),
+                description: t('search.watermarkDesc'),
+                icon: buildIcon(Type),
                 action: () => {
                     setWatermark(!watermark)
                     closeMenu()
                 },
                 section: 'preferences',
-                arrow: false
+                arrow: false,
             },
             {
                 id: 'toggle-spellcheck',
-                text: spellcheck ? '关闭拼写检查' : '开启拼写检查',
-                description: '减少输入时的低级错误。',
-                icon: <SpellCheck size={16} />,
+                text: spellcheck ? t('search.disableSpellcheck') : t('search.enableSpellcheck'),
+                description: t('search.spellcheckDesc'),
+                icon: buildIcon(SpellCheck),
                 action: () => {
                     setSpellcheck(!spellcheck)
                     closeMenu()
                 },
                 section: 'preferences',
-                arrow: false
-            }
+                arrow: false,
+            },
         ]
 
         return [...primary, ...recent, ...workspaceActions]
-    }, [
-        activeWorkspace,
-        backlinksVisible,
-        fileExplorerVisible,
-        handleNewFile,
-        handleOpenFile,
-        handleOpenRecentFile,
-        inputValue,
-        knowledgeGraphVisible,
-        openGlobalSearch,
-        recentFiles,
-        setBacklinksVisible,
-        setFileExplorerVisible,
-        setKnowledgeGraphVisible,
-        setSearchVisible,
-        setSpellcheck,
-        setTocVisible,
-        setWatermark,
-        spellcheck,
-        tocVisible,
-        watermark
-    ])
+    }, [activeWorkspace, backlinksVisible, fileExplorerVisible, handleNewFile, handleOpenFile, handleOpenRecentFile, inputValue, knowledgeGraphVisible, recentFiles, setBacklinksVisible, setFileExplorerVisible, setKnowledgeGraphVisible, setSearchVisible, setSpellcheck, setTocVisible, setWatermark, spellcheck, t, tocVisible, watermark])
 
     const query = inputValue.trim().toLowerCase()
     const filteredActions = query
         ? actions.filter(item => `${item.text} ${item.description}`.toLowerCase().includes(query))
         : actions
 
+    useEffect(() => {
+        if (!isFocused) return
+        if (filteredActions.length === 0) {
+            setActiveIndex(-1)
+            return
+        }
+        setActiveIndex(current => {
+            if (current < 0) return 0
+            if (current >= filteredActions.length) return filteredActions.length - 1
+            return current
+        })
+    }, [filteredActions, isFocused])
+
+    const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'ArrowDown') {
+            event.preventDefault()
+            if (filteredActions.length === 0) return
+            setActiveIndex(current => (current + 1) % filteredActions.length)
+            return
+        }
+
+        if (event.key === 'ArrowUp') {
+            event.preventDefault()
+            if (filteredActions.length === 0) return
+            setActiveIndex(current => (current - 1 + filteredActions.length) % filteredActions.length)
+            return
+        }
+
+        if (event.key === 'Escape') {
+            event.preventDefault()
+            closeMenu()
+            return
+        }
+
+        if (event.key === 'Enter') {
+            event.preventDefault()
+            const selectedAction = filteredActions[activeIndex]
+            if (selectedAction) {
+                selectedAction.action()
+            } else {
+                handleSearchKnowledge()
+            }
+        }
+    }
+
     const sections = {
         primary: filteredActions.filter(item => item.section === 'primary'),
         recent: filteredActions.filter(item => item.section === 'recent'),
         workspace: filteredActions.filter(item => item.section === 'workspace'),
-        preferences: filteredActions.filter(item => item.section === 'preferences')
+        preferences: filteredActions.filter(item => item.section === 'preferences'),
     }
 
-    const helperText = activeTab
-        ? '输入关键词后回车直接搜知识库，Alt+Q 可快速聚焦。'
-        : '先新建或打开文档，再逐步用上搜索和链接能力。'
+    const helperText = activeTab ? t('search.helperActive') : t('search.helperIdle')
+
+    let renderIndex = -1
+    const renderActionItem = (item: SearchAction) => {
+        renderIndex += 1
+        const itemIndex = renderIndex
+        const isActive = itemIndex === activeIndex
+
+        return (
+            <div
+                key={item.id}
+                className={`top-search-item${isActive ? ' top-search-item--active' : ''}`}
+                onMouseEnter={() => setActiveIndex(itemIndex)}
+                onMouseDown={event => {
+                    event.preventDefault()
+                    item.action()
+                }}
+            >
+                {item.icon}
+                <div className="top-search-item__copy">
+                    <span className="top-search-item__text">{item.text}</span>
+                    <span className="top-search-item__meta">{item.description}</span>
+                </div>
+                {item.arrow && <ChevronRight size={14} className="top-search-item__arrow" />}
+            </div>
+        )
+    }
 
     return (
         <div className={`top-search-menu ${isFocused ? 'is-focused' : ''}`}>
@@ -275,11 +343,11 @@ export function TopSearchMenu() {
                     ref={inputRef}
                     type="text"
                     className="top-search-menu__input"
-                    placeholder="搜索笔记、命令或最近文档 (Alt+Q / Ctrl+P)"
+                    placeholder={t('search.placeholder')}
                     value={inputValue}
-                    onChange={e => setInputValue(e.target.value)}
+                    onChange={event => setInputValue(event.target.value)}
                     onFocus={() => setIsFocused(true)}
-                    onKeyDown={handleKeyDown}
+                    onKeyDown={handleInputKeyDown}
                 />
             </div>
 
@@ -287,97 +355,36 @@ export function TopSearchMenu() {
                 <div className="top-search-dropdown" ref={dropdownRef}>
                     {filteredActions.length === 0 ? (
                         <div className="top-search-dropdown__empty">
-                            <div className="top-search-dropdown__empty-title">没有找到匹配项</div>
-                            <div className="top-search-dropdown__empty-copy">按 Enter 仍可直接搜索知识库。</div>
+                            <div className="top-search-dropdown__empty-title">{t('search.emptyTitle')}</div>
+                            <div className="top-search-dropdown__empty-copy">{t('search.emptyDesc')}</div>
                         </div>
                     ) : (
                         <>
                             {sections.primary.length > 0 && (
                                 <div className="top-search-dropdown__section">
-                                    <div className="top-search-dropdown__section-title">主任务</div>
-                                    {sections.primary.map(item => (
-                                        <div
-                                            key={item.id}
-                                            className="top-search-item"
-                                            onMouseDown={e => {
-                                                e.preventDefault()
-                                                item.action()
-                                            }}
-                                        >
-                                            {item.icon}
-                                            <div className="top-search-item__copy">
-                                                <span className="top-search-item__text">{item.text}</span>
-                                                <span className="top-search-item__meta">{item.description}</span>
-                                            </div>
-                                            {item.arrow && <ChevronRight size={14} className="top-search-item__arrow" />}
-                                        </div>
-                                    ))}
+                                    <div className="top-search-dropdown__section-title">{t('search.sectionPrimary')}</div>
+                                    {sections.primary.map(renderActionItem)}
                                 </div>
                             )}
 
                             {sections.recent.length > 0 && (
                                 <div className="top-search-dropdown__section">
-                                    <div className="top-search-dropdown__section-title">继续最近文档</div>
-                                    {sections.recent.map(item => (
-                                        <div
-                                            key={item.id}
-                                            className="top-search-item"
-                                            onMouseDown={e => {
-                                                e.preventDefault()
-                                                item.action()
-                                            }}
-                                        >
-                                            {item.icon}
-                                            <div className="top-search-item__copy">
-                                                <span className="top-search-item__text">{item.text}</span>
-                                                <span className="top-search-item__meta">{item.description}</span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                    <div className="top-search-dropdown__section-title">{t('search.sectionRecent')}</div>
+                                    {sections.recent.map(renderActionItem)}
                                 </div>
                             )}
 
                             {sections.workspace.length > 0 && (
                                 <div className="top-search-dropdown__section">
-                                    <div className="top-search-dropdown__section-title">编辑与知识增强</div>
-                                    {sections.workspace.map(item => (
-                                        <div
-                                            key={item.id}
-                                            className="top-search-item"
-                                            onMouseDown={e => {
-                                                e.preventDefault()
-                                                item.action()
-                                            }}
-                                        >
-                                            {item.icon}
-                                            <div className="top-search-item__copy">
-                                                <span className="top-search-item__text">{item.text}</span>
-                                                <span className="top-search-item__meta">{item.description}</span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                    <div className="top-search-dropdown__section-title">{t('search.sectionWorkspace')}</div>
+                                    {sections.workspace.map(renderActionItem)}
                                 </div>
                             )}
 
                             {sections.preferences.length > 0 && (
                                 <div className="top-search-dropdown__section">
-                                    <div className="top-search-dropdown__section-title">展示与偏好</div>
-                                    {sections.preferences.map(item => (
-                                        <div
-                                            key={item.id}
-                                            className="top-search-item"
-                                            onMouseDown={e => {
-                                                e.preventDefault()
-                                                item.action()
-                                            }}
-                                        >
-                                            {item.icon}
-                                            <div className="top-search-item__copy">
-                                                <span className="top-search-item__text">{item.text}</span>
-                                                <span className="top-search-item__meta">{item.description}</span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                    <div className="top-search-dropdown__section-title">{t('search.sectionPreferences')}</div>
+                                    {sections.preferences.map(renderActionItem)}
                                 </div>
                             )}
                         </>
@@ -388,5 +395,3 @@ export function TopSearchMenu() {
         </div>
     )
 }
-
-
