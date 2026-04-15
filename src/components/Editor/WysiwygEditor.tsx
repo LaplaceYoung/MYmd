@@ -84,6 +84,20 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
     const isUpdatingRef = useRef(false)
     const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null)
 
+    const preventReadonlyMutation = useCallback((event: React.SyntheticEvent<HTMLDivElement>) => {
+        if (!readOnly) return
+        event.preventDefault()
+    }, [readOnly])
+
+    const handleReadonlyKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (!readOnly) return
+        if (event.metaKey || event.ctrlKey || event.altKey) return
+
+        if (event.key.length === 1 || event.key === 'Enter' || event.key === 'Backspace' || event.key === 'Delete') {
+            event.preventDefault()
+        }
+    }, [readOnly])
+
     const blobToDataUrl = useCallback((blob: Blob) => {
         return new Promise<string>((resolve, reject) => {
             const reader = new FileReader()
@@ -362,6 +376,15 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [content])
 
+    useEffect(() => {
+        if (!editorRef.current) return
+
+        editorRef.current.action(ctx => {
+            const view = ctx.get(editorViewCtx)
+            view.setProps({ editable: () => !readOnly })
+        })
+    }, [readOnly])
+
     // 编辑器命令执行器
     const executeCommand = useCallback((cmd: string, payload?: unknown) => {
         if (!editorRef.current) return
@@ -629,8 +652,14 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
             <div
                 ref={containerRef}
                 className={`editor-wysiwyg selectable${readOnly ? ' editor-wysiwyg--readonly' : ''}${focusMode ? ' focus-mode' : ''}${typewriterMode ? ' typewriter-mode' : ''}`}
+                aria-readonly={readOnly ? 'true' : undefined}
+                data-editor-surface={readOnly ? 'preview' : 'editor'}
                 style={{ fontSize: `${editorFontSize}px` }}
                 spellCheck={readOnly ? false : spellcheck}
+                onBeforeInputCapture={preventReadonlyMutation}
+                onPasteCapture={preventReadonlyMutation}
+                onDropCapture={preventReadonlyMutation}
+                onKeyDownCapture={handleReadonlyKeyDown}
                 onContextMenu={(e) => {
                     if (readOnly) return
                     e.preventDefault()
