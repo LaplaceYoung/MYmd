@@ -66,3 +66,25 @@
   - Added `tests/e2e_mermaid_export_fallback.spec.ts` to cover both rendered and fallback export output.
   - Re-ran `npx playwright test tests/e2e_mermaid_export_fallback.spec.ts --reporter=line` and it passed on 2026-04-15.
   - Re-ran `npm run build` and it passed on 2026-04-15.
+
+### Slice 4
+
+- Scope:
+  - Phase P1 shared rich-text / HTML paste to Markdown pipeline
+  - align Source and WYSIWYG paste behavior without changing the current visual design
+- Planned touchpoints:
+  - `src/utils/htmlPaste.ts`
+  - `src/components/Editor/SourceEditor.tsx`
+  - `src/components/Editor/WysiwygEditor.tsx`
+  - `tests/e2e_source_html_paste.spec.ts`
+  - `tests/e2e_wysiwyg_html_paste.spec.ts`
+- Verification target:
+  - targeted Playwright regressions for source and WYSIWYG HTML paste
+  - `npm run build`
+- Evidence:
+  - Added `src/utils/htmlPaste.ts` as a shared HTML-to-Markdown conversion lane for rich-text paste handling.
+  - Wired Source editor HTML paste through the shared conversion utility before insertion so rich text lands as Markdown instead of mixed HTML/plain-text artifacts.
+  - Wired WYSIWYG HTML paste through Milkdown's parsed Markdown insertion path and added an explicit markdown sync so split/source views stay consistent after paste.
+  - Added `tests/e2e_source_html_paste.spec.ts` and `tests/e2e_wysiwyg_html_paste.spec.ts` to cover both editor surfaces with the same conversion expectations.
+  - Re-ran `npx playwright test tests/e2e_source_html_paste.spec.ts tests/e2e_wysiwyg_html_paste.spec.ts --reporter=line` and it passed on 2026-04-15.
+  - Re-ran `npm run build` and it passed on 2026-04-15.

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
-import { Editor, rootCtx, defaultValueCtx, editorViewCtx } from '@milkdown/kit/core'
+import { Editor, rootCtx, defaultValueCtx, editorViewCtx, serializerCtx } from '@milkdown/kit/core'
 import { commonmark } from '@milkdown/kit/preset/commonmark'
 import { gfm } from '@milkdown/kit/preset/gfm'
 import { history } from '@milkdown/kit/plugin/history'
@@ -7,7 +7,7 @@ import { listener, listenerCtx } from '@milkdown/kit/plugin/listener'
 import { clipboard } from '@milkdown/kit/plugin/clipboard'
 import { indent } from '@milkdown/kit/plugin/indent'
 import { trailing } from '@milkdown/kit/plugin/trailing'
-import { replaceAll, callCommand } from '@milkdown/kit/utils'
+import { replaceAll, callCommand, insert } from '@milkdown/kit/utils'
 import { math } from '@milkdown/plugin-math'
 import { diagram } from '@milkdown/plugin-diagram'
 import { prism } from '@milkdown/plugin-prism'
@@ -23,6 +23,7 @@ import { convertFileSrc } from '@tauri-apps/api/core'
 import { dirname, join } from '@tauri-apps/api/path'
 import { deleteColumn, deleteRow } from '@milkdown/kit/prose/tables'
 import { extractImageFileFromDataTransfer, readImageFromClipboardApi, rememberEditableTarget } from '@/utils/editorClipboard'
+import { getHtmlPasteMarkdown } from '@/utils/htmlPaste'
 
 // commonmark 命令
 import {
@@ -139,6 +140,20 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
             // 静默处理
         }
     }, [setActiveMarks])
+
+    const syncMarkdownFromEditor = useCallback((editor: Editor) => {
+        try {
+            editor.action(ctx => {
+                const serializer = ctx.get(serializerCtx)
+                const view = ctx.get(editorViewCtx)
+                const markdown = serializer(view.state.doc)
+                lastEditorMarkdownRef.current = markdown
+                updateContent(tabId, markdown)
+            })
+        } catch (error) {
+            console.warn('Failed to sync markdown after paste conversion:', error)
+        }
+    }, [tabId, updateContent])
 
     // 创建编辑器
     useEffect(() => {
@@ -257,6 +272,16 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                         dom.addEventListener('paste', async (e) => {
                             const clipboardEvent = e as ClipboardEvent
                             const clipboardData = clipboardEvent.clipboardData
+                            const htmlMarkdown = getHtmlPasteMarkdown(clipboardData)
+                            if (htmlMarkdown) {
+                                e.preventDefault()
+                                if (editor) {
+                                    editor.action(insert(htmlMarkdown))
+                                    syncMarkdownFromEditor(editor)
+                                }
+                                return
+                            }
+
                             const hasTextPayload = Boolean(
                                 clipboardData &&
                                 Array.from(clipboardData.types).some(type => type.startsWith('text/'))

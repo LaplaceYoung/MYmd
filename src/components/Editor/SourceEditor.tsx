@@ -9,6 +9,7 @@ import { useEditorStore } from '@/stores/editorStore'
 import { queryKnowledge } from '@/knowledge/service'
 import { copyImageToLocalAssets, saveBlobImageToLocalAssets } from '@/utils/fileUtils'
 import { extractImageFileFromDataTransfer, readImageFromClipboardApi } from '@/utils/editorClipboard'
+import { getHtmlPasteMarkdown } from '@/utils/htmlPaste'
 import { convertFileSrc } from '@tauri-apps/api/core'
 
 interface SourceEditorProps {
@@ -67,6 +68,19 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
         view.dispatch({
             changes: { from, to, insert: insertion },
             selection: { anchor: from + insertion.length }
+        })
+        return true
+    }, [])
+
+    const insertMarkdownAtSelection = useCallback((markdown: string) => {
+        const view = editorRef.current?.view
+        if (!view || !markdown) return false
+
+        const from = view.state.selection.main.from
+        const to = view.state.selection.main.to
+        view.dispatch({
+            changes: { from, to, insert: markdown },
+            selection: { anchor: from + markdown.length }
         })
         return true
     }, [])
@@ -272,11 +286,20 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
                         paste: (_event, view) => {
                             const event = _event as ClipboardEvent
                             const clipboardData = event.clipboardData
+                            const htmlMarkdown = getHtmlPasteMarkdown(clipboardData)
                             const immediateImageFile = extractImageFileFromDataTransfer(clipboardData)
                             const hasTextPayload = Boolean(
                                 clipboardData &&
                                 Array.from(clipboardData.types).some(type => type.startsWith('text/'))
                             )
+
+                            if (htmlMarkdown) {
+                                event.preventDefault()
+                                if (view === editorRef.current?.view) {
+                                    insertMarkdownAtSelection(htmlMarkdown)
+                                }
+                                return true
+                            }
 
                             if (!immediateImageFile && hasTextPayload) {
                                 return false
