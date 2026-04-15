@@ -1,16 +1,41 @@
-import { useState, useEffect, useRef } from 'react'
-import { X, ExternalLink, ImagePlus, Upload } from 'lucide-react'
-import { useEditorStore } from '@/stores/editorStore'
-import './InsertDialog.css'
-
+import { useEffect, useRef, useState } from 'react'
+import { ExternalLink, ImagePlus, Upload, X, Music2, Video, Globe } from 'lucide-react'
 import { open as openDialog } from '@tauri-apps/plugin-dialog'
 import { convertFileSrc } from '@tauri-apps/api/core'
+import { useEditorStore, type InsertDialogType } from '@/stores/editorStore'
 import { copyImageToLocalAssets } from '@/utils/fileUtils'
+import './InsertDialog.css'
 
-// 检测 Tauri 环境
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 
-/** 通用插入弹窗：图片和链接两种模式 */
+type LocalCapableDialogType = 'image' | 'audio' | 'video'
+
+const TITLE_MAP: Record<Exclude<InsertDialogType, null>, string> = {
+    link: '插入链接',
+    image: '插入图片',
+    audio: '插入音频',
+    video: '插入视频',
+    embed: '嵌入网页',
+}
+
+function supportsLocalInput(type: Exclude<InsertDialogType, null>): type is LocalCapableDialogType {
+    return type === 'image' || type === 'audio' || type === 'video'
+}
+
+function getDialogFilters(type: LocalCapableDialogType) {
+    if (type === 'image') {
+        return [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'] }]
+    }
+    if (type === 'audio') {
+        return [{ name: 'Audio', extensions: ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'] }]
+    }
+    return [{ name: 'Video', extensions: ['mp4', 'webm', 'mov', 'mkv', 'avi'] }]
+}
+
+function toDisplayName(path: string) {
+    return path.split(/[\\/]/).pop() || path
+}
+
 export function InsertDialog() {
     const dialogType = useEditorStore(s => s.insertDialog)
     const setInsertDialog = useEditorStore(s => s.setInsertDialog)
@@ -18,94 +43,116 @@ export function InsertDialog() {
 
     const [url, setUrl] = useState('')
     const [text, setText] = useState('')
-    const [localFile, setLocalFile] = useState('') // 本地选中的图片路径
-    const [mode, setMode] = useState<'url' | 'local'>('url') // 图片输入模式
+    const [localFile, setLocalFile] = useState('')
+    const [mode, setMode] = useState<'url' | 'local'>('url')
     const inputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
-        if (dialogType) {
-            setUrl('')
-            setText('')
-            setLocalFile('')
-            setMode('url')
-            setTimeout(() => inputRef.current?.focus(), 50)
-        }
+        if (!dialogType) return
+        setUrl('')
+        setText('')
+        setLocalFile('')
+        setMode('url')
+        window.setTimeout(() => inputRef.current?.focus(), 50)
     }, [dialogType])
 
     if (!dialogType) return null
 
+    const title = TITLE_MAP[dialogType]
     const isImage = dialogType === 'image'
-    const title = isImage ? '插入图片' : '插入链接'
+    const isLink = dialogType === 'link'
+    const isAudio = dialogType === 'audio'
+    const isVideo = dialogType === 'video'
+    const isEmbed = dialogType === 'embed'
+    const canUseLocal = supportsLocalInput(dialogType)
 
+    const handleClose = () => setInsertDialog(null)
 
+    const handleOverlayClick = (event: React.MouseEvent) => {
+        if (event.target === event.currentTarget) handleClose()
+    }
 
-    // 选择本地图片文件
-    const handleBrowseImage = async () => {
-        if (!isTauri) return
+    const handleBrowseLocal = async () => {
+        if (!canUseLocal || !isTauri) return
 
         const selected = await openDialog({
             multiple: false,
-            filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'] }]
+            filters: getDialogFilters(dialogType),
         })
-        if (selected) {
-            const filePath = Array.isArray(selected) ? selected[0] : (selected as string)
-            setLocalFile(filePath)
-            setMode('local')
-            // 显示文件名
-            const fileName = filePath.split(/[\\/]/).pop() || filePath
-            setText(fileName)
-        }
+        if (!selected) return
+
+        const filePath = Array.isArray(selected) ? selected[0] : selected
+        if (typeof filePath !== 'string') return
+        setLocalFile(filePath)
+        setMode('local')
+        setText(toDisplayName(filePath))
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const resolveLocalSrc = async () => {
+        if (!localFile) return ''
+        if (!canUseLocal) return localFile
+
+        if (dialogType === 'image') {
+            const activeTab = useEditorStore.getState().getActiveTab()
+            if (isTauri && activeTab?.filePath) {
+                try {
+                    const relativePath = await copyImageToLocalAssets(localFile, activeTab.filePath)
+                    if (relativePath) return relativePath
+                } catch (error) {
+                    console.warn('Failed to copy image to assets, fallback to absolute path:', error)
+                }
+            }
+        }
+
+        return isTauri ? convertFileSrc(localFile) : localFile
+    }
+
+    const getPrimarySource = async () => {
+        if (canUseLocal && mode === 'local') {
+            return await resolveLocalSrc()
+        }
+        return url.trim()
+    }
+
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault()
+
+        const source = await getPrimarySource()
+        if (!source) return
+
+        if (isLink) {
+            executeCommand('insertLink', { href: source, text: text.trim() || source })
+            handleClose()
+            return
+        }
 
         if (isImage) {
-            if (mode === 'local' && localFile) {
-                const activeTab = useEditorStore.getState().getActiveTab()
-
-                // If the markdown file is already saved to disk, copy the image to relative assets
-                if (isTauri && activeTab && activeTab.filePath) {
-                    try {
-                        const relativePath = await copyImageToLocalAssets(localFile, activeTab.filePath)
-                        if (relativePath) {
-                            // Use physical relative path instead of Tauri dev asset URL so the exported markdown is portable
-                            executeCommand('insertImage', { src: relativePath, alt: text || '' })
-                        } else {
-                            throw new Error("Copy failed")
-                        }
-                    } catch (e) {
-                        console.warn("Falling back to absolute path due to error:", e)
-                        const src = convertFileSrc(localFile)
-                        executeCommand('insertImage', { src, alt: text || '' })
-                    }
-                } else {
-                    // Fallback to absolute system path if unsaved
-                    const src = isTauri ? convertFileSrc(localFile) : localFile
-                    executeCommand('insertImage', { src, alt: text || '' })
-                }
-            } else if (url.trim()) {
-                // URL 模式
-                executeCommand('insertImage', { src: url, alt: text || '' })
-            } else {
-                return
-            }
-        } else {
-            // 链接模式
-            if (!url.trim()) return
-            executeCommand('insertLink', { href: url, text: text || url })
+            executeCommand('insertImage', { src: source, alt: text.trim() || '' })
+            handleClose()
+            return
         }
-        setInsertDialog(null)
+
+        if (isAudio) {
+            executeCommand('insertAudio', { src: source, title: text.trim() || '' })
+            handleClose()
+            return
+        }
+
+        if (isVideo) {
+            executeCommand('insertVideo', { src: source, title: text.trim() || '' })
+            handleClose()
+            return
+        }
+
+        if (isEmbed) {
+            executeCommand('insertEmbed', { src: source, title: text.trim() || '' })
+            handleClose()
+        }
     }
 
-    const handleClose = () => setInsertDialog(null)
-    const handleOverlayClick = (e: React.MouseEvent) => {
-        if (e.target === e.currentTarget) handleClose()
-    }
-
-    const canSubmit = isImage
-        ? (mode === 'local' ? !!localFile : !!url.trim())
-        : !!url.trim()
+    const canSubmit = canUseLocal
+        ? (mode === 'local' ? Boolean(localFile) : Boolean(url.trim()))
+        : Boolean(url.trim())
 
     return (
         <div className="insert-dialog__overlay" onClick={handleOverlayClick}>
@@ -117,8 +164,7 @@ export function InsertDialog() {
                     </button>
                 </div>
                 <form className="insert-dialog__body" onSubmit={handleSubmit}>
-                    {/* 图片模式：显示 URL / 本地 切换标签 */}
-                    {isImage && (
+                    {canUseLocal && (
                         <div className="insert-dialog__tabs">
                             <button
                                 type="button"
@@ -126,7 +172,7 @@ export function InsertDialog() {
                                 onClick={() => setMode('url')}
                             >
                                 <ExternalLink size={14} />
-                                网络图片
+                                网络地址
                             </button>
                             <button
                                 type="button"
@@ -134,69 +180,73 @@ export function InsertDialog() {
                                 onClick={() => setMode('local')}
                             >
                                 <Upload size={14} />
-                                本地上传
+                                本地文件
                             </button>
                         </div>
                     )}
 
-                    {/* URL 输入（链接模式总是显示，图片模式仅 url 标签下显示） */}
-                    {(!isImage || mode === 'url') && (
+                    {(!canUseLocal || mode === 'url') && (
                         <div className="insert-dialog__field">
                             <label className="insert-dialog__label">
-                                {isImage ? (
-                                    <><ImagePlus size={14} /> 图片地址</>
-                                ) : (
-                                    <><ExternalLink size={14} /> 链接地址</>
-                                )}
+                                {isLink && <><ExternalLink size={14} /> 链接地址</>}
+                                {isImage && <><ImagePlus size={14} /> 图片地址</>}
+                                {isAudio && <><Music2 size={14} /> 音频地址</>}
+                                {isVideo && <><Video size={14} /> 视频地址</>}
+                                {isEmbed && <><Globe size={14} /> 嵌入地址</>}
                             </label>
                             <input
                                 ref={inputRef}
                                 type="text"
                                 className="insert-dialog__input"
-                                placeholder={isImage ? 'https://example.com/image.png' : 'https://example.com'}
+                                placeholder={
+                                    isImage
+                                        ? 'https://example.com/image.png'
+                                        : isAudio
+                                            ? 'https://example.com/audio.mp3'
+                                            : isVideo
+                                                ? 'https://example.com/video.mp4'
+                                                : isEmbed
+                                                    ? 'https://www.youtube.com/embed/...'
+                                                    : 'https://example.com'
+                                }
                                 value={url}
-                                onChange={(e) => setUrl(e.target.value)}
+                                onChange={e => setUrl(e.target.value)}
                             />
                         </div>
                     )}
 
-                    {/* 本地上传区域 */}
-                    {isImage && mode === 'local' && (
+                    {canUseLocal && mode === 'local' && (
                         <div className="insert-dialog__field">
                             <label className="insert-dialog__label">
-                                <Upload size={14} /> 选择图片文件
+                                <Upload size={14} /> 选择本地文件
                             </label>
-                            <div className="insert-dialog__upload-area" onClick={handleBrowseImage}>
+                            <div className="insert-dialog__upload-area" onClick={() => void handleBrowseLocal()}>
                                 {localFile ? (
                                     <div className="insert-dialog__upload-selected">
-                                        <ImagePlus size={20} color="var(--accent)" />
-                                        <span className="insert-dialog__upload-filename">
-                                            {localFile.split(/[\\/]/).pop()}
-                                        </span>
+                                        <Upload size={20} color="var(--accent)" />
+                                        <span className="insert-dialog__upload-filename">{toDisplayName(localFile)}</span>
                                         <span className="insert-dialog__upload-hint">点击更换</span>
                                     </div>
                                 ) : (
                                     <div className="insert-dialog__upload-placeholder">
                                         <Upload size={32} color="var(--text-muted)" strokeWidth={1.5} />
-                                        <span>点击选择图片</span>
-                                        <span className="insert-dialog__upload-formats">支持 PNG、JPG、GIF、SVG、WebP</span>
+                                        <span>点击选择文件</span>
                                     </div>
                                 )}
                             </div>
                         </div>
                     )}
 
-                    {/* 替代文字 / 显示文本 */}
                     <div className="insert-dialog__field">
                         <label className="insert-dialog__label">
-                            {isImage ? '替代文字（可选）' : '显示文本（可选）'}
+                            {isLink ? '显示文本（可选）' : '标题/描述（可选）'}
                         </label>
                         <input
                             type="text"
                             className="insert-dialog__input"
-                            placeholder={isImage ? '图片描述' : '点击此处'}
+                            placeholder={isLink ? '点击此处' : '媒体描述'}
                             value={text}
-                            onChange={(e) => setText(e.target.value)}
+                            onChange={e => setText(e.target.value)}
                         />
                     </div>
 

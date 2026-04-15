@@ -17,13 +17,16 @@ import { createSyntaxHintPlugin } from './plugins/syntaxHintPlugin'
 import { mathEditPlugin } from './plugins/mathEditPlugin'
 import { diagramViewPlugin } from './plugins/diagramPlugin'
 import { createActiveBlockPlugin } from './plugins/activeBlockPlugin'
+import { createMediaEmbedPlugin } from './plugins/mediaEmbedPlugin'
 import { EditorContextMenu } from './EditorContextMenu'
 import { copyImageToLocalAssets, saveBlobImageToLocalAssets } from '@/utils/fileUtils'
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { dirname, join } from '@tauri-apps/api/path'
 import { deleteColumn, deleteRow } from '@milkdown/kit/prose/tables'
 import { extractImageFileFromDataTransfer, readImageFromClipboardApi, rememberEditableTarget } from '@/utils/editorClipboard'
+import { buildMediaEmbedSnippet } from '@/utils/mediaEmbeds'
 import { getHtmlPasteMarkdown } from '@/utils/htmlPaste'
+import { clampTableWidthPx, extractMarkdownTableWidths, upsertMarkdownTableWidth } from '@/utils/tableWidths'
 
 // commonmark 命令
 import {
@@ -84,6 +87,8 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
     const lastEditorMarkdownRef = useRef(content)
     const isUpdatingRef = useRef(false)
     const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null)
+    const contextTargetRef = useRef<EventTarget | null>(null)
+    const lastTableTargetRef = useRef<HTMLTableElement | null>(null)
 
     const preventReadonlyMutation = useCallback((event: React.SyntheticEvent<HTMLDivElement>) => {
         if (!readOnly) return
@@ -155,6 +160,77 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
         }
     }, [tabId, updateContent])
 
+    const applyTableWidthsToDom = useCallback((markdownContent: string) => {
+        const root = containerRef.current
+        if (!root) return
+
+        const widthMap = extractMarkdownTableWidths(markdownContent)
+        const tables = Array.from(root.querySelectorAll<HTMLTableElement>('.milkdown table'))
+
+        tables.forEach((table, index) => {
+            const widthPx = widthMap.get(index)
+            if (widthPx) {
+                table.style.width = `${widthPx}px`
+                table.dataset.tableWidth = String(widthPx)
+            } else {
+                table.style.removeProperty('width')
+                delete table.dataset.tableWidth
+            }
+        })
+    }, [])
+
+    const getSelectedTableContext = useCallback((editor: Editor) => {
+        return editor.action(ctx => {
+            const view = ctx.get(editorViewCtx)
+            const domSelection = window.getSelection()
+            const fromSelection = domSelection?.anchorNode instanceof Element
+                ? domSelection.anchorNode
+                : domSelection?.anchorNode?.parentElement ?? null
+            const fromContextTarget = contextTargetRef.current instanceof Element
+                ? contextTargetRef.current
+                : null
+            const fromLastTableTarget = lastTableTargetRef.current
+            const table =
+                fromContextTarget?.closest('table') ??
+                fromLastTableTarget ??
+                fromSelection?.closest('table') ??
+                (view.domAtPos(view.state.selection.from).node instanceof Element
+                    ? view.domAtPos(view.state.selection.from).node.closest('table')
+                    : view.domAtPos(view.state.selection.from).node.parentElement?.closest('table')) ??
+                null
+
+            if (!(table instanceof HTMLTableElement) || !containerRef.current) return null
+
+            const tables = Array.from(containerRef.current.querySelectorAll<HTMLTableElement>('.milkdown table'))
+            const index = tables.indexOf(table)
+            if (index < 0) return null
+
+            return { table, index }
+        })
+    }, [])
+
+    const setSelectedTableWidth = useCallback((nextWidthPx: number | null) => {
+        if (!editorRef.current) return false
+
+        const editor = editorRef.current
+        let tableContext = getSelectedTableContext(editor)
+        if (!tableContext && containerRef.current) {
+            const tables = Array.from(containerRef.current.querySelectorAll<HTMLTableElement>('.milkdown table'))
+            if (tables.length === 1) {
+                tableContext = { table: tables[0], index: 0 }
+            }
+        }
+        if (!tableContext) return false
+
+        const state = useEditorStore.getState()
+        const sourceMarkdown = state.tabs.find(tab => tab.id === tabId)?.content ?? lastEditorMarkdownRef.current
+        const updatedMarkdown = upsertMarkdownTableWidth(sourceMarkdown, tableContext.index, nextWidthPx)
+
+        updateContent(tabId, updatedMarkdown)
+        applyTableWidthsToDom(updatedMarkdown)
+        return true
+    }, [applyTableWidthsToDom, getSelectedTableContext, tabId, updateContent])
+
     // 创建编辑器
     useEffect(() => {
         if (!containerRef.current) return
@@ -206,7 +282,13 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
 
                     // 通过 reconfigure 添加自定义 ProseMirror 插件
                     const newState = view.state.reconfigure({
-                        plugins: [...view.state.plugins, createSyntaxHintPlugin(), prosemirrorSearchPlugin(), createActiveBlockPlugin()]
+                        plugins: [
+                            ...view.state.plugins,
+                            createSyntaxHintPlugin(),
+                            prosemirrorSearchPlugin(),
+                            createActiveBlockPlugin(),
+                            createMediaEmbedPlugin()
+                        ]
                     })
                     view.updateState(newState)
 
@@ -384,7 +466,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
             editorRef.current = null
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tabId])
+    }, [detectActiveMarks, blobToDataUrl, content, readOnly, syncMarkdownFromEditor, tabId, updateContent])
 
     // 仅当外部内容与编辑器自身产出不同时才同步
     useEffect(() => {
@@ -402,6 +484,18 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
     }, [content])
 
     useEffect(() => {
+        const root = containerRef.current
+        if (!root) return
+
+        applyTableWidthsToDom(content)
+        const observer = new MutationObserver(() => applyTableWidthsToDom(content))
+        observer.observe(root, { childList: true, subtree: true })
+
+        return () => observer.disconnect()
+    }, [applyTableWidthsToDom, content])
+
+    // 编辑器命令执行器
+    useEffect(() => {
         if (!editorRef.current) return
 
         editorRef.current.action(ctx => {
@@ -410,7 +504,6 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
         })
     }, [readOnly])
 
-    // 编辑器命令执行器
     const executeCommand = useCallback((cmd: string, payload?: unknown) => {
         if (!editorRef.current) return
 
@@ -525,6 +618,48 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                     }
                     break
                 }
+                case 'insertAudio': {
+                    const { src, title } = payload as { src: string; title?: string }
+                    const snippet = buildMediaEmbedSnippet('audio', { src, title })
+                    if (!snippet) break
+                    editor.action(ctx => {
+                        const view = ctx.get(editorViewCtx)
+                        const { state, dispatch } = view
+                        const { from, to } = state.selection
+                        const tr = state.tr.insertText(`${snippet}\n\n`, from, to)
+                        dispatch(tr.scrollIntoView())
+                        view.focus()
+                    })
+                    break
+                }
+                case 'insertVideo': {
+                    const { src, title } = payload as { src: string; title?: string }
+                    const snippet = buildMediaEmbedSnippet('video', { src, title })
+                    if (!snippet) break
+                    editor.action(ctx => {
+                        const view = ctx.get(editorViewCtx)
+                        const { state, dispatch } = view
+                        const { from, to } = state.selection
+                        const tr = state.tr.insertText(`${snippet}\n\n`, from, to)
+                        dispatch(tr.scrollIntoView())
+                        view.focus()
+                    })
+                    break
+                }
+                case 'insertEmbed': {
+                    const { src, title } = payload as { src: string; title?: string }
+                    const snippet = buildMediaEmbedSnippet('embed', { src, title })
+                    if (!snippet) break
+                    editor.action(ctx => {
+                        const view = ctx.get(editorViewCtx)
+                        const { state, dispatch } = view
+                        const { from, to } = state.selection
+                        const tr = state.tr.insertText(`${snippet}\n\n`, from, to)
+                        dispatch(tr.scrollIntoView())
+                        view.focus()
+                    })
+                    break
+                }
 
                 // 保留旧的 image 命令以兼容（打开弹窗）
                 case 'image': {
@@ -563,6 +698,28 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                         deleteColumn(view.state, view.dispatch)
                         view.focus()
                     })
+                    break
+                case 'tableSetWidth': {
+                    const { widthPx } = (payload ?? {}) as { widthPx?: number }
+                    if (typeof widthPx === 'number') {
+                        setSelectedTableWidth(clampTableWidthPx(widthPx))
+                    }
+                    break
+                }
+                case 'tableAdjustWidth': {
+                    const { deltaPx = 120 } = (payload ?? {}) as { deltaPx?: number }
+                    const tableContext = getSelectedTableContext(editor)
+                    if (!tableContext) break
+
+                    const state = useEditorStore.getState()
+                    const sourceMarkdown = state.tabs.find(tab => tab.id === tabId)?.content ?? lastEditorMarkdownRef.current
+                    const widthMap = extractMarkdownTableWidths(sourceMarkdown)
+                    const currentWidth = widthMap.get(tableContext.index) ?? Math.round(tableContext.table.getBoundingClientRect().width)
+                    setSelectedTableWidth(currentWidth + deltaPx)
+                    break
+                }
+                case 'tableResetWidth':
+                    setSelectedTableWidth(null)
                     break
 
                 // 撤销/恢复
@@ -654,7 +811,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
         } catch (e) {
             console.warn(`命令 "${cmd}" 执行失败:`, e)
         }
-    }, [detectActiveMarks])
+    }, [detectActiveMarks, getSelectedTableContext, setSelectedTableWidth, tabId])
 
     useEffect(() => {
         // 只读模式下不注册命令处理器
@@ -685,9 +842,20 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                 onPasteCapture={preventReadonlyMutation}
                 onDropCapture={preventReadonlyMutation}
                 onKeyDownCapture={handleReadonlyKeyDown}
+                onMouseDownCapture={(e) => {
+                    lastTableTargetRef.current =
+                        e.target instanceof Element
+                            ? e.target.closest('table')
+                            : null
+                }}
                 onContextMenu={(e) => {
                     if (readOnly) return
                     e.preventDefault()
+                    contextTargetRef.current = e.target
+                    lastTableTargetRef.current =
+                        e.target instanceof Element
+                            ? e.target.closest('table')
+                            : null
                     rememberEditableTarget(e.target)
                     setContextMenu({ x: e.clientX, y: e.clientY })
                 }}

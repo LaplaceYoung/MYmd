@@ -2,6 +2,13 @@
 import { invoke } from '@tauri-apps/api/core'
 import { indexKnowledgeDocument, rebuildWorkspaceIndex } from '@/knowledge/service'
 import PQueue from 'p-queue'
+import { resolveAppLocale, type AppLocale } from '@/i18n'
+import {
+    clampTableWidthPx,
+    countMarkdownTables,
+    extractMarkdownTableWidths,
+    upsertMarkdownTableWidth,
+} from '@/utils/tableWidths'
 // 单个标签页
 export interface Tab {
     /** 唯一标识 */
@@ -132,6 +139,8 @@ interface EditorState {
     searchHistory: string[]
     /** Max number of search terms to keep */
     searchHistoryLimit: number
+    /** 应用界面语言 */
+    locale: AppLocale
     /** 主题模式 */
     themeMode: ThemeMode
     /** 配色方案 */
@@ -219,6 +228,7 @@ interface EditorState {
     pushSearchHistory: (query: string) => void
     clearSearchHistory: () => void
     setSearchHistory: (history: string[]) => void
+    setLocale: (locale: AppLocale) => void
     setThemeMode: (mode: ThemeMode) => void
     setColorScheme: (scheme: ColorScheme) => void
     setEditorFontSize: (size: number) => void
@@ -283,6 +293,7 @@ interface EditorState {
 
 let tabCounter = 0
 const SEARCH_HISTORY_STORAGE_KEY = 'mymd.searchHistory'
+const APP_LOCALE_STORAGE_KEY = 'mymd.locale'
 const DEFAULT_SEARCH_HISTORY_LIMIT = 10
 const PAPER_SETTINGS_STORAGE_KEY = 'mymd.paperSettings'
 const DEFAULT_CUSTOM_PAPER_SIZE: CustomPaperSize = {
@@ -316,6 +327,41 @@ function persistSearchHistory(history: string[]) {
     } catch {
         // ignore persistence failures
     }
+}
+
+function loadLocaleFromStorage(): AppLocale {
+    if (typeof window === 'undefined') return 'system'
+    try {
+        const raw = window.localStorage.getItem(APP_LOCALE_STORAGE_KEY)
+        if (
+            raw === 'system' ||
+            raw === 'en-US' ||
+            raw === 'zh-CN' ||
+            raw === 'ja-JP' ||
+            raw === 'ko-KR' ||
+            raw === 'fr-FR' ||
+            raw === 'de-DE' ||
+            raw === 'es-ES'
+        ) {
+            return raw
+        }
+    } catch {
+        // ignore persistence failures
+    }
+    return 'system'
+}
+
+function persistLocale(locale: AppLocale) {
+    if (typeof window === 'undefined') return
+    try {
+        window.localStorage.setItem(APP_LOCALE_STORAGE_KEY, locale)
+    } catch {
+        // ignore persistence failures
+    }
+}
+
+function getDefaultUntitledTitle(locale: AppLocale) {
+    return resolveAppLocale(locale) === 'zh-CN' ? '未命名.md' : 'Untitled.md'
 }
 
 function clampPaperDimensionMm(value: number, fallback: number): number {
@@ -521,6 +567,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     globalSearchQuery: '',
     searchHistory: loadSearchHistoryFromStorage(),
     searchHistoryLimit: DEFAULT_SEARCH_HISTORY_LIMIT,
+    locale: loadLocaleFromStorage(),
     themeMode: 'system',
     colorScheme: 'default',
     editorFontSize: 16,
@@ -564,7 +611,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     addTab: (filePath, content = '') => {
         const id = generateTabId()
-        const title = filePath ? getFileName(filePath) : '未命名.md'
+        const title = filePath ? getFileName(filePath) : getDefaultUntitledTitle(get().locale)
 
         // 如果文件已经打开，直接切换到对应标签
         if (filePath) {
@@ -670,6 +717,25 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     }),
 
     executeCommand: (cmd, payload) => {
+        if (cmd === 'tableSetWidth' || cmd === 'tableAdjustWidth' || cmd === 'tableResetWidth') {
+            const activeTab = get().getActiveTab()
+            if (activeTab && countMarkdownTables(activeTab.content) === 1) {
+                if (cmd === 'tableSetWidth') {
+                    const widthPx = (payload as { widthPx?: number } | undefined)?.widthPx
+                    if (typeof widthPx === 'number') {
+                        get().updateContent(activeTab.id, upsertMarkdownTableWidth(activeTab.content, 0, clampTableWidthPx(widthPx)))
+                    }
+                } else if (cmd === 'tableAdjustWidth') {
+                    const deltaPx = (payload as { deltaPx?: number } | undefined)?.deltaPx ?? 120
+                    const widthMap = extractMarkdownTableWidths(activeTab.content)
+                    const currentWidth = widthMap.get(0) ?? 720
+                    get().updateContent(activeTab.id, upsertMarkdownTableWidth(activeTab.content, 0, currentWidth + deltaPx))
+                } else {
+                    get().updateContent(activeTab.id, upsertMarkdownTableWidth(activeTab.content, 0, null))
+                }
+            }
+        }
+
         if (cmd === 'openGlobalSearch') {
             const query =
                 typeof payload === 'string'
@@ -750,6 +816,11 @@ export const useEditorStore = create<EditorState>((set, get) => ({
             .slice(0, get().searchHistoryLimit)
         persistSearchHistory(nextHistory)
         set({ searchHistory: nextHistory })
+    },
+
+    setLocale: (locale) => {
+        persistLocale(locale)
+        set({ locale })
     },
 
     setThemeMode: (mode) => set({ themeMode: mode }),

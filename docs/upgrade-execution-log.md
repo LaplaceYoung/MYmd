@@ -120,3 +120,32 @@
   - Added `src/utils/renderApi.ts` to expose a shared automation-facing rendering lane from raw Markdown input to prepared body HTML and full export HTML output.
   - Reused the existing export preparation path so page-break preprocessing and Mermaid export handling stay consistent with the product runtime.
   - Added `tests/render_api.spec.ts` to verify both body-html rendering and full export-document generation from raw Markdown input.
+
+### Slice 7
+
+- Scope:
+  - Phase P1 table width persistence and low-disturbance editing controls
+  - keep wide-table behavior aligned between editor rendering and export output
+- Planned touchpoints:
+  - `.omx/context/ralph-table-width-controls-20260415T120000Z.md`
+  - `src/utils/tableWidths.ts`
+  - `src/utils/renderApi.ts`
+  - `src/components/Ribbon/Ribbon.tsx`
+  - `src/components/Editor/WysiwygEditor.tsx`
+  - `src/components/Editor/EditorContextMenu.tsx`
+  - `src/styles/editor.css`
+  - `src/stores/editorStore.ts`
+  - `tests/table_widths.spec.ts`
+  - `tests/e2e_table_width_resize.spec.ts`
+- Verification target:
+  - targeted table-width unit and Playwright regression coverage
+  - `npm run build`
+- Evidence:
+  - Added `src/utils/tableWidths.ts` with shared helpers to clamp widths, locate Markdown tables, persist `<!-- mymd:table-width=... -->` directives, and project those directives into rendered HTML.
+  - Wired WYSIWYG table-width commands to persist width directives back into Markdown and re-apply explicit widths onto rendered table nodes after editor mutations.
+  - Added context-menu actions to widen, narrow, and reset table width without changing the surrounding editor aesthetic.
+  - Applied persisted table widths in `src/utils/renderApi.ts` and the HTML export path so downstream paper sizing and export output respect the same table width state.
+  - Added a single-table store fallback so width commands still persist when the active selection context is unavailable.
+  - Added `tests/table_widths.spec.ts` and `tests/e2e_table_width_resize.spec.ts` to cover directive persistence and width-aware render output.
+  - Re-ran `npx playwright test tests/table_widths.spec.ts tests/e2e_table_width_resize.spec.ts --reporter=line` and it passed on 2026-04-15.
+  - Re-ran `npm run build` and it passed on 2026-04-15.

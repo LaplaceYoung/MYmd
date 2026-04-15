@@ -27,6 +27,9 @@ import {
     Save,
     FilePlus,
     Download,
+    AudioLines,
+    Video,
+    Globe,
     Bot,
     Sparkles,
     Network,
@@ -44,6 +47,7 @@ import {
 } from '@/utils/paper'
 import { copyFromEditor, cutFromEditor, pasteToEditor } from '@/utils/editorClipboard'
 import { buildContextualAiDraft } from '@/utils/aiDrafts'
+import { applyTableWidthDirectivesToHtml } from '@/utils/tableWidths'
 import './Ribbon.css'
 
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
@@ -204,7 +208,8 @@ export function Ribbon() {
                 exportOptions.pageBreakMode !== 'flow'
             )
             const rawBodyHtml = marked.parse(preprocessedMarkdown, { gfm: true }) as string
-            const bodyHtml = applyExportPageBreakMode(rawBodyHtml, exportOptions.pageBreakMode)
+            const widthAwareBodyHtml = applyTableWidthDirectivesToHtml(rawBodyHtml, preprocessedMarkdown)
+            const bodyHtml = applyExportPageBreakMode(widthAwareBodyHtml, exportOptions.pageBreakMode)
             const htmlTemplate = buildExportHtmlDocument({
                 title: tab.title,
                 bodyHtml,
@@ -397,6 +402,9 @@ export function Ribbon() {
                         <RibbonGroup title="媒体">
                             <RibbonButton icon={Image} label="插入图片" onClick={() => setInsertDialog('image')} large />
                             <RibbonButton icon={Link} label="插入链接" onClick={() => setInsertDialog('link')} large />
+                            <RibbonButton icon={AudioLines} label="插入音频" onClick={() => setInsertDialog('audio')} large />
+                            <RibbonButton icon={Video} label="插入视频" onClick={() => setInsertDialog('video')} large />
+                            <RibbonButton icon={Globe} label="嵌入网页" onClick={() => setInsertDialog('embed')} large />
                         </RibbonGroup>
 
                         <div className="ribbon-divider" />

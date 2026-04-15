@@ -1,10 +1,18 @@
 import { useEffect, useRef, useCallback } from 'react'
 import {
-    Scissors, Copy, ClipboardPaste,
-    Bold, Italic,
-    Link, Image,
-    Undo2, Redo2,
-    type LucideIcon
+    Scissors,
+    Copy,
+    ClipboardPaste,
+    Bold,
+    Italic,
+    Link,
+    Image,
+    TableProperties,
+    StretchHorizontal,
+    Shrink,
+    Undo2,
+    Redo2,
+    type LucideIcon,
 } from 'lucide-react'
 import './EditorContextMenu.css'
 import { copyFromEditor, cutFromEditor, pasteToEditor } from '@/utils/editorClipboard'
@@ -17,7 +25,6 @@ interface ContextMenuItemData {
     command?: string
     payload?: unknown
     disabled?: boolean
-    /** 自定义动作（非编辑器命令） */
     action?: () => void
 }
 
@@ -32,7 +39,6 @@ interface EditorContextMenuProps {
     onCommand: (cmd: string, payload?: unknown) => void
 }
 
-/** 构建菜单数据 */
 function buildMenuGroups(): ContextMenuGroup[] {
     return [
         {
@@ -40,8 +46,11 @@ function buildMenuGroups(): ContextMenuGroup[] {
                 { id: 'cut', label: '剪切', icon: Scissors, shortcut: 'Ctrl+X', action: () => cutFromEditor() },
                 { id: 'copy', label: '复制', icon: Copy, shortcut: 'Ctrl+C', action: () => copyFromEditor() },
                 {
-                    id: 'paste', label: '粘贴', icon: ClipboardPaste, shortcut: 'Ctrl+V',
-                    action: () => { void pasteToEditor() }
+                    id: 'paste',
+                    label: '粘贴',
+                    icon: ClipboardPaste,
+                    shortcut: 'Ctrl+V',
+                    action: () => { void pasteToEditor() },
                 },
             ],
         },
@@ -53,8 +62,15 @@ function buildMenuGroups(): ContextMenuGroup[] {
         },
         {
             items: [
-                { id: 'link', label: '插入链接…', icon: Link, command: 'link' },
-                { id: 'image', label: '插入图片…', icon: Image, command: 'image' },
+                { id: 'link', label: '插入链接', icon: Link, command: 'link' },
+                { id: 'image', label: '插入图片', icon: Image, command: 'image' },
+            ],
+        },
+        {
+            items: [
+                { id: 'table-wider', label: '表格加宽', icon: StretchHorizontal, command: 'tableAdjustWidth', payload: { deltaPx: 120 } },
+                { id: 'table-narrower', label: '表格收窄', icon: Shrink, command: 'tableAdjustWidth', payload: { deltaPx: -120 } },
+                { id: 'table-reset', label: '恢复自动宽度', icon: TableProperties, command: 'tableResetWidth' },
             ],
         },
         {
@@ -69,7 +85,6 @@ function buildMenuGroups(): ContextMenuGroup[] {
 export function EditorContextMenu({ x, y, onClose, onCommand }: EditorContextMenuProps) {
     const menuRef = useRef<HTMLDivElement>(null)
 
-    // 边界检测 — 确保菜单不超出可视区域
     useEffect(() => {
         const menu = menuRef.current
         if (!menu) return
@@ -92,14 +107,13 @@ export function EditorContextMenu({ x, y, onClose, onCommand }: EditorContextMen
         menu.style.top = `${Math.max(4, adjustedY)}px`
     }, [x, y])
 
-    // 点击外部关闭
     useEffect(() => {
         function handleMouseDown(e: MouseEvent) {
             if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
                 onClose()
             }
         }
-        // 使用 setTimeout 避免右键事件本身触发关闭
+
         const timer = setTimeout(() => {
             document.addEventListener('mousedown', handleMouseDown)
         }, 0)
@@ -110,18 +124,17 @@ export function EditorContextMenu({ x, y, onClose, onCommand }: EditorContextMen
         }
     }, [onClose])
 
-    // Escape 关闭
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
             if (e.key === 'Escape') {
                 onClose()
             }
         }
+
         document.addEventListener('keydown', handleKeyDown)
         return () => document.removeEventListener('keydown', handleKeyDown)
     }, [onClose])
 
-    // 执行菜单项
     const handleItemClick = useCallback((item: ContextMenuItemData) => {
         if (item.disabled) return
 
@@ -130,8 +143,9 @@ export function EditorContextMenu({ x, y, onClose, onCommand }: EditorContextMen
         } else if (item.command) {
             onCommand(item.command, item.payload)
         }
+
         onClose()
-    }, [onCommand, onClose])
+    }, [onClose, onCommand])
 
     const groups = buildMenuGroups()
 

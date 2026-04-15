@@ -4,6 +4,7 @@ import {
     getDefaultExportOptions,
     prepareMarkdownForExport,
 } from '@/utils/paper'
+import { applyTableWidthDirectivesToHtml } from '@/utils/tableWidths'
 import type {
     CustomPaperSize,
     DocumentProfile,
@@ -47,7 +48,8 @@ function resolveExportTimestamp(value?: string) {
 
 export async function renderMarkdownBodyHtml(markdown: string, preservePageBreakMarkers = true) {
     const preparedMarkdown = await prepareMarkdownForExport(markdown, preservePageBreakMarkers)
-    const bodyHtml = marked.parse(preparedMarkdown) as string
+    const rawBodyHtml = marked.parse(preparedMarkdown) as string
+    const bodyHtml = applyTableWidthDirectivesToHtml(rawBodyHtml, preparedMarkdown)
     return {
         preparedMarkdown,
         bodyHtml,
