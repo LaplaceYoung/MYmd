@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { List, Search, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ChevronRight, List, Search, X } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
 import { analyzeDocumentPerformance } from '@/utils/performance'
 import './TOCPanel.css'
@@ -10,6 +10,18 @@ interface TOCItem {
     text: string
     index: number
 }
+
+interface TOCTreeNode extends TOCItem {
+    children: TOCTreeNode[]
+    parentId: string | null
+}
+
+interface PersistedTocState {
+    collapsedByTab: Record<string, string[]>
+    activeByTab: Record<string, number>
+}
+
+const TOC_STATE_STORAGE_KEY = 'mymd:toc-state:v1'
 
 function extractHeadings(content: string): TOCItem[] {
     if (!content) return []
@@ -41,6 +53,103 @@ function extractHeadings(content: string): TOCItem[] {
     return items
 }
 
+function buildHeadingTree(items: TOCItem[]): TOCTreeNode[] {
+    const roots: TOCTreeNode[] = []
+    const stack: TOCTreeNode[] = []
+
+    for (const item of items) {
+        const node: TOCTreeNode = {
+            ...item,
+            children: [],
+            parentId: null,
+        }
+
+        while (stack.length > 0 && stack[stack.length - 1].level >= node.level) {
+            stack.pop()
+        }
+
+        const parent = stack[stack.length - 1] ?? null
+        if (parent) {
+            node.parentId = parent.id
+            parent.children.push(node)
+        } else {
+            roots.push(node)
+        }
+
+        stack.push(node)
+    }
+
+    return roots
+}
+
+function filterHeadingTree(nodes: TOCTreeNode[], query: string): TOCTreeNode[] {
+    if (!query) return nodes
+
+    const lowered = query.toLowerCase()
+    const visit = (node: TOCTreeNode): TOCTreeNode | null => {
+        const children = node.children
+            .map(visit)
+            .filter((child): child is TOCTreeNode => child !== null)
+
+        if (node.text.toLowerCase().includes(lowered) || children.length > 0) {
+            return { ...node, children }
+        }
+
+        return null
+    }
+
+    return nodes
+        .map(visit)
+        .filter((node): node is TOCTreeNode => node !== null)
+}
+
+function flattenVisibleTree(
+    nodes: TOCTreeNode[],
+    collapsedIds: Set<string>,
+    forceExpand = false
+): TOCTreeNode[] {
+    const result: TOCTreeNode[] = []
+
+    const visit = (node: TOCTreeNode) => {
+        result.push(node)
+        if (forceExpand || !collapsedIds.has(node.id)) {
+            node.children.forEach(visit)
+        }
+    }
+
+    nodes.forEach(visit)
+    return result
+}
+
+function loadPersistedTocState(): PersistedTocState {
+    if (typeof window === 'undefined') {
+        return { collapsedByTab: {}, activeByTab: {} }
+    }
+
+    try {
+        const raw = window.localStorage.getItem(TOC_STATE_STORAGE_KEY)
+        if (!raw) return { collapsedByTab: {}, activeByTab: {} }
+
+        const parsed = JSON.parse(raw) as Partial<PersistedTocState>
+        return {
+            collapsedByTab: parsed.collapsedByTab ?? {},
+            activeByTab: parsed.activeByTab ?? {},
+        }
+    } catch {
+        return { collapsedByTab: {}, activeByTab: {} }
+    }
+}
+
+function persistTocState(nextState: PersistedTocState) {
+    if (typeof window === 'undefined') return
+
+    try {
+        window.localStorage.setItem(TOC_STATE_STORAGE_KEY, JSON.stringify(nextState))
+    } catch {
+        // ignore persistence failures
+    }
+}
+
 export function TOCPanel() {
     const tocVisible = useEditorStore((s) => s.tocVisible)
     const setTocVisible = useEditorStore((s) => s.setTocVisible)
@@ -57,6 +166,8 @@ export function TOCPanel() {
     const [isIndexing, setIsIndexing] = useState(false)
     const [filterQuery, setFilterQuery] = useState('')
     const [activeHeadingIndex, setActiveHeadingIndex] = useState(-1)
+    const [collapsedIds, setCollapsedIds] = useState<string[]>([])
+    const pendingRestoreTabIdRef = useRef<string | null>(null)
 
     const getHeadingSelector = () =>
         viewMode === 'split'
@@ -128,11 +239,59 @@ export function TOCPanel() {
 
     useEffect(() => {
         setFilterQuery('')
-        setActiveHeadingIndex(headings.length > 0 ? headings[0].index : -1)
-    }, [activeTab?.id, headings])
+
+        if (!activeTab?.id) {
+            setCollapsedIds([])
+            setActiveHeadingIndex(-1)
+            return
+        }
+
+        const persisted = loadPersistedTocState()
+        pendingRestoreTabIdRef.current = activeTab.id
+        setCollapsedIds(persisted.collapsedByTab[activeTab.id] ?? [])
+        setActiveHeadingIndex(persisted.activeByTab[activeTab.id] ?? -1)
+    }, [activeTab?.id])
 
     useEffect(() => {
-        if (!tocVisible || headings.length === 0) return
+        const validHeadingIds = new Set(headings.map((heading) => heading.id))
+
+        setCollapsedIds((current) => current.filter((id) => validHeadingIds.has(id)))
+        setActiveHeadingIndex((current) => (
+            headings.some((heading) => heading.index === current)
+                ? current
+                : (headings[0]?.index ?? -1)
+        ))
+    }, [headings])
+
+    useEffect(() => {
+        if (!activeTab?.id) return
+        if (pendingRestoreTabIdRef.current === activeTab.id) {
+            pendingRestoreTabIdRef.current = null
+            return
+        }
+
+        const persisted = loadPersistedTocState()
+        persisted.collapsedByTab[activeTab.id] = collapsedIds
+        if (activeHeadingIndex >= 0) {
+            persisted.activeByTab[activeTab.id] = activeHeadingIndex
+        }
+        persistTocState(persisted)
+    }, [activeHeadingIndex, activeTab?.id, collapsedIds])
+
+    const headingTree = useMemo(() => buildHeadingTree(headings), [headings])
+    const normalizedFilter = filterQuery.trim().toLowerCase()
+    const filteredTree = useMemo(
+        () => filterHeadingTree(headingTree, normalizedFilter),
+        [headingTree, normalizedFilter]
+    )
+    const collapsedIdSet = useMemo(() => new Set(collapsedIds), [collapsedIds])
+    const visibleHeadings = useMemo(
+        () => flattenVisibleTree(filteredTree, collapsedIdSet, Boolean(normalizedFilter)),
+        [collapsedIdSet, filteredTree, normalizedFilter]
+    )
+
+    useEffect(() => {
+        if (!tocVisible || headings.length === 0 || normalizedFilter) return
 
         const syncActiveHeading = () => {
             const domHeadings = Array.from(document.querySelectorAll(getHeadingSelector()))
@@ -176,12 +335,15 @@ export function TOCPanel() {
             window.removeEventListener('resize', syncActiveHeading)
             observer?.disconnect()
         }
-    }, [activeTab?.id, headings, tocVisible, viewMode])
+    }, [activeTab?.id, headings, normalizedFilter, tocVisible, viewMode])
 
-    const normalizedFilter = filterQuery.trim().toLowerCase()
-    const filteredHeadings = normalizedFilter
-        ? headings.filter((heading) => heading.text.toLowerCase().includes(normalizedFilter))
-        : headings
+    const toggleCollapsed = (headingId: string) => {
+        setCollapsedIds((current) => (
+            current.includes(headingId)
+                ? current.filter((id) => id !== headingId)
+                : [...current, headingId]
+        ))
+    }
 
     const handleHeadingClick = (index: number) => {
         setActiveHeadingIndex(index)
@@ -226,17 +388,39 @@ export function TOCPanel() {
                 {isIndexing && <div className="toc-panel__empty">Indexing headings...</div>}
                 {!isIndexing && headings.length === 0 ? (
                     <div className="toc-panel__empty">暂无标题</div>
-                ) : !isIndexing && filteredHeadings.length === 0 ? (
+                ) : !isIndexing && visibleHeadings.length === 0 ? (
                     <div className="toc-panel__empty">没有匹配的大纲</div>
                 ) : (
-                    filteredHeadings.map((heading) => (
+                    visibleHeadings.map((heading) => (
                         <div
                             key={heading.id}
                             className={`toc-panel__item toc-panel__item--level-${heading.level}${heading.index === activeHeadingIndex ? ' toc-panel__item--active' : ''}`}
-                            onClick={() => handleHeadingClick(heading.index)}
+                            data-toc-index={heading.index}
                             title={heading.text}
                         >
-                            {heading.text}
+                            <div
+                                className="toc-panel__row"
+                                onClick={() => handleHeadingClick(heading.index)}
+                            >
+                                {heading.children.length > 0 ? (
+                                    <button
+                                        type="button"
+                                        className={`toc-panel__toggle${collapsedIdSet.has(heading.id) && !normalizedFilter ? ' is-collapsed' : ''}`}
+                                        data-toc-index={heading.index}
+                                        aria-label={collapsedIdSet.has(heading.id) && !normalizedFilter ? 'Expand heading section' : 'Collapse heading section'}
+                                        aria-expanded={collapsedIdSet.has(heading.id) && !normalizedFilter ? 'false' : 'true'}
+                                        onClick={(event) => {
+                                            event.stopPropagation()
+                                            toggleCollapsed(heading.id)
+                                        }}
+                                    >
+                                        <ChevronRight size={12} />
+                                    </button>
+                                ) : (
+                                    <span className="toc-panel__toggle-spacer" />
+                                )}
+                                <span className="toc-panel__item-label">{heading.text}</span>
+                            </div>
                         </div>
                     ))
                 )}

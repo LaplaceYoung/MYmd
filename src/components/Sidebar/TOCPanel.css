@@ -21,6 +21,34 @@
     flex-shrink: 0;
 }
 
+.toc-panel__filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+}
+
+.toc-panel__filter-icon {
+    flex-shrink: 0;
+}
+
+.toc-panel__filter-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-size: 12px;
+    padding: 7px 10px;
+    outline: none;
+}
+
+.toc-panel__filter-input:focus {
+    border-color: var(--accent);
+}
+
 .toc-panel__title {
     display: flex;
     align-items: center;
@@ -62,19 +90,72 @@
 }
 
 .toc-panel__item {
-    padding: 6px 16px;
-    cursor: pointer;
     font-size: 13px;
     color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     transition: background-color 0.2s, color 0.2s;
 }
 
-.toc-panel__item:hover {
+.toc-panel__row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.toc-panel__item-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.toc-panel__toggle {
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+.toc-panel__toggle:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.toc-panel__toggle.is-collapsed svg {
+    transform: rotate(0deg);
+}
+
+.toc-panel__toggle svg {
+    transform: rotate(90deg);
+    transition: transform 0.2s ease;
+}
+
+.toc-panel__toggle-spacer {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.toc-panel__item:hover .toc-panel__row {
     background-color: var(--bg-hover);
     color: var(--accent);
+}
+
+.toc-panel__item--active .toc-panel__row {
+    background: color-mix(in srgb, var(--accent, #2563eb) 12%, var(--bg-secondary));
+    color: var(--accent);
+    font-weight: 600;
 }
 
 .toc-panel__item--level-1 {
