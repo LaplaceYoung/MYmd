@@ -88,3 +88,19 @@
   - Added `tests/e2e_source_html_paste.spec.ts` and `tests/e2e_wysiwyg_html_paste.spec.ts` to cover both editor surfaces with the same conversion expectations.
   - Re-ran `npx playwright test tests/e2e_source_html_paste.spec.ts tests/e2e_wysiwyg_html_paste.spec.ts --reporter=line` and it passed on 2026-04-15.
   - Re-ran `npm run build` and it passed on 2026-04-15.
+
+### Slice 5
+
+- Scope:
+  - Phase P1 editor runtime mode/state query API
+  - expose a stable state snapshot for plugins, AI flows, and automation without changing the visual design
+- Planned touchpoints:
+  - `src/utils/editorRuntime.ts`
+  - `tests/e2e_editor_runtime_state.spec.ts`
+- Verification target:
+  - targeted Playwright regression for runtime state in WYSIWYG and split mode
+  - `npm run build`
+- Evidence:
+  - Added `src/utils/editorRuntime.ts` to provide a shared snapshot/query surface for active tab, mode, panel visibility, registered command ids, and preview/editability state.
+  - Kept the new API read-only and store-driven so it does not alter the existing theme, layout, or interaction flow.
+  - Added `tests/e2e_editor_runtime_state.spec.ts` to verify runtime state snapshots across WYSIWYG and split mode transitions.
