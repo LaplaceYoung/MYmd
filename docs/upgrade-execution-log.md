@@ -149,3 +149,24 @@
   - Added `tests/table_widths.spec.ts` and `tests/e2e_table_width_resize.spec.ts` to cover directive persistence and width-aware render output.
   - Re-ran `npx playwright test tests/table_widths.spec.ts tests/e2e_table_width_resize.spec.ts --reporter=line` and it passed on 2026-04-15.
   - Re-ran `npm run build` and it passed on 2026-04-15.
+
+### Slice 8
+
+- Scope:
+  - Phase P0 workspace tree consistency and file-operation closure
+  - keep wiki-link/backlink continuity aligned after workspace rename actions
+- Planned touchpoints:
+  - `.omx/context/ralph-workspace-explorer-ops-20260415T133500Z.md`
+  - `src/components/Sidebar/FileExplorer.tsx`
+  - `src/components/Sidebar/FileExplorer.css`
+  - `tests/e2e_wikilink_backlink.spec.ts`
+- Verification target:
+  - targeted Playwright regression for workspace rename/backlink continuity
+  - `npm run build`
+- Evidence:
+  - Added directory-cache and open-folder hydration logic so nested workspace tree state survives refreshes instead of collapsing on every reload.
+  - Added file-explorer action flows for create file, create folder, rename, and delete with dialog-based confirmation that preserves the current sidebar aesthetic.
+  - Guarded destructive operations by checking open dirty tabs before delete and refreshing the workspace plus knowledge index after successful actions.
+  - Expanded `tests/e2e_wikilink_backlink.spec.ts` into a mock-workspace regression that verifies `rename -> wikilink rewrite -> reindex -> backlink panel continuity`.
+  - Re-ran `npx playwright test tests/e2e_wikilink_backlink.spec.ts --reporter=line` and it passed on 2026-04-15.
+  - Re-ran `npm run build` and it passed on 2026-04-15.
