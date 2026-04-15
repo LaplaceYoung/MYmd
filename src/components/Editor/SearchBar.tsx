@@ -95,9 +95,10 @@ export function SearchBar() {
         }
     }, [])
 
-    const doSearch = useCallback((searchText: string, addToHistory = false) => {
+    const doSearch = useCallback((searchText: string, addToHistory = false, selectFirst = true) => {
         const normalized = searchText.trim()
         if (!normalized) {
+            executeCommand('search', '')
             setMatchCount(0)
             setCurrentMatch(0)
             return
@@ -109,6 +110,10 @@ export function SearchBar() {
         }
 
         const count = updateMatchStats(normalized, activeTabContent)
+        if (count > 0 && selectFirst) {
+            executeCommand('searchNext')
+            setCurrentMatch(1)
+        }
         flashFeedback(count > 0 ? `Found ${count} matches` : 'No matches found')
     }, [executeCommand, pushSearchHistory, updateMatchStats, activeTabContent, flashFeedback])
 
@@ -142,14 +147,14 @@ export function SearchBar() {
     const handleReplace = useCallback(() => {
         if (!query.trim()) return
         executeCommand('replace', { search: query, replace: replaceText })
-        doSearch(query)
+        doSearch(query, false, false)
         flashFeedback('Replaced current match')
     }, [executeCommand, query, replaceText, doSearch, flashFeedback])
 
     const handleReplaceAll = useCallback(() => {
         if (!query.trim()) return
         executeCommand('replaceAll', { search: query, replace: replaceText })
-        doSearch(query)
+        doSearch(query, false, false)
         flashFeedback('Replaced all matches')
     }, [executeCommand, query, replaceText, doSearch, flashFeedback])
 

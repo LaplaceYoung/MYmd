@@ -293,8 +293,10 @@ interface EditorState {
 
 let tabCounter = 0
 const SEARCH_HISTORY_STORAGE_KEY = 'mymd.searchHistory'
+const RECENT_FILES_STORAGE_KEY = 'mymd.recentFiles'
 const APP_LOCALE_STORAGE_KEY = 'mymd.locale'
 const DEFAULT_SEARCH_HISTORY_LIMIT = 10
+const DEFAULT_RECENT_FILES_LIMIT = 10
 const PAPER_SETTINGS_STORAGE_KEY = 'mymd.paperSettings'
 const DEFAULT_CUSTOM_PAPER_SIZE: CustomPaperSize = {
     widthMm: 180,
@@ -324,6 +326,38 @@ function persistSearchHistory(history: string[]) {
     if (typeof window === 'undefined') return
     try {
         window.localStorage.setItem(SEARCH_HISTORY_STORAGE_KEY, JSON.stringify(history))
+    } catch {
+        // ignore persistence failures
+    }
+}
+
+function loadRecentFilesFromStorage(): { path: string; title: string; time: number }[] {
+    if (typeof window === 'undefined') return []
+    try {
+        const raw = window.localStorage.getItem(RECENT_FILES_STORAGE_KEY)
+        if (!raw) return []
+        const parsed = JSON.parse(raw)
+        if (!Array.isArray(parsed)) return []
+
+        return parsed
+            .map(item => {
+                const path = typeof item?.path === 'string' ? item.path.trim() : ''
+                const title = typeof item?.title === 'string' ? item.title.trim() : ''
+                const time = Number(item?.time)
+                if (!path || !title || !Number.isFinite(time)) return null
+                return { path, title, time }
+            })
+            .filter((item): item is { path: string; title: string; time: number } => Boolean(item))
+            .slice(0, DEFAULT_RECENT_FILES_LIMIT)
+    } catch {
+        return []
+    }
+}
+
+function persistRecentFiles(recentFiles: { path: string; title: string; time: number }[]) {
+    if (typeof window === 'undefined') return
+    try {
+        window.localStorage.setItem(RECENT_FILES_STORAGE_KEY, JSON.stringify(recentFiles))
     } catch {
         // ignore persistence failures
     }
@@ -558,7 +592,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     activeTabId: null,
     viewMode: 'wysiwyg',
     zoom: 100,
-    recentFiles: [],
+    recentFiles: loadRecentFilesFromStorage(),
     editorCommands: {},
     activeMarks: [],
     insertDialog: null,
@@ -701,7 +735,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     addRecentFile: (filePath, title) => {
         set(state => {
             const filtered = state.recentFiles.filter(f => f.path !== filePath)
-            const updated = [{ path: filePath, title, time: Date.now() }, ...filtered].slice(0, 20)
+            const updated = [{ path: filePath, title, time: Date.now() }, ...filtered].slice(0, DEFAULT_RECENT_FILES_LIMIT)
+            persistRecentFiles(updated)
             return { recentFiles: updated }
         })
     },

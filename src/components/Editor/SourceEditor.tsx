@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror'
-import { SearchQuery, setSearchQuery, findNext, findPrevious, replaceNext, replaceAll } from '@codemirror/search'
+import { SearchCursor, SearchQuery, getSearchQuery, setSearchQuery, findNext, findPrevious, replaceNext, replaceAll, search } from '@codemirror/search'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
 import { autocompletion, type Completion, type CompletionContext } from '@codemirror/autocomplete'
-import { EditorView } from '@codemirror/view'
+import { Decoration, EditorView, type DecorationSet } from '@codemirror/view'
+import { RangeSetBuilder, StateField } from '@codemirror/state'
 import { useEditorStore } from '@/stores/editorStore'
 import { queryKnowledge } from '@/knowledge/service'
 import { copyImageToLocalAssets, saveBlobImageToLocalAssets } from '@/utils/fileUtils'
@@ -16,6 +17,42 @@ interface SourceEditorProps {
     tabId: string
     content: string
 }
+
+const sourceSearchMatchMark = Decoration.mark({ class: 'cm-searchMatch' })
+const sourceSelectedSearchMatchMark = Decoration.mark({ class: 'cm-searchMatch cm-searchMatch-selected' })
+
+function buildSourceSearchDecorations(state: Parameters<NonNullable<typeof StateField.define<DecorationSet>>['0']['create']>[0]): DecorationSet {
+    const query = getSearchQuery(state)
+    if (!query.search) return Decoration.none
+
+    const normalize = query.caseSensitive ? undefined : (value: string) => value.toLowerCase()
+    const cursor = new SearchCursor(state.doc, query.search, 0, state.doc.length, normalize)
+    const builder = new RangeSetBuilder<Decoration>()
+    const selection = state.selection.main
+
+    while (!cursor.next().done) {
+        const { from, to } = cursor.value
+        builder.add(
+            from,
+            to,
+            from === selection.from && to === selection.to
+                ? sourceSelectedSearchMatchMark
+                : sourceSearchMatchMark
+        )
+    }
+
+    return builder.finish()
+}
+
+const sourceSearchHighlightField = StateField.define<DecorationSet>({
+    create(state) {
+        return buildSourceSearchDecorations(state)
+    },
+    update(_value, transaction) {
+        return buildSourceSearchDecorations(transaction.state)
+    },
+    provide: field => EditorView.decorations.from(field),
+})
 
 // 检测实际使用的暗色模式（结合 store 和系统偏好）
 function useIsDark() {
@@ -263,6 +300,10 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
                     lineHeight: '1.8',
                 }}
                 extensions={[
+                    search({
+                        top: false,
+                    }),
+                    sourceSearchHighlightField,
                     markdown({ base: markdownLanguage, codeLanguages: languages }),
                     autocompletion({ override: [completeWikilink] }),
                     EditorView.domEventHandlers({

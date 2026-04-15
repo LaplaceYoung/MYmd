@@ -796,12 +796,17 @@
 /* ===================================================
    搜索匹配高亮
    =================================================== */
-.search-match {
+.search-match,
+.cm-selectionMatch,
+.cm-searchMatch,
+.ProseMirror-search-match {
     background-color: rgba(255, 204, 0, 0.4);
     border-radius: 2px;
 }
 
-.search-match-selected {
+.search-match-selected,
+.cm-searchMatch-selected,
+.ProseMirror-active-search-match {
     background-color: rgba(255, 150, 0, 0.6);
     outline: 1px solid rgba(255, 100, 0, 0.8);
 }
