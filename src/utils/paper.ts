@@ -7,6 +7,7 @@ import type {
     PaperOrientation,
     PaperPreset
 } from '@/stores/editorStore'
+import { replaceMermaidFencesWithRenderedBlocks } from '@/utils/mermaid'
 
 export interface PaperPresetMeta {
     id: PaperPreset
@@ -450,6 +451,8 @@ export function buildExportHtmlStyle(
             padding: 0.55em 0.7em;
             text-align: left;
             vertical-align: top;
+            min-width: 120px;
+            word-break: break-word;
         }
         th {
             background: rgba(148, 163, 184, 0.12);
@@ -461,7 +464,38 @@ export function buildExportHtmlStyle(
             page-break-before: always;
             height: 0;
         }
-        img, svg, canvas, table {
+        .mermaid-export,
+        .mermaid-export-fallback {
+            margin: 1.25em 0;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 14px;
+            background: rgba(248, 250, 252, 0.92);
+            overflow: hidden;
+        }
+        .mermaid-export {
+            padding: 18px;
+        }
+        .mermaid-export svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .mermaid-export-fallback {
+            padding: 16px 18px;
+        }
+        .mermaid-export-fallback__title {
+            font-weight: 600;
+            color: #b45309;
+        }
+        .mermaid-export-fallback__message {
+            margin-top: 6px;
+            color: #7c2d12;
+            font-size: 13px;
+        }
+        .mermaid-export-fallback pre {
+            margin: 12px 0 0;
+        }
+        img, svg, canvas {
             max-width: 100%;
         }
         img {
@@ -511,6 +545,11 @@ export function preprocessMarkdownForExport(markdown: string, preservePageBreakM
     return markdown
         .replace(/^[ \t]*<!--\s*pagebreak\s*-->[ \t]*$/gim, '<div class="page-break"></div>')
         .replace(/^[ \t]*:::\s*pagebreak\s*[ \t]*$/gim, '<div class="page-break"></div>')
+}
+
+export async function prepareMarkdownForExport(markdown: string, preservePageBreakMarkers = true) {
+    const normalizedMarkdown = preprocessMarkdownForExport(markdown, preservePageBreakMarkers)
+    return replaceMermaidFencesWithRenderedBlocks(normalizedMarkdown)
 }
 
 export function applyExportPageBreakMode(bodyHtml: string, mode: ExportPageBreakMode) {

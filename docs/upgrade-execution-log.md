@@ -43,3 +43,26 @@
   - Re-ran `npx playwright test tests/e2e_search_unified.spec.ts tests/e2e_toc_hierarchy.spec.ts --reporter=line` and it passed on 2026-04-15.
   - Re-ran `npm run build` and it passed on 2026-04-15.
   - Architect verification approved the slice after hydration was limited to tab switches and same-tab heading recompute stopped clearing TOC filter state.
+
+### Slice 3
+
+- Scope:
+  - Phase P1 Mermaid fallback and export path hardening
+  - shared Mermaid render/fallback utilities for editor and export preprocessing
+- Planned touchpoints:
+  - `src/utils/mermaid.ts`
+  - `src/utils/paper.ts`
+  - `src/components/Editor/plugins/diagramPlugin.ts`
+  - `src/components/Ribbon/Ribbon.tsx`
+  - `src/styles/editor.css`
+  - `tests/e2e_mermaid_export_fallback.spec.ts`
+- Verification target:
+  - targeted Playwright regression for Mermaid export preprocessing fallback
+  - `npm run build`
+- Evidence:
+  - Added shared Mermaid rendering helpers in `src/utils/mermaid.ts` so editor preview and export preprocessing use the same render/error surface.
+  - Hardened the Mermaid node view to preserve a stable empty state and show a source-preserving fallback when rendering fails.
+  - Added export preprocessing so fenced Mermaid blocks render to inline SVG for HTML export, and invalid diagrams fall back to a readable source block instead of silently failing.
+  - Added `tests/e2e_mermaid_export_fallback.spec.ts` to cover both rendered and fallback export output.
+  - Re-ran `npx playwright test tests/e2e_mermaid_export_fallback.spec.ts --reporter=line` and it passed on 2026-04-15.
+  - Re-ran `npm run build` and it passed on 2026-04-15.

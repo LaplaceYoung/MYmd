@@ -40,7 +40,7 @@ import { TablePicker } from './TablePicker'
 import {
     applyExportPageBreakMode,
     buildExportHtmlDocument,
-    preprocessMarkdownForExport,
+    prepareMarkdownForExport,
 } from '@/utils/paper'
 import { copyFromEditor, cutFromEditor, pasteToEditor } from '@/utils/editorClipboard'
 import { buildContextualAiDraft } from '@/utils/aiDrafts'
@@ -199,7 +199,7 @@ export function Ribbon() {
 
             if (!filePath) return
 
-            const preprocessedMarkdown = preprocessMarkdownForExport(
+            const preprocessedMarkdown = await prepareMarkdownForExport(
                 tab.content,
                 exportOptions.pageBreakMode !== 'flow'
             )
