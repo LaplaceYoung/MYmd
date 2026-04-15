@@ -26,3 +26,9 @@ vite.config.d.ts
 .agent
 .claude
 .gemini
+.omx/
+.github/
+AGENTS.md
+agents.md
+**/AGENTS.md
+**/agents.md
