@@ -1,5 +1,4 @@
 import { invoke } from "@tauri-apps/api/core";
-import { readDir } from "@tauri-apps/plugin-fs";
 import { extractHeadings, extractTags, extractWikilinks } from "./parser";
 import type {
   KnowledgeBacklinkItem,
@@ -9,6 +8,7 @@ import type {
   KnowledgeUpsertPayload
 } from "./types";
 import { readTextFileWithFallback } from "@/utils/fileRead";
+import { collectMarkdownFiles } from "@/utils/workspacePaths";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -17,6 +17,9 @@ interface RebuildWorkspaceIndexHooks {
   onProgress?: (payload: { processed: number; total: number; filePath: string }) => void;
   onComplete?: (payload: { processed: number; total: number }) => void;
   onError?: (payload: { processed: number; total: number; message: string }) => void;
+  signal?: AbortSignal;
+  progressStep?: number;
+  maxFiles?: number;
 }
 
 function titleFromPath(path: string): string {
@@ -25,35 +28,16 @@ function titleFromPath(path: string): string {
   return name.toLowerCase().endsWith(".md") ? name.slice(0, -3) : name;
 }
 
-async function collectMarkdownFiles(root: string): Promise<string[]> {
-  const files: string[] = [];
-  const queue: string[] = [root];
-  const maxFiles = 1200;
+function createAbortError() {
+  const error = new Error("Knowledge indexing aborted");
+  error.name = "AbortError";
+  return error;
+}
 
-  while (queue.length > 0 && files.length < maxFiles) {
-    const dir = queue.shift()!;
-    let entries;
-    try {
-      entries = await readDir(dir);
-    } catch {
-      continue;
-    }
-
-    for (const entry of entries) {
-      if (!entry.name) continue;
-      const path = `${dir.replace(/[\\/]+$/, "")}/${entry.name}`;
-      if (entry.isDirectory) {
-        queue.push(path);
-        continue;
-      }
-      if (entry.name.toLowerCase().endsWith(".md")) {
-        files.push(path);
-        if (files.length >= maxFiles) break;
-      }
-    }
+function throwIfAborted(signal?: AbortSignal) {
+  if (signal?.aborted) {
+    throw createAbortError();
   }
-
-  return files;
 }
 
 export async function indexKnowledgeDocument(
@@ -85,12 +69,15 @@ export async function rebuildWorkspaceIndex(
 
   let processed = 0;
   let total = 0;
+  const progressStep = Math.max(1, hooks?.progressStep ?? 20);
   try {
-    const files = await collectMarkdownFiles(workspacePath);
+    throwIfAborted(hooks?.signal);
+    const files = await collectMarkdownFiles(workspacePath, hooks?.maxFiles ?? 1800, hooks?.signal);
     total = files.length;
     hooks?.onStart?.({ total });
 
     for (const filePath of files) {
+      throwIfAborted(hooks?.signal);
       try {
         const content = await readTextFileWithFallback(filePath);
         await indexKnowledgeDocument(filePath, content, workspacePath);
@@ -98,12 +85,27 @@ export async function rebuildWorkspaceIndex(
         console.warn("knowledge index skip file:", filePath, error);
       } finally {
         processed += 1;
-        hooks?.onProgress?.({ processed, total, filePath });
+        const shouldReport =
+          processed === total ||
+          processed % progressStep === 0 ||
+          processed === 1;
+
+        if (shouldReport) {
+          hooks?.onProgress?.({ processed, total, filePath });
+        }
       }
     }
 
     hooks?.onComplete?.({ processed, total });
   } catch (error) {
+    if (hooks?.signal?.aborted) {
+      hooks?.onError?.({
+        processed,
+        total,
+        message: "Knowledge indexing cancelled",
+      });
+      return;
+    }
     const message = error instanceof Error ? error.message : "Failed to rebuild workspace index";
     hooks?.onError?.({ processed, total, message });
     throw error;

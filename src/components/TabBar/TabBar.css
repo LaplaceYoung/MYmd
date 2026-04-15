@@ -61,6 +61,19 @@
     flex: 1;
 }
 
+.tabbar__tab-input {
+    flex: 1;
+    min-width: 0;
+    height: 26px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--accent);
+    background: var(--bg-elevated, rgba(255, 255, 255, 0.08));
+    color: var(--text-primary);
+    padding: 0 8px;
+    font-size: 13px;
+    outline: none;
+}
+
 .tabbar__tab-dirty {
     width: 6px;
     height: 6px;
@@ -110,4 +123,13 @@
 .tabbar__add:hover {
     color: var(--text-primary);
     background: rgba(255, 255, 255, 0.05);
+}
+
+.tabbar__rename-error {
+    display: flex;
+    align-items: center;
+    color: var(--danger, #f87171);
+    font-size: 12px;
+    padding: 0 8px;
+    flex-shrink: 0;
 }
