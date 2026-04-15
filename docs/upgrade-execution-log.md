@@ -104,3 +104,19 @@
   - Added `src/utils/editorRuntime.ts` to provide a shared snapshot/query surface for active tab, mode, panel visibility, registered command ids, and preview/editability state.
   - Kept the new API read-only and store-driven so it does not alter the existing theme, layout, or interaction flow.
   - Added `tests/e2e_editor_runtime_state.spec.ts` to verify runtime state snapshots across WYSIWYG and split mode transitions.
+
+### Slice 6
+
+- Scope:
+  - Phase P3 local automation render surface
+  - expose a reusable Markdown-to-export-HTML API without changing the current visual design
+- Planned touchpoints:
+  - `src/utils/renderApi.ts`
+  - `tests/render_api.spec.ts`
+- Verification target:
+  - targeted render API tests
+  - `npm run build`
+- Evidence:
+  - Added `src/utils/renderApi.ts` to expose a shared automation-facing rendering lane from raw Markdown input to prepared body HTML and full export HTML output.
+  - Reused the existing export preparation path so page-break preprocessing and Mermaid export handling stay consistent with the product runtime.
+  - Added `tests/render_api.spec.ts` to verify both body-html rendering and full export-document generation from raw Markdown input.
