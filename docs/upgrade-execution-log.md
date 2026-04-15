@@ -170,3 +170,23 @@
   - Expanded `tests/e2e_wikilink_backlink.spec.ts` into a mock-workspace regression that verifies `rename -> wikilink rewrite -> reindex -> backlink panel continuity`.
   - Re-ran `npx playwright test tests/e2e_wikilink_backlink.spec.ts --reporter=line` and it passed on 2026-04-15.
   - Re-ran `npm run build` and it passed on 2026-04-15.
+
+### Slice 9
+
+- Scope:
+  - Phase P2 media workflow regression coverage
+  - align image-paste tests with the current welcome-to-editor startup flow
+- Planned touchpoints:
+  - `.omx/context/ralph-media-regressions-20260415T151500Z.md`
+  - `tests/e2e_media_embed.spec.ts`
+  - `tests/e2e_image_paste.spec.ts`
+  - `tests/e2e_source_image_paste.spec.ts`
+- Verification target:
+  - targeted Playwright regressions for media embed and image paste
+  - `npm run build`
+- Evidence:
+  - Kept the slice test-only and avoided runtime editor changes.
+  - Updated image-paste regressions so they enter the editor through the current welcome/sidebar flow instead of the outdated `新建` button path.
+  - Preserved coverage for WYSIWYG paste, split-source paste, trusted media embed rendering, and blocked untrusted embeds.
+  - Re-ran `npx playwright test tests/e2e_media_embed.spec.ts tests/e2e_image_paste.spec.ts tests/e2e_source_image_paste.spec.ts --reporter=line` and it passed on 2026-04-15.
+  - Re-ran `npm run build` and it passed on 2026-04-15.
