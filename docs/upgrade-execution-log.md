@@ -540,3 +540,30 @@
   - `npm run ci:repo-hygiene`
   - `npm run typecheck`
   - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 20`
+
+### Slice 27
+
+- Scope:
+  - active goal artifact audit
+  - map the long-running Markdown benchmark alignment objective to repository evidence and current blockers
+- Planned touchpoints:
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/release-iteration-playbook.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added a prompt-to-artifact checklist covering benchmark alignment, gap backlog, implementation slices, verification evidence, release packaging, runtime smoke, retrospective logs, and current blockers.
+  - Recorded the latest published release evidence for `v1.4.3-hotfix8`.
+  - Recorded the current open PR state as `BLOCKED / REVIEW_REQUIRED` for PR #1-#12.
+  - Linked the release playbook to the active goal audit so future iteration work has one evidence checklist.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh release view --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 20`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh release view --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 20`

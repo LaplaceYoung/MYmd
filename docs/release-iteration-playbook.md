@@ -143,6 +143,7 @@ npm run release:smoke -- --tauri-exe E:\EnvConfig\rust_target\release\app.exe
 5. Add a dated execution-log entry for every meaningful slice.
 6. Record machine-specific build paths in project memory after they affect a release.
 7. Use `docs/iteration-merge-queue-2026-05.md` as the active PR-to-release sequencing surface.
+8. Use `docs/active-goal-artifact-audit-2026-05.md` to map the long-running benchmark goal to current evidence and blockers.
 
 ## Current Machine Notes
 
