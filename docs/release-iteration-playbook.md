@@ -45,10 +45,19 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 | Electron build | `npm run build:electron` | Portable release |
 | Tauri smoke | Run `E:\EnvConfig\rust_target\release\app.exe` and capture UI evidence | Installer release |
 | Electron smoke | Run portable EXE with CDP screenshot and DOM text evidence | Portable release |
+| Release smoke automation | `npm run release:smoke` | Local release verification |
 | Checksums | `Get-FileHash -Algorithm SHA256` for each release asset | GitHub release |
 | Release verification | `gh release view <tag> --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets` | GitHub release |
 
 ## Desktop Smoke Checklist
+
+The preferred local path is:
+
+```bash
+npm run release:smoke
+```
+
+Use the manual steps below when debugging one runtime in isolation.
 
 ### Tauri
 
@@ -67,6 +76,26 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 5. Capture `Page.captureScreenshot`.
 6. Confirm `Runtime.exceptionThrown` and `Log.entryAdded` have no blocking errors.
 7. Stop the app process.
+
+## Release Smoke Script
+
+`scripts/release-smoke-check.mjs` performs these checks without adding package dependencies:
+
+- Finds the newest `release/v*` staging folder by default.
+- Validates `SHA256SUMS.txt` and all referenced release assets.
+- Confirms the NSIS installer, MSI installer, and Electron portable zip are present.
+- Starts Electron portable with a CDP port, checks DOM text markers, captures a screenshot, and fails on renderer errors.
+- Starts the Tauri release executable, captures a Windows `PrintWindow` screenshot, and validates window title plus image contrast.
+- Writes `test-results/release-smoke-summary.json`.
+
+Useful options:
+
+```bash
+npm run release:smoke -- --skip-tauri
+npm run release:smoke -- --skip-electron
+npm run release:smoke -- --release-dir release/v1.4.3-hotfix6
+npm run release:smoke -- --tauri-exe E:\EnvConfig\rust_target\release\app.exe
+```
 
 ## Release Asset Checklist
 

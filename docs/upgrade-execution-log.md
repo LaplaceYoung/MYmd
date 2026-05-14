@@ -286,3 +286,25 @@
   - `npm run typecheck`
   - `npm run ci:repo-hygiene`
   - documentation link/reference inspection
+
+### Slice 13
+
+- Scope:
+  - P0 release smoke automation
+  - make release readiness checks repeatable after Tauri/Electron packaging
+- Planned touchpoints:
+  - `scripts/release-smoke-check.mjs`
+  - `package.json`
+  - `docs/release-iteration-playbook.md`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added `npm run release:smoke` as the release verification entry point.
+  - Automated release asset and SHA256 validation for the latest `release/v*` staging folder.
+  - Automated Electron portable smoke through Chrome DevTools Protocol DOM markers, screenshot capture, and renderer error checks.
+  - Automated Tauri runtime smoke through Windows `PrintWindow` screenshot capture, window title verification, and image contrast checks.
+- Verification target:
+  - `npm run release:smoke`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
