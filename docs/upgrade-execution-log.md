@@ -528,7 +528,8 @@
 - Product management baseline:
   - PR #1 now shows `BLOCKED / REVIEW_REQUIRED` after the main-sync verification pass.
   - PR #12 is now represented in the queue as the release-management PR for Wave 0.
-  - The queue records a dated readiness snapshot linking PR #1-#8 verification comments and PR #9-#12 body verification checklists.
+  - The queue records a dated readiness snapshot linking PR #1-#12 verification comments.
+  - PR #9, #10, and #11 now point to concrete verification comments for plugin API, writing stats, and deterministic local asset gates.
   - Release packaging remains tied to merged `main` evidence and the desktop smoke gate.
 - Verification target:
   - `git diff --check`
@@ -538,3 +539,4 @@
   - `git diff --check`
   - `npm run ci:repo-hygiene`
   - `npm run typecheck`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 20`

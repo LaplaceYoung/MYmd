@@ -32,7 +32,7 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 
 ## Readiness Snapshot
 
-Captured on 2026-05-15 after PR #1-#8 rechecks.
+Captured on 2026-05-15 after PR #1-#11 rechecks and PR #12 queue refresh.
 
 | PR | Latest Evidence | Evidence Surface |
 |---:|---|---|
@@ -44,10 +44,10 @@ Captured on 2026-05-15 after PR #1-#8 rechecks.
 | #6 | task toggle bug fix, typecheck, build, repo hygiene, diff check, task-list E2E | https://github.com/LaplaceYoung/MYmd/pull/6#issuecomment-4455137386 |
 | #7 | immersive E2E stabilization, typecheck, build, repo hygiene, diff check, immersive modes E2E | https://github.com/LaplaceYoung/MYmd/pull/7#issuecomment-4455167424 |
 | #8 | typecheck, build, repo hygiene, diff check, render API frontmatter tests | https://github.com/LaplaceYoung/MYmd/pull/8#issuecomment-4455181429 |
-| #9 | typecheck, build, repo hygiene, diff check, plugin API tests | PR body verification checklist |
-| #10 | typecheck, build, repo hygiene, diff check, writing stats tests, benchmark link checks | PR body verification checklist |
-| #11 | typecheck, build, repo hygiene, diff check, local asset tests | PR body verification checklist |
-| #12 | typecheck, repo hygiene, diff check, changelog link checks | PR body verification checklist |
+| #9 | typecheck, build, repo hygiene, diff check, plugin API tests | https://github.com/LaplaceYoung/MYmd/pull/9#issuecomment-4455215928 |
+| #10 | typecheck, build, repo hygiene, diff check, writing stats tests, benchmark link checks | https://github.com/LaplaceYoung/MYmd/pull/10#issuecomment-4455226982 |
+| #11 | typecheck, build, repo hygiene, diff check, local asset tests | https://github.com/LaplaceYoung/MYmd/pull/11#issuecomment-4455248568 |
+| #12 | typecheck, repo hygiene, diff check, changelog link checks | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4455204178 |
 
 ## Merge Waves
 
