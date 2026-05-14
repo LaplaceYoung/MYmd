@@ -47,7 +47,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 | Keep README and release version synchronized | Users should trust the release page and repository landing page | README/README_en version matches latest GitHub release |
 | Add release smoke automation to project docs | Packaging quality has direct user impact | `npm run release:smoke` covers Tauri installer, MSI, Electron portable, checksum, screenshot/DOM smoke |
 | Keep search entry semantics unified | Titlebar search, command search, and global search should feel predictable | E2E covers titlebar search, modal search, keyboard result open |
-| Keep CLI/file association indexing path covered | Double-click/open-with should feed the knowledge loop | E2E or smoke covers CLI open and searchable content |
+| Keep CLI/file association indexing path covered | Double-click/open-with should feed the knowledge loop | `npm run release:smoke` verifies CLI open plus document, heading, and tag search recall |
 | Track known build warnings | Large editor chunks need visible ownership | Release notes mention current chunk warnings and owner lane |
 
 ### P1: Natural Knowledge Workflow

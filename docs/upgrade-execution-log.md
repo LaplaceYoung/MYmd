@@ -308,3 +308,33 @@
   - `npm run typecheck`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 14
+
+- Scope:
+  - P0 CLI/file-association knowledge indexing smoke
+  - fold the open-file indexing gate into release verification
+- Planned touchpoints:
+  - `scripts/release-smoke-check.mjs`
+  - `src/knowledge/parser.ts`
+  - `docs/release-iteration-playbook.md`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Extended `npm run release:smoke` with a Tauri CLI-open test using `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` for CDP access.
+  - The smoke creates a temporary Markdown file, launches the release `app.exe` with that file as a path argument, confirms the opened document renders, and queries the native knowledge DB for document, heading, and tag hits.
+  - Fixed standalone hashtag parsing so `#topic` lines are indexed as tags while Markdown headings stay excluded from tag extraction.
+  - This turns the previous skipped `e2e_cli_indexing` placeholder into a release-bound runtime gate.
+- Verification target:
+  - `npm run release:smoke`
+  - `node --check scripts/release-smoke-check.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run build:tauri`
+  - `npm run release:smoke` with CLI indexing `documentHits: 1`, `headingHits: 2`, `tagHits: 1`, `blockingEventCount: 0`
+  - `node --check scripts/release-smoke-check.mjs`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`

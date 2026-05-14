@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import http from "node:http";
 import path from "node:path";
@@ -19,10 +19,12 @@ function parseArgs(argv) {
       (process.platform === "win32" ? "E:\\EnvConfig\\rust_target\\release\\app.exe" : ""),
     outputDir: path.join(repoRoot, "test-results"),
     cdpPort: 9444,
+    cliCdpPort: 9445,
     markers: DEFAULT_MARKERS,
     skipAssets: false,
     skipElectron: false,
     skipTauri: false,
+    skipCliIndexing: false,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -43,6 +45,9 @@ function parseArgs(argv) {
     } else if (arg === "--cdp-port") {
       options.cdpPort = Number(next);
       i += 1;
+    } else if (arg === "--cli-cdp-port") {
+      options.cliCdpPort = Number(next);
+      i += 1;
     } else if (arg === "--marker") {
       options.markers.push(next);
       i += 1;
@@ -52,6 +57,8 @@ function parseArgs(argv) {
       options.skipElectron = true;
     } else if (arg === "--skip-tauri") {
       options.skipTauri = true;
+    } else if (arg === "--skip-cli-indexing") {
+      options.skipCliIndexing = true;
     } else if (arg === "--help" || arg === "-h") {
       printHelp();
       process.exit(0);
@@ -79,10 +86,12 @@ Options:
   --tauri-exe <path>     Tauri executable. Defaults to MYMD_TAURI_EXE or E:\\EnvConfig\\rust_target\\release\\app.exe.
   --output-dir <path>    Smoke output folder. Defaults to test-results.
   --cdp-port <number>    Electron remote debugging port. Defaults to 9444.
+  --cli-cdp-port <num>   Tauri CLI indexing remote debugging port. Defaults to 9445.
   --marker <text>        Extra renderer text marker expected in Electron DOM.
   --skip-assets          Skip release asset and SHA256 checks.
   --skip-electron        Skip Electron portable smoke.
   --skip-tauri           Skip Tauri window smoke.
+  --skip-cli-indexing    Skip Tauri CLI-open knowledge indexing smoke.
 `);
 }
 
@@ -496,6 +505,183 @@ async function smokeTauri(options) {
   return { ...result, screenshotPath, executableSize: stat.size };
 }
 
+async function evaluateCdp(client, expression) {
+  const result = await client.send("Runtime.evaluate", {
+    expression,
+    returnByValue: true,
+    awaitPromise: true,
+  });
+
+  if (result.result?.exceptionDetails) {
+    throw new Error(`CDP evaluation failed: ${JSON.stringify(result.result.exceptionDetails)}`);
+  }
+
+  return result.result?.result?.value;
+}
+
+function normalizePathForCompare(filePath) {
+  return String(filePath || "").replace(/\\/g, "/").toLowerCase();
+}
+
+function jsString(value) {
+  return JSON.stringify(String(value));
+}
+
+async function smokeCliIndexing(options) {
+  const stat = assertFile(options.tauriExe, "Tauri executable");
+  const port = options.cliCdpPort;
+  const tempDir = path.join(options.outputDir, "cli-indexing-smoke");
+  mkdirSync(tempDir, { recursive: true });
+
+  const token = `mymd-cli-index-${randomUUID()}`;
+  const filePath = path.join(tempDir, `CLI Index ${Date.now()}.md`);
+  const markdown = [
+    "# CLI Index Smoke",
+    "",
+    "This document verifies CLI open indexing.",
+    "",
+    token,
+    "",
+    "#cli-index-smoke",
+    "",
+  ].join("\n");
+  writeFileSync(filePath, markdown, "utf8");
+
+  const screenshotPath = path.join(options.outputDir, "release-cli-indexing-smoke-cdp.png");
+  const summaryPath = path.join(options.outputDir, "release-cli-indexing-smoke-summary.json");
+  const child = spawn(options.tauriExe, [filePath], {
+    cwd: path.dirname(options.tauriExe),
+    env: {
+      ...process.env,
+      WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${port}`,
+    },
+    windowsHide: true,
+    stdio: "ignore",
+  });
+
+  try {
+    const pages = await waitForCdp(port, 30000);
+    const page = pages.find((entry) => entry.type === "page") || pages[0];
+    if (!page?.webSocketDebuggerUrl) throw new Error("Tauri CDP page has no websocket URL.");
+
+    const client = cdpClient(page.webSocketDebuggerUrl);
+    await client.opened;
+    await client.send("Runtime.enable");
+    await client.send("Log.enable");
+    await client.send("Page.enable");
+    await client.send("Emulation.setDeviceMetricsOverride", {
+      width: 1400,
+      height: 900,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+
+    const expectedPathKey = normalizePathForCompare(filePath);
+    let pageState = null;
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      pageState = await evaluateCdp(
+        client,
+        `(async () => ({
+          href: location.href,
+          title: document.title,
+          args: await window.__TAURI_INTERNALS__?.invoke?.("get_cli_args"),
+          body: document.body?.innerText || "",
+          rootHtmlLength: document.getElementById("root")?.innerHTML.length || 0
+        }))()`,
+      );
+
+      const args = Array.isArray(pageState?.args) ? pageState.args.map(normalizePathForCompare) : [];
+      const hasArg = args.some((arg) => arg === expectedPathKey);
+      const hasBody = String(pageState?.body || "").includes(token);
+      if (hasArg && hasBody) break;
+      await wait(500);
+    }
+
+    if (!pageState || !String(pageState.body || "").includes(token)) {
+      throw new Error("CLI-opened document text did not render in the Tauri window.");
+    }
+
+    const args = Array.isArray(pageState.args) ? pageState.args.map(normalizePathForCompare) : [];
+    if (!args.some((arg) => arg === expectedPathKey)) {
+      throw new Error(`Tauri get_cli_args did not include the CLI file path: ${filePath}`);
+    }
+
+    let knowledgeResult = null;
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      knowledgeResult = await evaluateCdp(
+        client,
+        `(async () => ({
+          token: await window.__TAURI_INTERNALS__?.invoke?.("knowledge_query", { searchText: ${jsString(token)}, limit: 30, offset: 0 }),
+          heading: await window.__TAURI_INTERNALS__?.invoke?.("knowledge_query", { searchText: "CLI Index Smoke", limit: 30, offset: 0 }),
+          tag: await window.__TAURI_INTERNALS__?.invoke?.("knowledge_query", { searchText: "cli-index-smoke", limit: 30, offset: 0 })
+        }))()`,
+      );
+
+      const documents = knowledgeResult?.token?.documents || [];
+      const headings = knowledgeResult?.heading?.headings || [];
+      const tags = knowledgeResult?.tag?.tags || [];
+      const hasDocument = documents.some((item) => normalizePathForCompare(item.file_path) === expectedPathKey);
+      const hasHeading = headings.some((item) => normalizePathForCompare(item.file_path) === expectedPathKey);
+      const hasTag = tags.some((item) => normalizePathForCompare(item.file_path) === expectedPathKey);
+      if (hasDocument && hasHeading && hasTag) break;
+      await wait(500);
+    }
+
+    const documents = knowledgeResult?.token?.documents || [];
+    const headings = knowledgeResult?.heading?.headings || [];
+    const tags = knowledgeResult?.tag?.tags || [];
+    const hasDocument = documents.some((item) => normalizePathForCompare(item.file_path) === expectedPathKey);
+    const hasHeading = headings.some((item) => normalizePathForCompare(item.file_path) === expectedPathKey);
+    const hasTag = tags.some((item) => normalizePathForCompare(item.file_path) === expectedPathKey);
+
+    if (!hasDocument) throw new Error("CLI-opened document was not returned by knowledge document search.");
+    if (!hasHeading) throw new Error("CLI-opened document heading was not returned by knowledge heading search.");
+    if (!hasTag) throw new Error("CLI-opened document tag was not returned by knowledge tag search.");
+
+    const screenshotResult = await client.send("Page.captureScreenshot", {
+      format: "png",
+      fromSurface: true,
+      captureBeyondViewport: true,
+    });
+    const screenshotBytes = Buffer.from(screenshotResult.result.data, "base64");
+    writeFileSync(screenshotPath, screenshotBytes);
+
+    const blockingEvents = client.events.filter((event) => {
+      if (event.method === "Runtime.exceptionThrown") return true;
+      if (event.method === "Log.entryAdded") return event.params?.entry?.level === "error";
+      if (event.method === "Runtime.consoleAPICalled") return event.params?.type === "error";
+      return false;
+    });
+
+    if (blockingEvents.length > 0) {
+      throw new Error(`Tauri CLI indexing smoke has blocking events: ${JSON.stringify(blockingEvents.slice(0, 3))}`);
+    }
+    if (screenshotBytes.length < 10000) {
+      throw new Error(`Tauri CLI indexing screenshot is too small: ${screenshotBytes.length} bytes`);
+    }
+
+    const summary = {
+      executable: options.tauriExe,
+      executableSize: stat.size,
+      filePath,
+      token,
+      title: pageState.title,
+      rootHtmlLength: pageState.rootHtmlLength,
+      documentHits: documents.length,
+      headingHits: headings.length,
+      tagHits: tags.length,
+      screenshotPath,
+      screenshotBytes: screenshotBytes.length,
+      blockingEventCount: blockingEvents.length,
+    };
+    writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`);
+    client.close();
+    return summary;
+  } finally {
+    await killProcessTree(child.pid);
+  }
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   mkdirSync(options.outputDir, { recursive: true });
@@ -516,6 +702,10 @@ async function main() {
 
   if (!options.skipTauri) {
     results.checks.tauri = await smokeTauri(options);
+  }
+
+  if (!options.skipCliIndexing) {
+    results.checks.cliIndexing = await smokeCliIndexing(options);
   }
 
   const summaryPath = path.join(options.outputDir, "release-smoke-summary.json");

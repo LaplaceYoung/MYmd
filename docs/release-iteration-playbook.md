@@ -46,6 +46,7 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 | Tauri smoke | Run `E:\EnvConfig\rust_target\release\app.exe` and capture UI evidence | Installer release |
 | Electron smoke | Run portable EXE with CDP screenshot and DOM text evidence | Portable release |
 | Release smoke automation | `npm run release:smoke` | Local release verification |
+| CLI indexing smoke | Included in `npm run release:smoke` | File association / CLI release verification |
 | Checksums | `Get-FileHash -Algorithm SHA256` for each release asset | GitHub release |
 | Release verification | `gh release view <tag> --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets` | GitHub release |
 
@@ -86,6 +87,7 @@ Use the manual steps below when debugging one runtime in isolation.
 - Confirms the NSIS installer, MSI installer, and Electron portable zip are present.
 - Starts Electron portable with a CDP port, checks DOM text markers, captures a screenshot, and fails on renderer errors.
 - Starts the Tauri release executable, captures a Windows `PrintWindow` screenshot, and validates window title plus image contrast.
+- Starts the Tauri release executable with a temporary Markdown path argument, confirms the file renders, then verifies document, heading, and tag search through the knowledge DB.
 - Writes `test-results/release-smoke-summary.json`.
 
 Useful options:
@@ -93,6 +95,7 @@ Useful options:
 ```bash
 npm run release:smoke -- --skip-tauri
 npm run release:smoke -- --skip-electron
+npm run release:smoke -- --skip-cli-indexing
 npm run release:smoke -- --release-dir release/v1.4.3-hotfix6
 npm run release:smoke -- --tauri-exe E:\EnvConfig\rust_target\release\app.exe
 ```
