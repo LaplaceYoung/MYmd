@@ -17,7 +17,7 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 
 | PR | Branch | Product Lane | Current State | Merge Wave | Release Trigger |
 |---:|---|---|---|---:|---|
-| #1 | `young/review-code-health-and-performance-stability` | Performance and stability | BEHIND / REVIEW_REQUIRED | 0 | Rebase, rerun broad gates, then decide whether to keep or split |
+| #1 | `young/review-code-health-and-performance-stability` | Performance and stability | BLOCKED / REVIEW_REQUIRED | 0 | Broad gates rerun after main sync; await review |
 | #2 | `young/index-progress-retry` | P1 index reliability | BLOCKED / REVIEW_REQUIRED | 1 | Include in next knowledge workflow release |
 | #3 | `young/preview-edit-isolation` | P1 reading/editing safety | BLOCKED / REVIEW_REQUIRED | 1 | Include in next knowledge workflow release |
 | #4 | `young/unlinked-mentions-closure` | P1 knowledge network | BLOCKED / REVIEW_REQUIRED | 2 | Include after index and preview safety land |
@@ -28,19 +28,40 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 | #9 | `young/readonly-plugin-api-contract` | P3 extension surface | BLOCKED / REVIEW_REQUIRED | 4 | Include after core writing/export queue stabilizes |
 | #10 | `young/writing-stats-markdown-aware` | P2 writing polish | BLOCKED / REVIEW_REQUIRED | 3 | Include in editor production power release |
 | #11 | `young/deterministic-image-assets` | P2 resource workflow | BLOCKED / REVIEW_REQUIRED | 3 | Include in editor production power release |
+| #12 | `young/iteration-merge-queue` | Release management | BLOCKED / REVIEW_REQUIRED | 0 | Merge before release packaging work so queue status stays authoritative |
+
+## Readiness Snapshot
+
+Captured on 2026-05-15 after PR #1-#8 rechecks.
+
+| PR | Latest Evidence | Evidence Surface |
+|---:|---|---|
+| #1 | main sync plus typecheck, build, repo hygiene, diff check, Mermaid/export targeted tests | https://github.com/LaplaceYoung/MYmd/pull/1#issuecomment-4455004862 |
+| #2 | typecheck, build, repo hygiene, diff check, index progress retry E2E | https://github.com/LaplaceYoung/MYmd/pull/2#issuecomment-4455029648 |
+| #3 | typecheck, build, repo hygiene, diff check, preview isolation/runtime E2E | https://github.com/LaplaceYoung/MYmd/pull/3#issuecomment-4455048432 |
+| #4 | typecheck, build, repo hygiene, diff check, wikilink/backlink E2E | https://github.com/LaplaceYoung/MYmd/pull/4#issuecomment-4455063473 |
+| #5 | typecheck, build, repo hygiene, diff check, render API footnote tests | https://github.com/LaplaceYoung/MYmd/pull/5#issuecomment-4455073290 |
+| #6 | task toggle bug fix, typecheck, build, repo hygiene, diff check, task-list E2E | https://github.com/LaplaceYoung/MYmd/pull/6#issuecomment-4455137386 |
+| #7 | immersive E2E stabilization, typecheck, build, repo hygiene, diff check, immersive modes E2E | https://github.com/LaplaceYoung/MYmd/pull/7#issuecomment-4455167424 |
+| #8 | typecheck, build, repo hygiene, diff check, render API frontmatter tests | https://github.com/LaplaceYoung/MYmd/pull/8#issuecomment-4455181429 |
+| #9 | typecheck, build, repo hygiene, diff check, plugin API tests | PR body verification checklist |
+| #10 | typecheck, build, repo hygiene, diff check, writing stats tests, benchmark link checks | PR body verification checklist |
+| #11 | typecheck, build, repo hygiene, diff check, local asset tests | PR body verification checklist |
+| #12 | typecheck, repo hygiene, diff check, changelog link checks | PR body verification checklist |
 
 ## Merge Waves
 
 ### Wave 0: Stabilize The Queue
 
-- Goal: Rebase or retire the behind stability PR before stacking more release packaging work.
+- Goal: Keep the stability PR and queue-management PR current before stacking more release packaging work.
 - Gate:
   - `npm run typecheck`
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - targeted tests named in the PR body
 - Exit evidence:
-  - PR #1 reports clean merge state or a replacement branch exists.
+  - PR #1 reports clean merge state and current verification evidence.
+  - PR #12 records the current release-wave status before merge packaging begins.
 
 ### Wave 1: Knowledge Workflow Safety
 

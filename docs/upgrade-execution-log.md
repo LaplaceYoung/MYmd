@@ -516,3 +516,25 @@
   - `npm run typecheck`
   - Obsidian changelog HEAD request returned 200
   - Joplin desktop changelog HEAD request returned 200
+
+### Slice 26
+
+- Scope:
+  - release readiness queue refresh
+  - capture PR #1-#12 gate state after the latest review-pass updates
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - PR #1 now shows `BLOCKED / REVIEW_REQUIRED` after the main-sync verification pass.
+  - PR #12 is now represented in the queue as the release-management PR for Wave 0.
+  - The queue records a dated readiness snapshot linking PR #1-#8 verification comments and PR #9-#12 body verification checklists.
+  - Release packaging remains tied to merged `main` evidence and the desktop smoke gate.
+- Verification target:
+  - `git diff --check`
+  - `npm run ci:repo-hygiene`
+  - `npm run typecheck`
+- Verification completed:
+  - `git diff --check`
+  - `npm run ci:repo-hygiene`
+  - `npm run typecheck`
