@@ -488,3 +488,30 @@
   - `MYmd_1.4.3_x64-setup.exe`: `B7D5FA58C169E143A306B5CF05DAA1C70BADF727A6264BD9CCAF1BB665DBC50B`
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
+
+### Slice 19
+
+- Scope:
+  - P0 build-health cleanup
+  - reduce noisy Vite manual chunk warnings while preserving lazy editor/sidebar entrypoints
+- Planned touchpoints:
+  - `vite.config.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Replaced broad vendor chunk buckets with stable low-risk package buckets for React, KaTeX, icons, Tauri, and state helpers.
+  - Let Rollup place editor, diagram, and Markdown runtime packages with their lazy entrypoints so the production build has a clearer chunk graph.
+  - Closed the circular manual chunk warning lane in the current Vite build.
+  - Kept remaining large chunks visible for the next performance lane: `WysiwygEditor`, `SourceEditor`, `mindmap-definition`, and `flowchart-elk-definition`.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run build`
+  - production preview app shell smoke on `http://127.0.0.1:4173`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run build` with the circular manual chunk warning lane closed
+  - production preview app shell smoke on `http://127.0.0.1:4173` rendered `.app-main-shell` with title `MYmd - Markdown Editor` and screenshot `test-results/app-production-smoke.png`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`

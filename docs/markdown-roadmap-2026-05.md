@@ -48,7 +48,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 | Add release smoke automation to project docs | Packaging quality has direct user impact | `npm run release:smoke` covers Tauri installer, MSI, Electron portable, checksum, screenshot/DOM smoke |
 | Keep search entry semantics unified | Titlebar search, command search, and global search should feel predictable | E2E covers titlebar search, modal search, keyboard result open |
 | Keep CLI/file association indexing path covered | Double-click/open-with should feed the knowledge loop | `npm run release:smoke` verifies CLI open plus document, heading, and tag search recall |
-| Track known build warnings | Large editor chunks need visible ownership | Release notes mention current chunk warnings and owner lane |
+| Track build warning ownership | Circular manual chunk warnings are closed; large editor chunks need visible ownership | Release notes mention remaining WYSIWYG/source editor and Mermaid definition chunk warnings with owner lane |
 
 ### P1: Natural Knowledge Workflow
 
