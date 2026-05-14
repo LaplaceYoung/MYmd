@@ -29,10 +29,11 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 | #10 | `young/writing-stats-markdown-aware` | P2 writing polish | BLOCKED / REVIEW_REQUIRED | 3 | Include in editor production power release |
 | #11 | `young/deterministic-image-assets` | P2 resource workflow | BLOCKED / REVIEW_REQUIRED | 3 | Include in editor production power release |
 | #12 | `young/iteration-merge-queue` | Release management | BLOCKED / REVIEW_REQUIRED | 0 | Merge before release packaging work so queue status stays authoritative |
+| #13 | `young/graph-view-filter-set` | P3 graph sensemaking | BLOCKED / REVIEW_REQUIRED | 4 | Include after core writing/export queue stabilizes |
 
 ## Readiness Snapshot
 
-Captured on 2026-05-15 after PR #1-#11 rechecks and PR #12 queue refresh.
+Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 queue refresh, and PR #13 graph-filter verification.
 
 | PR | Latest Evidence | Evidence Surface |
 |---:|---|---|
@@ -48,6 +49,7 @@ Captured on 2026-05-15 after PR #1-#11 rechecks and PR #12 queue refresh.
 | #10 | typecheck, build, repo hygiene, diff check, writing stats tests, benchmark link checks | https://github.com/LaplaceYoung/MYmd/pull/10#issuecomment-4455226982 |
 | #11 | typecheck, build, repo hygiene, diff check, local asset tests | https://github.com/LaplaceYoung/MYmd/pull/11#issuecomment-4455248568 |
 | #12 | typecheck, repo hygiene, diff check, changelog link checks | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4455204178 |
+| #13 | typecheck, build, repo hygiene, diff check, graph panel E2E, cargo check | https://github.com/LaplaceYoung/MYmd/pull/13#issuecomment-4455401410 |
 
 ## Merge Waves
 
@@ -116,19 +118,23 @@ Captured on 2026-05-15 after PR #1-#11 rechecks and PR #12 queue refresh.
   - Markdown-aware writing stats
   - deterministic image assets
 
-### Wave 4: Extension Surface
+### Wave 4: Extension And Sensemaking
 
-- Goal: Land the read-only plugin API after editor and export behavior settle.
-- PR:
+- Goal: Land the read-only plugin API and graph sensemaking filters after editor and export behavior settle.
+- PRs:
   - #9 `young/readonly-plugin-api-contract`
+  - #13 `young/graph-view-filter-set`
 - Gate:
   - `npm run typecheck`
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - `npx playwright test tests/plugin_api.spec.ts --reporter=line`
+  - `npx playwright test tests/e2e_graph_panel.spec.ts --reporter=line`
+  - `cargo check --manifest-path src-tauri/Cargo.toml`
 - Release note focus:
   - stable read-only plugin registration ids
   - command/sidebar/search cleanup contract
+  - graph folder/tag/link-depth filters
 
 ## Release Packaging Rule
 

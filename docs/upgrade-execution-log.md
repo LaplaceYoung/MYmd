@@ -567,3 +567,27 @@
   - `git diff --check`
   - `gh release view --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets`
   - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 20`
+
+### Slice 28
+
+- Scope:
+  - merge queue refresh for graph view filter slice
+  - keep release waves aligned after PR #13 creation
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added PR #13 `young/graph-view-filter-set` to Wave 4 as P3 graph sensemaking scope.
+  - Linked PR #13 verification evidence covering typecheck, graph panel E2E, build, repo hygiene, diff check, and cargo check.
+  - Updated the active-goal audit from PR #1-#12 to PR #1-#13.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 20`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
