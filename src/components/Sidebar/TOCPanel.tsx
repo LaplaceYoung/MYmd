@@ -322,13 +322,13 @@ export function TOCPanel() {
         const headingRoot = document.querySelector(
             viewMode === 'split' ? '.editor-split__preview .editor' : '.editor-wysiwyg .editor'
         )
-        const observer = headingRoot
-            ? new MutationObserver(() => {
+        let observer: MutationObserver | null = null
+        if (headingRoot) {
+            observer = new MutationObserver(() => {
                 queueSync()
             })
-            : null
-
-        observer?.observe(headingRoot, { childList: true, subtree: true })
+            observer.observe(headingRoot, { childList: true, subtree: true })
+        }
 
         return () => {
             scrollContainer?.removeEventListener('scroll', syncActiveHeading)

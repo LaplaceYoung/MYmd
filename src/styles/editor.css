@@ -23,6 +23,14 @@
     animation: editorFadeIn 200ms ease-out;
 }
 
+.editor-surface-loading {
+    min-height: 240px;
+    display: grid;
+    place-items: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
 @keyframes editorFadeIn {
     from {
         opacity: 0;

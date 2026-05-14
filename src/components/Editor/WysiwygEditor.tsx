@@ -190,13 +190,15 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                 ? contextTargetRef.current
                 : null
             const fromLastTableTarget = lastTableTargetRef.current
+            const selectionNode = view.domAtPos(view.state.selection.from).node
+            const fromEditorPosition = selectionNode instanceof Element
+                ? selectionNode
+                : selectionNode.parentElement
             const table =
                 fromContextTarget?.closest('table') ??
                 fromLastTableTarget ??
                 fromSelection?.closest('table') ??
-                (view.domAtPos(view.state.selection.from).node instanceof Element
-                    ? view.domAtPos(view.state.selection.from).node.closest('table')
-                    : view.domAtPos(view.state.selection.from).node.parentElement?.closest('table')) ??
+                fromEditorPosition?.closest('table') ??
                 null
 
             if (!(table instanceof HTMLTableElement) || !containerRef.current) return null

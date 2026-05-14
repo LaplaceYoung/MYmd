@@ -25,7 +25,13 @@ export interface BuildContextualAiDraftInput {
     hasWorkspace: boolean
 }
 
-export function buildContextualAiDraft(input: BuildContextualAiDraftInput): Omit<AiPanelDraft, 'version'> {
+export interface AiScenarioCard {
+    id: 'resume-project' | 'weekly-brief' | 'readme-refresh' | 'publish-article' | 'knowledge-cards'
+    label: string
+    description: string
+}
+
+function buildDraftMeta(input: Omit<BuildContextualAiDraftInput, 'mode'>) {
     const paperMeta = getPaperPresetMeta(
         input.paperPreset,
         input.customPaperSize,
@@ -39,6 +45,92 @@ export function buildContextualAiDraft(input: BuildContextualAiDraftInput): Omit
     const profileLabel = getDocumentProfileMeta(input.documentProfile).label
     const exportLabel = getExportProfileMeta(input.exportProfile).label
     const title = input.title.trim() || 'Untitled document'
+
+    return {
+        paperLabel,
+        profileLabel,
+        exportLabel,
+        title,
+    }
+}
+
+export function getAiScenarioCards(): AiScenarioCard[] {
+    return [
+        {
+            id: 'resume-project',
+            label: 'Resume Project',
+            description: 'Turn raw notes into concise, interview-ready project bullets.',
+        },
+        {
+            id: 'weekly-brief',
+            label: 'Weekly Brief',
+            description: 'Convert ongoing work into a tight status update with outcomes and next steps.',
+        },
+        {
+            id: 'readme-refresh',
+            label: 'README Refresh',
+            description: 'Restructure product notes into a cleaner README with clearer value and setup.',
+        },
+        {
+            id: 'publish-article',
+            label: 'Publish Article',
+            description: 'Expand rough notes into a polished article draft with headings and readable flow.',
+        },
+        {
+            id: 'knowledge-cards',
+            label: 'Knowledge Cards',
+            description: 'Split a long note into reusable linked cards and hub-note candidates.',
+        },
+    ]
+}
+
+export function buildScenarioAiDraft(
+    scenarioId: AiScenarioCard['id'],
+    input: Omit<BuildContextualAiDraftInput, 'mode'>
+): Omit<AiPanelDraft, 'version'> {
+    const { paperLabel, profileLabel, exportLabel, title } = buildDraftMeta(input)
+
+    if (scenarioId === 'resume-project') {
+        return {
+            taskMode: 'writing',
+            includeGraphContext: false,
+            instruction: `Rewrite "${title}" into a resume-ready project entry for the ${profileLabel} profile. Keep it factual, compact, metric-aware when evidence exists, and make the output fit a ${paperLabel} ${exportLabel} handoff.`,
+        }
+    }
+
+    if (scenarioId === 'weekly-brief') {
+        return {
+            taskMode: 'writing',
+            includeGraphContext: false,
+            instruction: `Turn "${title}" into a weekly brief with progress, outcomes, blockers, and next steps. Keep the structure easy to scan and suitable for the ${exportLabel} export profile.`,
+        }
+    }
+
+    if (scenarioId === 'readme-refresh') {
+        return {
+            taskMode: 'writing',
+            includeGraphContext: false,
+            instruction: `Restructure "${title}" into a sharper README. Clarify product value, core capabilities, setup steps, and usage flow while preserving the original facts and matching the ${profileLabel} profile tone.`,
+        }
+    }
+
+    if (scenarioId === 'publish-article') {
+        return {
+            taskMode: 'writing',
+            includeGraphContext: false,
+            instruction: `Expand "${title}" into a polished article draft with a strong title, clean H2/H3 structure, natural transitions, and a readable pace suitable for the ${exportLabel} export profile on a ${paperLabel} canvas.`,
+        }
+    }
+
+    return {
+        taskMode: 'graph',
+        includeGraphContext: input.hasWorkspace,
+        instruction: `Break "${title}" into reusable knowledge cards, suggest stronger wiki links, and identify hub-note opportunities. Use current graph context when available and keep the structure aligned with the ${profileLabel} document profile.`,
+    }
+}
+
+export function buildContextualAiDraft(input: BuildContextualAiDraftInput): Omit<AiPanelDraft, 'version'> {
+    const { paperLabel, profileLabel, exportLabel, title } = buildDraftMeta(input)
 
     if (input.mode === 'layout') {
         return {

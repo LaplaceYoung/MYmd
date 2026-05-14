@@ -442,9 +442,12 @@ export function buildExportHtmlStyle(
             color: #334155;
         }
         table {
-            width: 100%;
+            width: max-content;
+            min-width: 100%;
+            max-width: none;
             border-collapse: collapse;
             margin: 1em 0;
+            table-layout: auto;
         }
         th, td {
             border: 1px solid rgba(15, 23, 42, 0.14);

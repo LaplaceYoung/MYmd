@@ -1,9 +1,10 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { FilePlus, FolderOpen, Home, Clock, FileText } from 'lucide-react'
 import { TemplateGallery } from './TemplateGallery'
 import { SettingsPanel } from '../Settings/SettingsPanel'
 import { AccountPanel } from '../Account/AccountPanel'
 import { useEditorStore } from '@/stores/editorStore'
+import { useI18n } from '@/i18n'
 import logoSrc from '@/assets/logo.svg'
 
 type WelcomeViewType = 'home' | 'account' | 'settings'
@@ -15,21 +16,26 @@ interface WelcomeViewProps {
 }
 
 export function WelcomeView({ handleNewFile, handleOpenFile, handleOpenRecentFile }: WelcomeViewProps) {
+    const { t } = useI18n()
     const [welcomeView, setWelcomeView] = useState<WelcomeViewType>('home')
     const recentFiles = useEditorStore(s => s.recentFiles)
 
     const hour = new Date().getHours()
-    const greeting = hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好'
+    const greeting = hour < 12
+        ? t('welcome.greetingMorning')
+        : hour < 18
+            ? t('welcome.greetingAfternoon')
+            : t('welcome.greetingEvening')
 
     const formatRelativeTime = (timestamp: number) => {
         const diff = Date.now() - timestamp
         const minutes = Math.floor(diff / 60000)
-        if (minutes < 1) return '刚刚'
-        if (minutes < 60) return `${minutes} 分钟前`
+        if (minutes < 1) return t('welcome.justNow')
+        if (minutes < 60) return t('welcome.minutesAgo', { count: minutes })
         const hours = Math.floor(minutes / 60)
-        if (hours < 24) return `${hours} 小时前`
+        if (hours < 24) return t('welcome.hoursAgo', { count: hours })
         const days = Math.floor(hours / 24)
-        return `${days} 天前`
+        return t('welcome.daysAgo', { count: days })
     }
 
     return (
@@ -46,15 +52,15 @@ export function WelcomeView({ handleNewFile, handleOpenFile, handleOpenRecentFil
                         onClick={() => setWelcomeView('home')}
                     >
                         <Home size={28} strokeWidth={1} />
-                        <span>开始</span>
+                        <span>{t('welcome.start')}</span>
                     </button>
                     <button className="welcome-word__sidebar-btn" onClick={handleNewFile}>
                         <FilePlus size={28} strokeWidth={1} />
-                        <span>新建</span>
+                        <span>{t('welcome.new')}</span>
                     </button>
                     <button className="welcome-word__sidebar-btn" onClick={handleOpenFile}>
                         <FolderOpen size={28} strokeWidth={1} />
-                        <span>打开</span>
+                        <span>{t('welcome.open')}</span>
                     </button>
                 </div>
                 <div className="welcome-word__sidebar-bottom">
@@ -63,13 +69,13 @@ export function WelcomeView({ handleNewFile, handleOpenFile, handleOpenRecentFil
                         className={`welcome-word__sidebar-btn text-only ${welcomeView === 'account' ? 'active' : ''}`}
                         onClick={() => setWelcomeView('account')}
                     >
-                        账户
+                        {t('welcome.account')}
                     </button>
                     <button
                         className={`welcome-word__sidebar-btn text-only ${welcomeView === 'settings' ? 'active' : ''}`}
                         onClick={() => setWelcomeView('settings')}
                     >
-                        选项
+                        {t('welcome.options')}
                     </button>
                 </div>
             </div>
@@ -91,15 +97,15 @@ export function WelcomeView({ handleNewFile, handleOpenFile, handleOpenRecentFil
 
                     <div className="welcome-word__section">
                         <div className="welcome-word__recent-header">
-                            <h2 className="welcome-word__section-title active">最近</h2>
+                            <h2 className="welcome-word__section-title active">{t('welcome.recent')}</h2>
                         </div>
                         <div className="welcome-word__recent-list">
                             <table className="welcome-word__recent-table">
                                 <thead>
                                     <tr>
-                                        <th>名称</th>
-                                        <th>修改时间</th>
-                                        <th>位置</th>
+                                        <th>{t('welcome.tableName')}</th>
+                                        <th>{t('welcome.tableModified')}</th>
+                                        <th>{t('welcome.tableLocation')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -128,7 +134,7 @@ export function WelcomeView({ handleNewFile, handleOpenFile, handleOpenRecentFil
                                             <td colSpan={3}>
                                                 <div className="welcome-word__recent-empty">
                                                     <Clock size={36} color="var(--text-muted)" strokeWidth={1.5} style={{ marginBottom: '8px' }} />
-                                                    没有最近打开的文档。
+                                                    {t('welcome.noRecent')}
                                                 </div>
                                             </td>
                                         </tr>

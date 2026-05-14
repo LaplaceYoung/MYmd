@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useEditorStore } from '@/stores/editorStore'
-import { WysiwygEditor } from './WysiwygEditor'
-import { SourceEditor } from './SourceEditor'
 import { SearchBar } from './SearchBar'
 import { InsertDialog } from './InsertDialog'
 import { WelcomeView } from './WelcomeView'
@@ -20,6 +18,13 @@ interface EditorContainerProps {
     suppressWelcome?: boolean
 }
 
+const WysiwygEditor = lazy(() => import('./WysiwygEditor').then(module => ({ default: module.WysiwygEditor })))
+const SourceEditor = lazy(() => import('./SourceEditor').then(module => ({ default: module.SourceEditor })))
+
+function EditorSurfaceLoading() {
+    return <div className="editor-surface-loading">Loading editor...</div>
+}
+
 /** 编辑器容器：根据当前标签和视图模式渲染编辑器 */
 export function EditorContainer({ suppressWelcome = false }: EditorContainerProps) {
     const tabs = useEditorStore(s => s.tabs)
@@ -33,27 +38,43 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
     const paperOrientation = useEditorStore(s => s.paperOrientation)
     const customPaperSize = useEditorStore(s => s.customPaperSize)
     const pageMarginMm = useEditorStore(s => s.pageMarginMm)
+    const autoExpandPaperForWideTables = useEditorStore(s => s.autoExpandPaperForWideTables)
+    const maxAutoPaperWidthPx = useEditorStore(s => s.maxAutoPaperWidthPx)
     const documentProfile = useEditorStore(s => s.documentProfile)
     const exportProfile = useEditorStore(s => s.exportProfile)
     const commandRef = useRef<((cmd: string, payload?: unknown) => void) | null>(null)
+    const workspaceRootRef = useRef<HTMLDivElement>(null)
     const [previewContent, setPreviewContent] = useState(activeTab?.content ?? '')
     const [showModeGuide, setShowModeGuide] = useState(() => {
         if (typeof window === 'undefined') return false
         return window.localStorage.getItem('mymd:view-mode-guide:v1') !== 'dismissed'
     })
+    const [wideTableWidthPx, setWideTableWidthPx] = useState<number | null>(null)
 
     const splitContainerRef = useRef<HTMLDivElement>(null)
     const perfInfo = useMemo(
         () => analyzeDocumentPerformance(activeTab?.content ?? ''),
         [activeTab?.content]
     )
-    const paperStyle = useMemo(
+    const basePaperStyle = useMemo(
         () => ({
             ...getPaperCssVariables(paperPreset, customPaperSize, paperOrientation, pageMarginMm),
             ...getDocumentProfileCssVariables(documentProfile)
         }) as React.CSSProperties,
         [customPaperSize, documentProfile, pageMarginMm, paperOrientation, paperPreset]
     )
+    const paperStyle = useMemo(() => {
+        const style = { ...basePaperStyle } as React.CSSProperties & Record<string, string>
+        if (!autoExpandPaperForWideTables || !wideTableWidthPx) {
+            return style
+        }
+
+        const baseWidthValue = Number.parseInt(String(style['--paper-width'] ?? '').replace('px', ''), 10)
+        const baseWidth = Number.isFinite(baseWidthValue) ? baseWidthValue : 800
+        const nextWidth = Math.max(baseWidth, Math.min(maxAutoPaperWidthPx, Math.round(wideTableWidthPx + 24)))
+        style['--paper-width'] = `${nextWidth}px`
+        return style
+    }, [autoExpandPaperForWideTables, basePaperStyle, maxAutoPaperWidthPx, wideTableWidthPx])
     const pageGuides = shouldShowPageGuides(paperPreset, exportProfile) ? 'on' : 'off'
 
     // Shortcuts and file operations
@@ -90,6 +111,56 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
         }
     }, [showModeGuide, viewMode])
 
+    useEffect(() => {
+        if (!autoExpandPaperForWideTables) {
+            setWideTableWidthPx(null)
+            return
+        }
+
+        const root = workspaceRootRef.current
+        if (!root) return
+
+        let rafId = 0
+        let observedTables: HTMLTableElement[] = []
+        const selector = '.editor-wysiwyg .milkdown table'
+
+        const measure = () => {
+            window.cancelAnimationFrame(rafId)
+            rafId = window.requestAnimationFrame(() => {
+                const tables = Array.from(root.querySelectorAll<HTMLTableElement>(selector))
+                if (tables.length === 0) {
+                    setWideTableWidthPx(null)
+                    return
+                }
+                const widest = tables.reduce((max, table) => Math.max(max, Math.ceil(table.scrollWidth)), 0)
+                setWideTableWidthPx(widest > 0 ? widest : null)
+            })
+        }
+
+        const resizeObserver = new ResizeObserver(() => measure())
+        const observeCurrentTables = () => {
+            resizeObserver.disconnect()
+            observedTables = Array.from(root.querySelectorAll<HTMLTableElement>(selector))
+            observedTables.forEach(table => resizeObserver.observe(table))
+        }
+
+        const mutationObserver = new MutationObserver(() => {
+            observeCurrentTables()
+            measure()
+        })
+
+        observeCurrentTables()
+        measure()
+        mutationObserver.observe(root, { childList: true, subtree: true })
+
+        return () => {
+            window.cancelAnimationFrame(rafId)
+            resizeObserver.disconnect()
+            mutationObserver.disconnect()
+            observedTables = []
+        }
+    }, [activeTabId, autoExpandPaperForWideTables, viewMode])
+
     const dismissModeGuide = () => {
         window.localStorage.setItem('mymd:view-mode-guide:v1', 'dismissed')
         setShowModeGuide(false)
@@ -99,7 +170,7 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
     if (!activeTab) {
         if (suppressWelcome) {
             return (
-                <div className={`editor-container ${watermark ? 'has-watermark' : ''}`}>
+                <div ref={workspaceRootRef} className={`editor-container ${watermark ? 'has-watermark' : ''}`}>
                     <div
                         style={{
                             flex: 1,
@@ -131,7 +202,7 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
     } as React.CSSProperties
 
     return (
-        <div className={`editor-container ${watermark ? 'has-watermark' : ''}`}>
+        <div ref={workspaceRootRef} className={`editor-container ${watermark ? 'has-watermark' : ''}`}>
             <SearchBar />
             <InsertDialog />
             {showModeGuide && (
@@ -170,12 +241,14 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
                     data-page-guides={pageGuides}
                 >
                     <div className="editor-zoom-container" style={zoomStyle}>
-                        <WysiwygEditor
-                            key={activeTab.id}
-                            tabId={activeTab.id}
-                            content={activeTab.content}
-                            onCommandRef={commandRef}
-                        />
+                        <Suspense fallback={<EditorSurfaceLoading />}>
+                            <WysiwygEditor
+                                key={activeTab.id}
+                                tabId={activeTab.id}
+                                content={activeTab.content}
+                                onCommandRef={commandRef}
+                            />
+                        </Suspense>
                     </div>
                 </div>
             ) : (
@@ -192,11 +265,13 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
                             transition: isDraggingRef.current ? 'none' : undefined
                         }}
                     >
-                        <SourceEditor
-                            key={`source-${activeTab.id}`}
-                            tabId={activeTab.id}
-                            content={activeTab.content}
-                        />
+                        <Suspense fallback={<EditorSurfaceLoading />}>
+                            <SourceEditor
+                                key={`source-${activeTab.id}`}
+                                tabId={activeTab.id}
+                                content={activeTab.content}
+                            />
+                        </Suspense>
                     </div>
                     <div
                         className="editor-split__divider"
@@ -215,12 +290,14 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
                         }}
                     >
                         <div className="editor-zoom-container" style={zoomStyle}>
-                            <WysiwygEditor
-                                key={`preview-${activeTab.id}`}
-                                tabId={activeTab.id}
-                                content={previewContent}
-                                readOnly
-                            />
+                            <Suspense fallback={<EditorSurfaceLoading />}>
+                                <WysiwygEditor
+                                    key={`preview-${activeTab.id}`}
+                                    tabId={activeTab.id}
+                                    content={previewContent}
+                                    readOnly
+                                />
+                            </Suspense>
                         </div>
                     </div>
                 </div>

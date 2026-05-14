@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { queryKnowledge } from "@/knowledge/service";
 import { useEditorStore } from "@/stores/editorStore";
@@ -8,6 +8,16 @@ import type { KnowledgeSearchResponse } from "@/knowledge/types";
 import "./GlobalSearchModal.css";
 
 const EMPTY_RESULTS: KnowledgeSearchResponse = { documents: [], headings: [], tags: [] };
+
+interface SearchListItem {
+  id: string;
+  group: "documents" | "headings" | "tags" | "plugins";
+  title: string;
+  subtitle?: string;
+  preview?: string;
+  level?: number;
+  onSelect: () => void;
+}
 
 export function GlobalSearchModal() {
   const addTab = useEditorStore((s) => s.addTab);
@@ -24,6 +34,7 @@ export function GlobalSearchModal() {
   const [pluginResults, setPluginResults] = useState<
     { id: string; title: string; subtitle?: string; onSelect: () => void }[]
   >([]);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     const onGlobalKeyDown = (e: KeyboardEvent) => {
@@ -49,21 +60,29 @@ export function GlobalSearchModal() {
     }
 
     setLoading(true);
+    let cancelled = false;
     const timer = window.setTimeout(() => {
       Promise.all([queryKnowledge(normalized), queryPluginSearch(normalized)])
         .then(([data, plugins]) => {
+          if (cancelled) return;
           setResults(data);
           setPluginResults(plugins);
         })
         .catch((error) => {
+          if (cancelled) return;
           console.warn("knowledge query failed:", error);
           setResults(EMPTY_RESULTS);
           setPluginResults([]);
         })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
     }, 150);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [query, queryPluginSearch, visible]);
 
   const totalCount = useMemo(
@@ -72,7 +91,7 @@ export function GlobalSearchModal() {
   );
   const aggregateCount = totalCount + pluginResults.length;
 
-  const openResult = async (filePath: string, headingSlug = "") => {
+  const openResult = useCallback(async (filePath: string, headingSlug = "") => {
     try {
       const content = await readTextFileWithFallback(filePath);
       const tabId = addTab(filePath, content);
@@ -85,6 +104,92 @@ export function GlobalSearchModal() {
       }
     } catch (error) {
       console.warn("open search result failed:", filePath, error);
+    }
+  }, [addTab, closeGlobalSearch, markSaved]);
+
+  const listItems = useMemo<SearchListItem[]>(
+    () => [
+      ...results.documents.map((item) => ({
+        id: `doc:${item.file_path}`,
+        group: "documents" as const,
+        title: item.title || item.file_path,
+        subtitle: item.file_path,
+        preview: item.preview,
+        onSelect: () => {
+          void openResult(item.file_path);
+        },
+      })),
+      ...results.headings.map((item) => ({
+        id: `heading:${item.file_path}:${item.heading_slug}`,
+        group: "headings" as const,
+        title: item.heading_text,
+        subtitle: item.document_title,
+        level: item.level,
+        onSelect: () => {
+          void openResult(item.file_path, item.heading_slug);
+        },
+      })),
+      ...results.tags.map((item) => ({
+        id: `tag:${item.file_path}:${item.tag}`,
+        group: "tags" as const,
+        title: `#${item.tag}`,
+        subtitle: item.document_title,
+        onSelect: () => {
+          void openResult(item.file_path);
+        },
+      })),
+      ...pluginResults.map((item) => ({
+        id: `plugin:${item.id}`,
+        group: "plugins" as const,
+        title: item.title,
+        subtitle: item.subtitle,
+        onSelect: () => {
+          item.onSelect();
+          closeGlobalSearch();
+        },
+      })),
+    ],
+    [closeGlobalSearch, openResult, pluginResults, results.documents, results.headings, results.tags]
+  );
+
+  useEffect(() => {
+    if (!visible) {
+      setActiveIndex(0);
+      return;
+    }
+
+    if (listItems.length === 0) {
+      setActiveIndex(-1);
+      return;
+    }
+
+    setActiveIndex((current) => {
+      if (current < 0) return 0;
+      if (current >= listItems.length) return listItems.length - 1;
+      return current;
+    });
+  }, [listItems, visible]);
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (listItems.length === 0) return;
+      setActiveIndex((current) => (current + 1) % listItems.length);
+      return;
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (listItems.length === 0) return;
+      setActiveIndex((current) => (current - 1 + listItems.length) % listItems.length);
+      return;
+    }
+
+    if (e.key === "Enter") {
+      const activeItem = listItems[activeIndex];
+      if (!activeItem) return;
+      e.preventDefault();
+      activeItem.onSelect();
     }
   };
 
@@ -100,6 +205,7 @@ export function GlobalSearchModal() {
               autoFocus
               value={query}
               onChange={(e) => setGlobalSearchQuery(e.target.value)}
+              onKeyDown={handleInputKeyDown}
               placeholder="Search notes, headings, tags..."
             />
           </div>
@@ -114,27 +220,41 @@ export function GlobalSearchModal() {
           {results.documents.length > 0 && (
             <section>
               <div className="global-search__group-title">Documents</div>
-              {results.documents.map((item) => (
+              {results.documents.map((item) => {
+                const itemId = `doc:${item.file_path}`;
+                const isActive = listItems[activeIndex]?.id === itemId;
+                return (
                 <button
-                  key={`doc:${item.file_path}`}
-                  className="global-search__item"
+                  key={itemId}
+                  className={`global-search__item${isActive ? " global-search__item--active" : ""}`}
+                  onMouseEnter={() => {
+                    const nextIndex = listItems.findIndex((listItem) => listItem.id === itemId);
+                    if (nextIndex >= 0) setActiveIndex(nextIndex);
+                  }}
                   onClick={() => void openResult(item.file_path)}
                 >
                   <div className="global-search__item-title">{item.title || item.file_path}</div>
                   <div className="global-search__item-meta">{item.file_path}</div>
                   <div className="global-search__item-preview">{item.preview}</div>
                 </button>
-              ))}
+              )})}
             </section>
           )}
 
           {results.headings.length > 0 && (
             <section>
               <div className="global-search__group-title">Headings</div>
-              {results.headings.map((item) => (
+              {results.headings.map((item) => {
+                const itemId = `heading:${item.file_path}:${item.heading_slug}`;
+                const isActive = listItems[activeIndex]?.id === itemId;
+                return (
                 <button
-                  key={`heading:${item.file_path}:${item.heading_slug}`}
-                  className="global-search__item"
+                  key={itemId}
+                  className={`global-search__item${isActive ? " global-search__item--active" : ""}`}
+                  onMouseEnter={() => {
+                    const nextIndex = listItems.findIndex((listItem) => listItem.id === itemId);
+                    if (nextIndex >= 0) setActiveIndex(nextIndex);
+                  }}
                   onClick={() => void openResult(item.file_path, item.heading_slug)}
                 >
                   <div className="global-search__item-title">
@@ -142,33 +262,47 @@ export function GlobalSearchModal() {
                   </div>
                   <div className="global-search__item-meta">{item.document_title}</div>
                 </button>
-              ))}
+              )})}
             </section>
           )}
 
           {results.tags.length > 0 && (
             <section>
               <div className="global-search__group-title">Tags</div>
-              {results.tags.map((item) => (
+              {results.tags.map((item) => {
+                const itemId = `tag:${item.file_path}:${item.tag}`;
+                const isActive = listItems[activeIndex]?.id === itemId;
+                return (
                 <button
-                  key={`tag:${item.file_path}:${item.tag}`}
-                  className="global-search__item"
+                  key={itemId}
+                  className={`global-search__item${isActive ? " global-search__item--active" : ""}`}
+                  onMouseEnter={() => {
+                    const nextIndex = listItems.findIndex((listItem) => listItem.id === itemId);
+                    if (nextIndex >= 0) setActiveIndex(nextIndex);
+                  }}
                   onClick={() => void openResult(item.file_path)}
                 >
                   <div className="global-search__item-title">#{item.tag}</div>
                   <div className="global-search__item-meta">{item.document_title}</div>
                 </button>
-              ))}
+              )})}
             </section>
           )}
 
           {pluginResults.length > 0 && (
             <section>
               <div className="global-search__group-title">Plugin Results</div>
-              {pluginResults.map((item) => (
+              {pluginResults.map((item) => {
+                const itemId = `plugin:${item.id}`;
+                const isActive = listItems[activeIndex]?.id === itemId;
+                return (
                 <button
-                  key={`plugin:${item.id}`}
-                  className="global-search__item"
+                  key={itemId}
+                  className={`global-search__item${isActive ? " global-search__item--active" : ""}`}
+                  onMouseEnter={() => {
+                    const nextIndex = listItems.findIndex((listItem) => listItem.id === itemId);
+                    if (nextIndex >= 0) setActiveIndex(nextIndex);
+                  }}
                   onClick={() => {
                     item.onSelect();
                     closeGlobalSearch();
@@ -177,7 +311,7 @@ export function GlobalSearchModal() {
                   <div className="global-search__item-title">{item.title}</div>
                   {item.subtitle && <div className="global-search__item-meta">{item.subtitle}</div>}
                 </button>
-              ))}
+              )})}
             </section>
           )}
 

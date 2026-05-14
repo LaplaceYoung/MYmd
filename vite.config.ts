@@ -12,12 +12,19 @@ export default defineConfig({
   // Tauri configuration
   clearScreen: false,
   build: {
-    minify: false,
+    minify: 'esbuild',
+    cssMinify: 'esbuild',
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-mermaid': ['mermaid'],
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (id.includes('react') || id.includes('react-dom')) return 'vendor-react'
+          if (id.includes('mermaid')) return 'vendor-mermaid'
+          if (id.includes('@milkdown') || id.includes('prosemirror')) return 'vendor-milkdown'
+          if (id.includes('@codemirror') || id.includes('codemirror')) return 'vendor-codemirror'
+          if (id.includes('katex')) return 'vendor-katex'
+          if (id.includes('lucide-react')) return 'vendor-icons'
+          return 'vendor-misc'
         },
       },
     },

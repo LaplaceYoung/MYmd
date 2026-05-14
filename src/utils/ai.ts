@@ -12,6 +12,8 @@ export interface AiPromptPreset {
     instruction: string
 }
 
+export type AiOutputShape = 'full' | 'outline'
+
 interface ChatContentPart {
     type?: string
     text?: string
@@ -51,6 +53,7 @@ interface ResponsesApiResponse {
 export interface RequestAiSuggestionInput {
     config: AiConfigInput
     taskMode: AiTaskMode
+    outputShape?: AiOutputShape
     instruction: string
     title: string
     content: string
@@ -187,23 +190,27 @@ export function getAiTaskPresets(mode: AiTaskMode): AiPromptPreset[] {
     return AI_PRESETS[mode] ?? AI_PRESETS.writing
 }
 
-export function buildSystemPrompt(mode: AiTaskMode) {
+export function buildSystemPrompt(mode: AiTaskMode, outputShape: AiOutputShape = 'full') {
+    const outlineSuffix = outputShape === 'outline'
+        ? ' Return an outline only. Use Markdown headings and bullet points. Do not write full paragraphs.'
+        : ''
+
     if (mode === 'writing' || mode === 'content') {
-        return 'You are a senior writing assistant. Draft complete, coherent Markdown content based on user instructions while preserving given facts. Return Markdown only.'
+        return `You are a senior writing assistant. Draft complete, coherent Markdown content based on user instructions while preserving given facts. Return Markdown only.${outlineSuffix}`
     }
     if (mode === 'polish') {
-        return 'You are a senior editorial assistant. Polish language, tone, and readability while preserving meaning and factual integrity. Return Markdown only.'
+        return `You are a senior editorial assistant. Polish language, tone, and readability while preserving meaning and factual integrity. Return Markdown only.${outlineSuffix}`
     }
     if (mode === 'modify') {
-        return 'You are a senior Markdown editor. Execute targeted revisions requested by the user and avoid changing unrelated parts. Return Markdown only.'
+        return `You are a senior Markdown editor. Execute targeted revisions requested by the user and avoid changing unrelated parts. Return Markdown only.${outlineSuffix}`
     }
     if (mode === 'layout') {
-        return 'You are a senior Markdown editor. Improve document structure and formatting for print, export, and long-form readability. Return Markdown only.'
+        return `You are a senior Markdown editor. Improve document structure and formatting for print, export, and long-form readability. Return Markdown only.${outlineSuffix}`
     }
     if (mode === 'graph') {
-        return 'You are a local knowledge-base assistant. Improve note structure, internal links, topic clusters, and related-node suggestions. Prefer wiki links when helpful. Return Markdown only.'
+        return `You are a local knowledge-base assistant. Improve note structure, internal links, topic clusters, and related-node suggestions. Prefer wiki links when helpful. Return Markdown only.${outlineSuffix}`
     }
-    return 'You are a senior writing assistant. Improve clarity, flow, tone, and structure while preserving facts. Return Markdown only.'
+    return `You are a senior writing assistant. Improve clarity, flow, tone, and structure while preserving facts. Return Markdown only.${outlineSuffix}`
 }
 
 function collectAssistantText(content?: string | ChatContentPart[], trim = true) {
@@ -227,7 +234,7 @@ function detectEndpointMode(endpoint: string): AiEndpointMode {
 
 function buildChatMessages(input: RequestAiSuggestionInput) {
     return [
-        { role: 'system', content: buildSystemPrompt(input.taskMode) },
+        { role: 'system', content: buildSystemPrompt(input.taskMode, input.outputShape ?? 'full') },
         {
             role: 'user',
             content: buildAiUserPrompt({
@@ -235,6 +242,7 @@ function buildChatMessages(input: RequestAiSuggestionInput) {
                 title: input.title,
                 content: input.content,
                 graphContext: input.graphContext,
+                outputShape: input.outputShape ?? 'full',
             }),
         },
     ]
@@ -272,17 +280,27 @@ export function buildAiUserPrompt(input: {
     title: string
     content: string
     graphContext?: string
+    outputShape?: AiOutputShape
 }) {
     const graphContext = input.graphContext?.trim()
+    const outputShape = input.outputShape ?? 'full'
     const graphSection = graphContext
         ? graphContext.startsWith('Knowledge graph snapshot:')
             ? graphContext
             : `Knowledge graph snapshot:\n${graphContext}`
         : ''
+    const outputSection = outputShape === 'outline'
+        ? [
+            'Output shape: outline only',
+            'Use nested Markdown headings and bullet points.',
+            'Do not write full paragraphs unless the source already requires them.',
+        ].join('\n')
+        : 'Output shape: full draft'
 
     return [
         `Extra instruction: ${input.instruction.trim() || 'None. Improve based on mode.'}`,
         'Return Markdown only. Do not add explanations.',
+        outputSection,
         '',
         `Document title: ${input.title}`,
         '',

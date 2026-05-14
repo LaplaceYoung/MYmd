@@ -196,6 +196,15 @@
     background-color: var(--bg-hover, #e5e5e5);
 }
 
+.top-search-item--active {
+    background-color: color-mix(in srgb, var(--accent, #2563eb) 16%, var(--bg-elevated, #ffffff));
+}
+
+.top-search-item--active .top-search-item__text {
+    color: var(--text-primary, #1f2937);
+    font-weight: 600;
+}
+
 .top-search-item__text {
     flex: 1;
 }

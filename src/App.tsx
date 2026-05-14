@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { TitleBar } from './components/TitleBar/TitleBar'
 import { TabBar } from './components/TabBar/TabBar'
 import { Ribbon } from './components/Ribbon/Ribbon'
@@ -12,13 +12,15 @@ import { useSessionRecovery } from './components/Editor/hooks/useSessionRecovery
 import { GlobalSearchModal } from './components/Editor/GlobalSearchModal'
 import './styles/immersive.css'
 
-import { TOCPanel } from './components/Sidebar/TOCPanel'
-import { FileExplorer } from './components/Sidebar/FileExplorer'
-import { BacklinksPanel } from './components/Sidebar/BacklinksPanel'
-import { KnowledgeGraphPanel } from './components/Sidebar/KnowledgeGraphPanel'
-import { AiPanel } from './components/Sidebar/AiPanel'
 import { installBuiltinKnowledgePlugin } from './plugins/builtinKnowledgePlugin'
 import { installBuiltinAiPlugin } from './plugins/builtinAiPlugin'
+import { resolveAppLocale } from './i18n'
+
+const TOCPanel = lazy(() => import('./components/Sidebar/TOCPanel').then(module => ({ default: module.TOCPanel })))
+const FileExplorer = lazy(() => import('./components/Sidebar/FileExplorer').then(module => ({ default: module.FileExplorer })))
+const BacklinksPanel = lazy(() => import('./components/Sidebar/BacklinksPanel').then(module => ({ default: module.BacklinksPanel })))
+const KnowledgeGraphPanel = lazy(() => import('./components/Sidebar/KnowledgeGraphPanel').then(module => ({ default: module.KnowledgeGraphPanel })))
+const AiPanel = lazy(() => import('./components/Sidebar/AiPanel').then(module => ({ default: module.AiPanel })))
 
 export default function App() {
     useAutoSave()
@@ -29,6 +31,12 @@ export default function App() {
     const hasActiveTab = tabs.length > 0
     const themeMode = useEditorStore(s => s.themeMode)
     const colorScheme = useEditorStore(s => s.colorScheme)
+    const locale = useEditorStore(s => s.locale)
+    const fileExplorerVisible = useEditorStore(s => s.fileExplorerVisible)
+    const tocVisible = useEditorStore(s => s.tocVisible)
+    const backlinksVisible = useEditorStore(s => s.backlinksVisible)
+    const knowledgeGraphVisible = useEditorStore(s => s.knowledgeGraphVisible)
+    const aiPanelVisible = useEditorStore(s => s.aiPanelVisible)
 
     // 主题切换：将 data-theme 属性应用到 <html> 元素
     useEffect(() => {
@@ -53,6 +61,10 @@ export default function App() {
             root.setAttribute('data-color-scheme', colorScheme)
         }
     }, [colorScheme])
+
+    useEffect(() => {
+        document.documentElement.lang = resolveAppLocale(locale)
+    }, [locale])
 
     useEffect(() => {
         const cleanupKnowledge = installBuiltinKnowledgePlugin()
@@ -92,11 +104,13 @@ export default function App() {
                 </div>
             )}
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden', width: '100%' }}>
-                <FileExplorer />
-                <TOCPanel />
-                <BacklinksPanel />
-                <KnowledgeGraphPanel />
-                <AiPanel />
+                <Suspense fallback={null}>
+                    {fileExplorerVisible && <FileExplorer />}
+                    {tocVisible && <TOCPanel />}
+                    {backlinksVisible && <BacklinksPanel />}
+                    {knowledgeGraphVisible && <KnowledgeGraphPanel />}
+                    {aiPanelVisible && <AiPanel />}
+                </Suspense>
                 <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     <EditorContainer suppressWelcome={suppressWelcome} />
                 </div>

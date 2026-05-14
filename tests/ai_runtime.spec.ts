@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import {
     buildAiUserPrompt,
+    buildSystemPrompt,
     getAiTaskPresets,
     requestAiSuggestion,
     verifyAiConnection,
@@ -20,6 +21,27 @@ test('builds an AI user prompt with instruction, markdown, and graph context', (
     expect(prompt).toContain('# Draft')
     expect(prompt).toContain('Knowledge graph snapshot:')
     expect(prompt).toContain('Resume -> Experience')
+})
+
+test('builds an outline-only prompt variant when requested', () => {
+    const prompt = buildAiUserPrompt({
+        instruction: 'Summarize this document.',
+        title: 'Candidate Notes',
+        content: '# Draft\n\nAlpha beta',
+        outputShape: 'outline',
+    })
+
+    expect(prompt).toContain('Output shape: outline only')
+    expect(prompt).toContain('Use nested Markdown headings and bullet points')
+})
+
+test('builds a system prompt that reflects the requested output shape', () => {
+    const fullDraftPrompt = buildSystemPrompt('writing', 'full')
+    const outlinePrompt = buildSystemPrompt('writing', 'outline')
+
+    expect(fullDraftPrompt).toContain('complete, coherent Markdown content')
+    expect(outlinePrompt).toContain('outline only')
+    expect(outlinePrompt).toContain('Do not write full paragraphs')
 })
 
 test('returns mode-specific prompt presets', () => {

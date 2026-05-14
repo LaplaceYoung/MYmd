@@ -64,6 +64,51 @@
     gap: 8px;
 }
 
+.ai-panel__scenario-grid {
+    display: grid;
+    gap: 8px;
+}
+
+.ai-panel__scenario-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--accent) 4%, var(--bg-surface)),
+        var(--bg-surface)
+    );
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+.ai-panel__scenario-card:hover {
+    border-color: var(--accent);
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--accent) 10%, var(--bg-surface)),
+        var(--bg-surface)
+    );
+    color: var(--text-primary);
+}
+
+.ai-panel__scenario-label {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ai-panel__scenario-desc {
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
 .ai-panel__task-card {
     display: flex;
     align-items: flex-start;

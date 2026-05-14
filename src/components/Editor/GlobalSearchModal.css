@@ -104,6 +104,12 @@
   background: var(--bg-hover);
 }
 
+.global-search__item--active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent, #2563eb) 10%, var(--bg-hover, #f4f7fb));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent, #2563eb) 22%, transparent);
+}
+
 .global-search__item-title {
   color: var(--text-primary);
   font-size: 13px;

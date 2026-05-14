@@ -190,3 +190,34 @@
   - Preserved coverage for WYSIWYG paste, split-source paste, trusted media embed rendering, and blocked untrusted embeds.
   - Re-ran `npx playwright test tests/e2e_media_embed.spec.ts tests/e2e_image_paste.spec.ts tests/e2e_source_image_paste.spec.ts --reporter=line` and it passed on 2026-04-15.
   - Re-ran `npm run build` and it passed on 2026-04-15.
+
+### Slice 10
+
+- Scope:
+  - product health and performance pass
+  - restore strict typecheck health, reduce startup bundle pressure, and keep E2E selectors locale-tolerant
+- Planned touchpoints:
+  - `src/App.tsx`
+  - `src/components/Editor/EditorContainer.tsx`
+  - `src/components/Editor/GlobalSearchModal.tsx`
+  - `src/components/Editor/SourceEditor.tsx`
+  - `src/components/Editor/TemplateGallery.tsx`
+  - `src/components/Editor/WysiwygEditor.tsx`
+  - `src/components/Sidebar/TOCPanel.tsx`
+  - `src/styles/editor.css`
+  - `vite.config.ts`
+  - `tests/e2e_unsaved_close.spec.ts`
+  - `tests/e2e_layout_profile.spec.ts`
+- Functional health:
+  - Core local editor workflow is healthy: welcome/new document, WYSIWYG editor loading, settings-to-editor status path, unsaved close interception, and production build are verified.
+  - Knowledge workflow health is medium-high: global search has stale-result cancellation and keyboard selection, backlinks/graph paths are present, and remaining risk sits in larger workspace indexing and graph-heavy documents.
+  - Performance health improved: the startup route now defers editor-heavy and hidden sidebar code, and the production build uses minified, cacheable vendor chunks.
+  - Repository hygiene is healthy: tracked generated artifacts and secret patterns passed the repo hygiene script.
+- Evidence:
+  - Fixed strict TypeScript failures in CodeMirror search decoration typing, WYSIWYG DOM narrowing, and TOC mutation observer setup.
+  - Converted WYSIWYG/source editors and conditional sidebars to lazy chunks so the welcome/startup route avoids loading hidden advanced surfaces.
+  - Enabled Vite esbuild minification and split React, Milkdown, CodeMirror, KaTeX, icons, Mermaid, and misc vendor chunks.
+  - Reduced the main production JS chunk from about 2,046.98 kB to about 465.79 kB in the local Vite build output.
+  - Removed the duplicate template-content store update; `addTab(null, content)` already initializes new tab content.
+  - Made global search async queries cancellable and stabilized result-opening callbacks.
+  - Re-ran `npm run typecheck`, `npm run build`, `npm run ci:repo-hygiene`, `npx playwright test tests/ai_runtime.spec.ts tests/ai_draft_entry.spec.ts`, and `npx playwright test tests/e2e_unsaved_close.spec.ts tests/e2e_layout_profile.spec.ts --workers=1` on 2026-05-14.

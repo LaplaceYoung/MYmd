@@ -1,6 +1,22 @@
 import { useState } from 'react'
-import { Monitor, Moon, Sun, Type, Info, Palette, FileSpreadsheet, Bot, KeyRound, Link2, LayoutTemplate, CheckCircle2, LoaderCircle } from 'lucide-react'
+import {
+    Monitor,
+    Moon,
+    Sun,
+    Type,
+    Info,
+    Palette,
+    FileSpreadsheet,
+    Bot,
+    KeyRound,
+    Link2,
+    LayoutTemplate,
+    CheckCircle2,
+    LoaderCircle,
+    Languages,
+} from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
+import { useI18n, type AppLocale } from '@/i18n'
 import type {
     ThemeMode,
     ColorScheme,
@@ -8,60 +24,24 @@ import type {
     PaperPreset,
     DocumentProfile,
     ExportProfile,
-    ExportPageBreakMode
+    ExportPageBreakMode,
 } from '@/stores/editorStore'
-import {
-    getDocumentProfileMeta,
-    getExportProfileMeta,
-    getPaperOrientationLabel,
-    getPaperPresetMeta,
-} from '@/utils/paper'
 import { verifyAiConnection } from '@/utils/ai'
 import './SettingsPanel.css'
 
-const COLOR_SCHEMES: { id: ColorScheme; label: string; color: string }[] = [
-    { id: 'default', label: 'Word Blue', color: '#2b579a' },
-    { id: 'aurora-green', label: 'Aurora Green', color: '#10b981' },
-    { id: 'sunset-orange', label: 'Sunset Orange', color: '#f97316' },
-    { id: 'lavender', label: 'Lavender', color: '#8b5cf6' },
-    { id: 'sakura-pink', label: 'Sakura Pink', color: '#ec4899' },
-    { id: 'ocean-cyan', label: 'Ocean Cyan', color: '#06b6d4' },
-    { id: 'amber-gold', label: 'Amber Gold', color: '#d97706' },
-    { id: 'graphite', label: 'Graphite', color: '#6b7280' }
-]
-
-const PAPER_PRESETS: { id: PaperPreset; label: string; detail: string }[] = [
-    getPaperPresetMeta('screen'),
-    getPaperPresetMeta('a4'),
-    getPaperPresetMeta('letter'),
-    getPaperPresetMeta('legal'),
-    getPaperPresetMeta('custom')
-]
-
-const DOCUMENT_PROFILES: { id: DocumentProfile; label: string; detail: string }[] = [
-    getDocumentProfileMeta('standard'),
-    getDocumentProfileMeta('resume'),
-    getDocumentProfileMeta('manuscript')
-]
-
-const EXPORT_PROFILES: { id: ExportProfile; label: string; detail: string }[] = [
-    getExportProfileMeta('print'),
-    getExportProfileMeta('share'),
-    getExportProfileMeta('web')
-]
-
-const PAGE_BREAK_MODES: { id: ExportPageBreakMode; label: string; detail: string }[] = [
-    { id: 'flow', label: 'Flow', detail: 'No forced section pagination.' },
-    { id: 'manual', label: 'Manual', detail: 'Only explicit pagebreak markers create a new page.' },
-    { id: 'sections', label: 'Sections', detail: 'Insert page breaks before each H1 section.' },
-]
-
-const PAPER_ORIENTATIONS: { id: PaperOrientation; label: string; detail: string }[] = [
-    { id: 'portrait', label: getPaperOrientationLabel('portrait'), detail: 'Vertical page flow for documents and print.' },
-    { id: 'landscape', label: getPaperOrientationLabel('landscape'), detail: 'Horizontal page flow for wide layouts and tables.' },
+const COLOR_SCHEMES: { id: ColorScheme; labelKey: string; color: string }[] = [
+    { id: 'default', labelKey: 'settings.schemeDefault', color: '#2b579a' },
+    { id: 'aurora-green', labelKey: 'settings.schemeAuroraGreen', color: '#10b981' },
+    { id: 'sunset-orange', labelKey: 'settings.schemeSunsetOrange', color: '#f97316' },
+    { id: 'lavender', labelKey: 'settings.schemeLavender', color: '#8b5cf6' },
+    { id: 'sakura-pink', labelKey: 'settings.schemeSakuraPink', color: '#ec4899' },
+    { id: 'ocean-cyan', labelKey: 'settings.schemeOceanCyan', color: '#06b6d4' },
+    { id: 'amber-gold', labelKey: 'settings.schemeAmberGold', color: '#d97706' },
+    { id: 'graphite', labelKey: 'settings.schemeGraphite', color: '#6b7280' },
 ]
 
 export function SettingsPanel() {
+    const { locale, setLocale, localeOptions, t } = useI18n()
     const themeMode = useEditorStore(s => s.themeMode)
     const setThemeMode = useEditorStore(s => s.setThemeMode)
     const colorScheme = useEditorStore(s => s.colorScheme)
@@ -94,9 +74,40 @@ export function SettingsPanel() {
     const [aiProbeMessage, setAiProbeMessage] = useState('')
 
     const themes: { mode: ThemeMode; icon: typeof Sun; label: string }[] = [
-        { mode: 'light', icon: Sun, label: 'Light' },
-        { mode: 'dark', icon: Moon, label: 'Dark' },
-        { mode: 'system', icon: Monitor, label: 'System' }
+        { mode: 'light', icon: Sun, label: t('settings.themeLight') },
+        { mode: 'dark', icon: Moon, label: t('settings.themeDark') },
+        { mode: 'system', icon: Monitor, label: t('settings.themeSystem') },
+    ]
+
+    const paperPresets: { id: PaperPreset; label: string; detail: string }[] = [
+        { id: 'screen', label: t('settings.paperScreen'), detail: t('settings.paperScreenDetail') },
+        { id: 'a4', label: 'A4', detail: '210 x 297 mm' },
+        { id: 'letter', label: 'Letter', detail: '8.5 x 11 in' },
+        { id: 'legal', label: 'Legal', detail: '8.5 x 14 in' },
+        { id: 'custom', label: t('settings.paperCustom'), detail: t('settings.paperCustomDetail') },
+    ]
+
+    const paperOrientations: { id: PaperOrientation; label: string; detail: string }[] = [
+        { id: 'portrait', label: t('settings.orientationPortrait'), detail: t('settings.orientationPortraitDetail') },
+        { id: 'landscape', label: t('settings.orientationLandscape'), detail: t('settings.orientationLandscapeDetail') },
+    ]
+
+    const documentProfiles: { id: DocumentProfile; label: string; detail: string }[] = [
+        { id: 'standard', label: t('settings.profileStandard'), detail: t('settings.profileStandardDetail') },
+        { id: 'resume', label: t('settings.profileResume'), detail: t('settings.profileResumeDetail') },
+        { id: 'manuscript', label: t('settings.profileManuscript'), detail: t('settings.profileManuscriptDetail') },
+    ]
+
+    const exportProfiles: { id: ExportProfile; label: string; detail: string }[] = [
+        { id: 'print', label: t('settings.exportPrint'), detail: t('settings.exportPrintDetail') },
+        { id: 'share', label: t('settings.exportShare'), detail: t('settings.exportShareDetail') },
+        { id: 'web', label: t('settings.exportWeb'), detail: t('settings.exportWebDetail') },
+    ]
+
+    const pageBreakModes: { id: ExportPageBreakMode; label: string; detail: string }[] = [
+        { id: 'flow', label: t('settings.pageBreakFlow'), detail: t('settings.pageBreakFlowDetail') },
+        { id: 'manual', label: t('settings.pageBreakManual'), detail: t('settings.pageBreakManualDetail') },
+        { id: 'sections', label: t('settings.pageBreakSections'), detail: t('settings.pageBreakSectionsDetail') },
     ]
 
     const applySiliconFlowPreset = () => {
@@ -104,28 +115,28 @@ export function SettingsPanel() {
             endpoint: 'https://api.siliconflow.cn/v1/chat/completions',
             model: 'deepseek-ai/DeepSeek-R1-Distill-Qwen-7B',
         })
-        setAiProbeMessage('SiliconFlow preset applied.')
+        setAiProbeMessage(t('settings.connectionPresetApplied'))
     }
 
     const handleAiProbe = async () => {
         if (!aiConfig.endpoint.trim() || !aiConfig.model.trim() || !aiConfig.apiKey.trim()) {
-            setAiProbeMessage('Please fill endpoint/model/api key first.')
+            setAiProbeMessage(t('settings.connectionMissing'))
             return
         }
         setAiProbeRunning(true)
-        setAiProbeMessage('Testing AI connection...')
+        setAiProbeMessage(t('settings.connectionTesting'))
         try {
             const text = await verifyAiConnection({
                 config: aiConfig,
                 timeoutMs: 20_000,
             })
             if (text.includes('CONNECTION_OK')) {
-                setAiProbeMessage('Connection OK.')
+                setAiProbeMessage(t('settings.connectionOk'))
             } else {
-                setAiProbeMessage(`Connected, unexpected echo: ${text.slice(0, 40)}`)
+                setAiProbeMessage(t('settings.connectionUnexpected', { text: text.slice(0, 40) }))
             }
         } catch (error) {
-            setAiProbeMessage(error instanceof Error ? error.message : 'Connection failed')
+            setAiProbeMessage(error instanceof Error ? error.message : t('settings.connectionFailed'))
         } finally {
             setAiProbeRunning(false)
         }
@@ -133,12 +144,12 @@ export function SettingsPanel() {
 
     return (
         <div className="settings-panel">
-            <h2 className="settings-panel__title">Settings</h2>
+            <h2 className="settings-panel__title">{t('settings.title')}</h2>
 
             <div className="settings-panel__section">
-                <h3 className="settings-panel__section-title">Appearance</h3>
+                <h3 className="settings-panel__section-title">{t('settings.appearance')}</h3>
                 <div className="settings-panel__group">
-                    <label className="settings-panel__label">Theme</label>
+                    <label className="settings-panel__label">{t('settings.theme')}</label>
                     <div className="settings-panel__theme-row">
                         {themes.map(({ mode, icon: Icon, label }) => (
                             <button
@@ -156,29 +167,56 @@ export function SettingsPanel() {
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <Palette size={14} />
-                        Color Scheme
+                        {t('settings.colorScheme')}
                     </label>
                     <div className="settings-panel__scheme-grid">
-                        {COLOR_SCHEMES.map(({ id, label, color }) => (
+                        {COLOR_SCHEMES.map(({ id, labelKey, color }) => (
                             <button
                                 key={id}
                                 className={`settings-panel__scheme-card ${colorScheme === id ? 'active' : ''}`}
                                 onClick={() => setColorScheme(id)}
                             >
                                 <span className="settings-panel__scheme-dot" style={{ background: color }} />
-                                <span className="settings-panel__scheme-label">{label}</span>
+                                <span className="settings-panel__scheme-label">{t(labelKey)}</span>
                             </button>
                         ))}
                     </div>
                 </div>
+
+                <div className="settings-panel__group">
+                    <label className="settings-panel__label">
+                        <Languages size={14} />
+                        {t('settings.language')}
+                    </label>
+                    <div className="settings-panel__paper-grid">
+                        {localeOptions.map((option) => (
+                            <button
+                                key={option.id}
+                                type="button"
+                                data-locale-option={option.id}
+                                className={`settings-panel__paper-card ${locale === option.id ? 'active' : ''}`}
+                                onClick={() => setLocale(option.id as AppLocale)}
+                            >
+                                <span className="settings-panel__paper-label">
+                                    {option.id === 'system' ? t('common.system') : option.nativeLabel}
+                                </span>
+                                <span className="settings-panel__paper-detail">
+                                    {option.id === 'system' ? t('common.followSystem') : option.label}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                    <div className="settings-panel__hint">{t('settings.languageHint')}</div>
+                </div>
             </div>
 
             <div className="settings-panel__section">
-                <h3 className="settings-panel__section-title">Editor</h3>
+                <h3 className="settings-panel__section-title">{t('settings.editor')}</h3>
+
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <Type size={14} />
-                        Font Size
+                        {t('settings.fontSize')}
                     </label>
                     <div className="settings-panel__font-size-row">
                         <input
@@ -196,10 +234,10 @@ export function SettingsPanel() {
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <FileSpreadsheet size={14} />
-                        Paper Size
+                        {t('settings.paperSize')}
                     </label>
                     <div className="settings-panel__paper-grid">
-                        {PAPER_PRESETS.map(preset => (
+                        {paperPresets.map(preset => (
                             <button
                                 key={preset.id}
                                 className={`settings-panel__paper-card ${paperPreset === preset.id ? 'active' : ''}`}
@@ -238,18 +276,16 @@ export function SettingsPanel() {
                             </label>
                         </div>
                     )}
-                    <div className="settings-panel__hint">
-                        Custom paper size flows through the editor canvas and HTML export together.
-                    </div>
+                    <div className="settings-panel__hint">{t('settings.paperHint')}</div>
                 </div>
 
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <FileSpreadsheet size={14} />
-                        Paper Orientation
+                        {t('settings.paperOrientation')}
                     </label>
                     <div className="settings-panel__paper-grid settings-panel__paper-grid--compact">
-                        {PAPER_ORIENTATIONS.map(orientation => (
+                        {paperOrientations.map(orientation => (
                             <button
                                 key={orientation.id}
                                 className={`settings-panel__paper-card ${paperOrientation === orientation.id ? 'active' : ''}`}
@@ -265,11 +301,11 @@ export function SettingsPanel() {
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <LayoutTemplate size={14} />
-                        Page Margin
+                        {t('settings.pageMargin')}
                     </label>
                     <div className="settings-panel__custom-paper-grid settings-panel__custom-paper-grid--single">
                         <label className="settings-panel__field">
-                            <span className="settings-panel__field-label">Uniform page margin (mm)</span>
+                            <span className="settings-panel__field-label">{t('settings.uniformMargin')}</span>
                             <input
                                 type="number"
                                 min="8"
@@ -281,15 +317,13 @@ export function SettingsPanel() {
                             />
                         </label>
                     </div>
-                    <div className="settings-panel__hint">
-                        Applies to the editor canvas padding and print/export page margin together.
-                    </div>
+                    <div className="settings-panel__hint">{t('settings.marginHint')}</div>
                 </div>
 
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <LayoutTemplate size={14} />
-                        Wide Table Handling
+                        {t('settings.wideTableHandling')}
                     </label>
                     <div className="settings-panel__toggle-row">
                         <label className="settings-panel__checkbox-card">
@@ -298,12 +332,12 @@ export function SettingsPanel() {
                                 checked={autoExpandPaperForWideTables}
                                 onChange={e => setAutoExpandPaperForWideTables(e.target.checked)}
                             />
-                            <span>Auto expand paper for wide tables</span>
+                            <span>{t('settings.autoExpandWideTables')}</span>
                         </label>
                     </div>
                     <div className="settings-panel__custom-paper-grid settings-panel__custom-paper-grid--single">
                         <label className="settings-panel__field">
-                            <span className="settings-panel__field-label">Max auto paper width (px)</span>
+                            <span className="settings-panel__field-label">{t('settings.maxAutoWidth')}</span>
                             <input
                                 type="number"
                                 min="900"
@@ -316,18 +350,16 @@ export function SettingsPanel() {
                             />
                         </label>
                     </div>
-                    <div className="settings-panel__hint">
-                        Keeps wide tables readable by increasing paper width up to the configured ceiling.
-                    </div>
+                    <div className="settings-panel__hint">{t('settings.wideTableHint')}</div>
                 </div>
 
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <Type size={14} />
-                        Layout Profile
+                        {t('settings.layoutProfile')}
                     </label>
                     <div className="settings-panel__paper-grid">
-                        {DOCUMENT_PROFILES.map(profile => (
+                        {documentProfiles.map(profile => (
                             <button
                                 key={profile.id}
                                 className={`settings-panel__paper-card ${documentProfile === profile.id ? 'active' : ''}`}
@@ -343,10 +375,10 @@ export function SettingsPanel() {
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <FileSpreadsheet size={14} />
-                        Export Profile
+                        {t('settings.exportProfile')}
                     </label>
                     <div className="settings-panel__paper-grid">
-                        {EXPORT_PROFILES.map(profile => (
+                        {exportProfiles.map(profile => (
                             <button
                                 key={profile.id}
                                 className={`settings-panel__paper-card ${exportProfile === profile.id ? 'active' : ''}`}
@@ -362,7 +394,7 @@ export function SettingsPanel() {
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <LayoutTemplate size={14} />
-                        Export Chrome
+                        {t('settings.exportChrome')}
                     </label>
                     <div className="settings-panel__toggle-row">
                         <label className="settings-panel__checkbox-card">
@@ -371,7 +403,7 @@ export function SettingsPanel() {
                                 checked={exportOptions.showHeader}
                                 onChange={e => setExportShowHeader(e.target.checked)}
                             />
-                            <span>Header bar</span>
+                            <span>{t('settings.headerBar')}</span>
                         </label>
                         <label className="settings-panel__checkbox-card">
                             <input
@@ -379,7 +411,7 @@ export function SettingsPanel() {
                                 checked={exportOptions.showFooter}
                                 onChange={e => setExportShowFooter(e.target.checked)}
                             />
-                            <span>Footer stamp</span>
+                            <span>{t('settings.footerStamp')}</span>
                         </label>
                     </div>
                 </div>
@@ -387,10 +419,10 @@ export function SettingsPanel() {
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <FileSpreadsheet size={14} />
-                        Page Breaks
+                        {t('settings.pageBreaks')}
                     </label>
                     <div className="settings-panel__paper-grid">
-                        {PAGE_BREAK_MODES.map(mode => (
+                        {pageBreakModes.map(mode => (
                             <button
                                 key={mode.id}
                                 className={`settings-panel__paper-card ${exportOptions.pageBreakMode === mode.id ? 'active' : ''}`}
@@ -401,30 +433,29 @@ export function SettingsPanel() {
                             </button>
                         ))}
                     </div>
-                    <div className="settings-panel__hint">
-                        Manual mode recognizes <code>&lt;!-- pagebreak --&gt;</code> and <code>:::pagebreak</code>.
-                    </div>
+                    <div className="settings-panel__hint">{t('settings.pageBreakHint')}</div>
                 </div>
             </div>
 
             <div className="settings-panel__section">
-                <h3 className="settings-panel__section-title">AI Access</h3>
+                <h3 className="settings-panel__section-title">{t('settings.aiAccess')}</h3>
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <Bot size={14} />
-                        Quick Provider
+                        {t('settings.quickProvider')}
                     </label>
                     <div className="settings-panel__toggle-row">
                         <button className="settings-panel__theme-btn settings-panel__theme-btn--inline" onClick={applySiliconFlowPreset}>
                             <Bot size={16} strokeWidth={1.5} />
-                            <span>Use SiliconFlow DeepSeek 7B</span>
+                            <span>{t('settings.useSiliconFlow')}</span>
                         </button>
                     </div>
                 </div>
+
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <Link2 size={14} />
-                        Endpoint
+                        {t('settings.endpoint')}
                     </label>
                     <input
                         className="settings-panel__text-input"
@@ -433,10 +464,11 @@ export function SettingsPanel() {
                         placeholder="https://api.siliconflow.cn/v1/chat/completions"
                     />
                 </div>
+
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <Bot size={14} />
-                        Model
+                        {t('settings.model')}
                     </label>
                     <input
                         className="settings-panel__text-input"
@@ -445,10 +477,11 @@ export function SettingsPanel() {
                         placeholder="deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
                     />
                 </div>
+
                 <div className="settings-panel__group">
                     <label className="settings-panel__label">
                         <KeyRound size={14} />
-                        API Key
+                        {t('settings.apiKey')}
                     </label>
                     <input
                         type="password"
@@ -457,15 +490,18 @@ export function SettingsPanel() {
                         onChange={e => setAiConfig({ apiKey: e.target.value })}
                         placeholder="sk-..."
                     />
-                    <div className="settings-panel__hint">
-                        Uses an OpenAI-compatible Chat Completions endpoint. Your key is kept local only.
-                    </div>
+                    <div className="settings-panel__hint">{t('settings.apiKeyHint')}</div>
                 </div>
+
                 <div className="settings-panel__group">
                     <div className="settings-panel__toggle-row">
-                        <button className="settings-panel__theme-btn settings-panel__theme-btn--inline" onClick={() => void handleAiProbe()} disabled={aiProbeRunning}>
+                        <button
+                            className="settings-panel__theme-btn settings-panel__theme-btn--inline"
+                            onClick={() => void handleAiProbe()}
+                            disabled={aiProbeRunning}
+                        >
                             {aiProbeRunning ? <LoaderCircle size={16} className="settings-panel__spin" /> : <CheckCircle2 size={16} strokeWidth={1.5} />}
-                            <span>{aiProbeRunning ? 'Testing...' : 'Test AI Connection'}</span>
+                            <span>{aiProbeRunning ? t('settings.testing') : t('settings.testConnection')}</span>
                         </button>
                     </div>
                     {aiProbeMessage && <div className="settings-panel__hint">{aiProbeMessage}</div>}
@@ -473,18 +509,17 @@ export function SettingsPanel() {
             </div>
 
             <div className="settings-panel__section">
-                <h3 className="settings-panel__section-title">About</h3>
+                <h3 className="settings-panel__section-title">{t('settings.about')}</h3>
                 <div className="settings-panel__about">
                     <Info size={16} color="var(--accent)" />
                     <div>
                         <div className="settings-panel__about-name">MYmd</div>
                         <div className="settings-panel__about-ver">Version 1.0.0</div>
-                        <div className="settings-panel__about-desc">
-                            Local-first Markdown desktop editor with stronger print layout, knowledge workflow, and AI-assisted editing.
-                        </div>
+                        <div className="settings-panel__about-desc">{t('settings.aboutDesc')}</div>
                     </div>
                 </div>
             </div>
         </div>
     )
 }
+

@@ -14,10 +14,10 @@ test('ribbon AI quick actions open the assistant in the matching mode', async ({
 
     await page.locator('[data-ai-entry="layout"]').dispatchEvent('click')
     await expect(page.locator('.ai-panel')).toBeVisible()
-    await expect(page.locator('.ai-panel__task-card.active')).toContainText('Layout Polish')
+    await expect(page.locator('.ai-panel__task-card.active')).toContainText('Layout')
 
     await page.locator('[data-ai-entry="content"]').dispatchEvent('click')
-    await expect(page.locator('.ai-panel__task-card.active')).toContainText('Content Rewrite')
+    await expect(page.locator('.ai-panel__task-card.active')).toContainText('Writing')
 
     await page.locator('[data-ai-entry="graph"]').dispatchEvent('click')
     await expect(page.locator('.ai-panel__task-card.active')).toContainText('Graph Enrichment')
@@ -60,6 +60,26 @@ test('ai panel can apply a single diff block and restore the original document',
 
     await page.locator('.ai-panel__ghost--restore').click()
     await expect(page.locator('.editor-wysiwyg .ProseMirror')).not.toContainText('Revised')
+})
+
+test('ai panel can open the generated result in a new draft tab', async ({ page }) => {
+    await page.addInitScript(() => {
+        window.localStorage.setItem('mymd:view-mode-guide:v1', 'dismissed')
+        window.localStorage.removeItem('mymd:session:v1')
+    })
+
+    await page.goto('http://127.0.0.1:1420')
+    await page.waitForLoadState('networkidle')
+
+    await page.locator('.welcome-word__sidebar-btn').nth(1).dispatchEvent('click')
+    await page.locator('[data-ai-entry="content"]').dispatchEvent('click')
+    await page.locator('.ai-panel__result').fill('# Fresh Draft\n\nScenario output')
+
+    await page.locator('.ai-panel__ghost--new-tab').click()
+
+    await expect(page.locator('.tabbar__tab')).toHaveCount(2)
+    await expect(page.locator('.tabbar__tab--active')).toContainText('AI Draft')
+    await expect(page.locator('.editor-wysiwyg .ProseMirror')).toContainText('Fresh Draft')
 })
 
 test('ai panel can save and reload session history snapshots', async ({ page }) => {

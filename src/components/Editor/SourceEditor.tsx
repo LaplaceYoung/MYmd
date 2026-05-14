@@ -5,11 +5,12 @@ import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
 import { autocompletion, type Completion, type CompletionContext } from '@codemirror/autocomplete'
 import { Decoration, EditorView, type DecorationSet } from '@codemirror/view'
-import { RangeSetBuilder, StateField } from '@codemirror/state'
+import { RangeSetBuilder, StateField, type EditorState } from '@codemirror/state'
 import { useEditorStore } from '@/stores/editorStore'
 import { queryKnowledge } from '@/knowledge/service'
 import { copyImageToLocalAssets, saveBlobImageToLocalAssets } from '@/utils/fileUtils'
 import { extractImageFileFromDataTransfer, readImageFromClipboardApi } from '@/utils/editorClipboard'
+import { buildMediaEmbedSnippet } from '@/utils/mediaEmbeds'
 import { getHtmlPasteMarkdown } from '@/utils/htmlPaste'
 import { convertFileSrc } from '@tauri-apps/api/core'
 
@@ -21,7 +22,7 @@ interface SourceEditorProps {
 const sourceSearchMatchMark = Decoration.mark({ class: 'cm-searchMatch' })
 const sourceSelectedSearchMatchMark = Decoration.mark({ class: 'cm-searchMatch cm-searchMatch-selected' })
 
-function buildSourceSearchDecorations(state: Parameters<NonNullable<typeof StateField.define<DecorationSet>>['0']['create']>[0]): DecorationSet {
+function buildSourceSearchDecorations(state: EditorState): DecorationSet {
     const query = getSearchQuery(state)
     if (!query.search) return Decoration.none
 
@@ -224,6 +225,42 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
                 view.dispatch({
                     changes: { from, to, insert: insertion },
                     selection: { anchor: from + insertion.length }
+                })
+                break
+            }
+            case 'insertAudio': {
+                const { src, title } = payload as { src: string; title?: string }
+                const insertion = buildMediaEmbedSnippet('audio', { src, title })
+                if (!insertion) break
+                const from = view.state.selection.main.from
+                const to = view.state.selection.main.to
+                view.dispatch({
+                    changes: { from, to, insert: `${insertion}\n\n` },
+                    selection: { anchor: from + insertion.length + 2 }
+                })
+                break
+            }
+            case 'insertVideo': {
+                const { src, title } = payload as { src: string; title?: string }
+                const insertion = buildMediaEmbedSnippet('video', { src, title })
+                if (!insertion) break
+                const from = view.state.selection.main.from
+                const to = view.state.selection.main.to
+                view.dispatch({
+                    changes: { from, to, insert: `${insertion}\n\n` },
+                    selection: { anchor: from + insertion.length + 2 }
+                })
+                break
+            }
+            case 'insertEmbed': {
+                const { src, title } = payload as { src: string; title?: string }
+                const insertion = buildMediaEmbedSnippet('embed', { src, title })
+                if (!insertion) break
+                const from = view.state.selection.main.from
+                const to = view.state.selection.main.to
+                view.dispatch({
+                    changes: { from, to, insert: `${insertion}\n\n` },
+                    selection: { anchor: from + insertion.length + 2 }
                 })
                 break
             }
