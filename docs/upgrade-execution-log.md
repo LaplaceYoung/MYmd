@@ -673,3 +673,39 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
   - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+
+### Slice 32
+
+- Scope:
+  - PR #14 SourceEditor code-fence language loading budget
+  - build-health queue evidence refresh after SourceEditor chunk reduction
+- Planned touchpoints:
+  - `src/components/Editor/SourceEditor.tsx`
+  - `src/components/Editor/commonMarkdownCodeLanguages.ts`
+  - `package.json`
+  - `package-lock.json`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Replaced the full `@codemirror/language-data` catalog in SourceEditor with a curated Markdown code-fence language budget covering JS/TS/JSX/TSX, JSON, HTML, CSS, Python, SQL, XML, and YAML.
+  - Removed rare CodeMirror language packages pulled only by `@codemirror/language-data` from the lockfile.
+  - Reduced the PR #14 build graph from 3745 to 3632 transformed modules and reduced the SourceEditor production chunk from about 650.43 kB / 220.21 kB gzip to about 619.98 kB / 212.27 kB gzip.
+  - Updated the merge queue and active-goal audit to point at the latest PR #14 verification comment.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run build`
+  - `npx playwright test tests/e2e_document_search_recent.spec.ts tests/e2e_source_html_paste.spec.ts --reporter=line`
+  - production preview SourceEditor smoke on `http://127.0.0.1:4173`
+  - `rg` language-data reference check across `package.json`, `package-lock.json`, and `src`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run build`
+  - `npx playwright test tests/e2e_document_search_recent.spec.ts tests/e2e_source_html_paste.spec.ts --reporter=line`
+  - production preview SourceEditor smoke on `http://127.0.0.1:4173`
+  - `rg` language-data reference check across `package.json`, `package-lock.json`, and `src`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
