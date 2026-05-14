@@ -2,6 +2,19 @@ import { Plugin } from '@milkdown/kit/prose/state'
 import { Decoration, DecorationSet } from '@milkdown/kit/prose/view'
 import type { EditorView } from '@milkdown/kit/prose/view'
 
+function findTaskItemPos(view: EditorView, widgetPos: number): number | null {
+    const $pos = view.state.doc.resolve(widgetPos)
+
+    for (let depth = $pos.depth; depth > 0; depth -= 1) {
+        const node = $pos.node(depth)
+        if (node.type.name === 'list_item' && typeof node.attrs.checked === 'boolean') {
+            return $pos.before(depth)
+        }
+    }
+
+    return null
+}
+
 function toggleTaskItem(view: EditorView, itemPos: number) {
     const node = view.state.doc.nodeAt(itemPos)
     if (!node || node.type.name !== 'list_item' || typeof node.attrs.checked !== 'boolean') return
@@ -49,7 +62,9 @@ export function createTaskListTogglePlugin(readOnly: boolean) {
 
                                 const widgetPos = getPos()
                                 if (typeof widgetPos !== 'number') return
-                                toggleTaskItem(view, widgetPos - 1)
+                                const taskItemPos = findTaskItemPos(view, widgetPos)
+                                if (taskItemPos === null) return
+                                toggleTaskItem(view, taskItemPos)
                             })
 
                             return checkbox

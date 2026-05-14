@@ -3,19 +3,25 @@ import { expect, test } from '@playwright/test'
 test('wysiwyg task list checkboxes update markdown source directly', async ({ page }) => {
     await page.addInitScript(() => {
         window.localStorage.setItem('mymd:view-mode-guide:v1', 'dismissed')
-        window.localStorage.removeItem('mymd:session:v1')
+        window.localStorage.setItem('mymd:session:v1', JSON.stringify({
+            version: 1,
+            timestamp: Date.now(),
+            activeTabIndex: 0,
+            viewMode: 'wysiwyg',
+            activeWorkspace: null,
+            tabs: [
+                {
+                    filePath: null,
+                    title: 'Tasks.md',
+                    content: '- [ ] Draft outline\n- [x] Ship release\n',
+                    isDirty: true,
+                },
+            ],
+        }))
     })
 
     await page.goto('http://localhost:1420')
     await page.waitForLoadState('networkidle')
-
-    await page.evaluate(async () => {
-        const { useEditorStore } = await import('/src/stores/editorStore.ts')
-        const store = useEditorStore.getState()
-        const tabId = store.addTab(null, '- [ ] Draft outline\n- [x] Ship release\n')
-        store.setActiveTab(tabId)
-        store.setViewMode('wysiwyg')
-    })
 
     const wysiwygEditor = page.locator('.editor-wysiwyg .ProseMirror')
     const checkboxes = wysiwygEditor.locator('.editor-task-list__checkbox')
@@ -25,20 +31,25 @@ test('wysiwyg task list checkboxes update markdown source directly', async ({ pa
     await expect(checkboxes.nth(1)).toBeChecked()
 
     await checkboxes.nth(0).click()
+    await expect(checkboxes.nth(0)).toBeChecked()
     await expect.poll(async () => {
-        return await page.evaluate(async () => {
-            const { useEditorStore } = await import('/src/stores/editorStore.ts')
-            return useEditorStore.getState().getActiveTab()?.content ?? ''
+        return await page.evaluate(() => {
+            const snapshot = window.localStorage.getItem('mymd:session:v1')
+            if (!snapshot) return ''
+            return JSON.parse(snapshot).tabs?.[0]?.content ?? ''
         })
     }).toMatch(/^[*-] \[x\] Draft outline/m)
 
     await checkboxes.nth(1).click()
+    await expect(checkboxes.nth(1)).not.toBeChecked()
+
     await expect.poll(async () => {
-        return await page.evaluate(async () => {
-            const { useEditorStore } = await import('/src/stores/editorStore.ts')
-            return useEditorStore.getState().getActiveTab()?.content ?? ''
+        return await page.evaluate(() => {
+            const snapshot = window.localStorage.getItem('mymd:session:v1')
+            if (!snapshot) return ''
+            return JSON.parse(snapshot).tabs?.[0]?.content ?? ''
         })
-    }).toMatch(/^[*-] \[ \] Ship release/m)
+    }).toMatch(/^[*-] \[x\] Draft outline[\s\S]*^[*-] \[ \] Ship release/m)
 
     await page.getByTitle('Split mode').click()
     const sourceEditor = page.locator('.editor-split__source .cm-content')
