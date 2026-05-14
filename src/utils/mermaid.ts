@@ -1,9 +1,18 @@
-import mermaid from 'mermaid'
-
 let isMermaidInitialized = false
 let mermaidRenderCounter = 0
+let mermaidLoader: Promise<typeof import('mermaid')['default']> | null = null
+let mermaidInstance: typeof import('mermaid')['default'] | null = null
 
-function ensureMermaid() {
+async function loadMermaid() {
+    if (mermaidInstance) return mermaidInstance
+
+    mermaidLoader ??= import('mermaid').then(module => module.default)
+    mermaidInstance = await mermaidLoader
+    return mermaidInstance
+}
+
+async function ensureMermaid() {
+    const mermaid = await loadMermaid()
     if (isMermaidInitialized) return mermaid
 
     mermaid.initialize({
@@ -56,7 +65,7 @@ export function getMermaidErrorMarkup(source: string, error: unknown) {
 }
 
 export async function renderMermaidSvg(source: string, idPrefix = 'mermaid-svg') {
-    const renderer = ensureMermaid()
+    const renderer = await ensureMermaid()
     mermaidRenderCounter += 1
     const renderId = `${idPrefix}-${mermaidRenderCounter}`
     const { svg } = await renderer.render(renderId, source)
