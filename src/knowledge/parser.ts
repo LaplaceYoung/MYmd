@@ -246,8 +246,8 @@ export function extractTags(content: string): string[] {
 
   lines.forEach((line) => {
     const trimmed = line.trim();
-    if (trimmed.startsWith("#")) return;
-    const matches = trimmed.match(/(^|\s)#([\p{L}\p{N}_-]+)/gu);
+    if (/^#{1,6}\s+/.test(trimmed)) return;
+    const matches = trimmed.match(/(^|\s)#([\p{L}\p{N}_-]+(?:\/[\p{L}\p{N}_-]+)*)/gu);
     if (!matches) return;
     matches.forEach((token) => {
       const tag = token.replace(/(^|\s)#/u, "").trim().toLowerCase();

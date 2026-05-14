@@ -3,11 +3,11 @@ import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror'
 import { SearchCursor, SearchQuery, getSearchQuery, setSearchQuery, findNext, findPrevious, replaceNext, replaceAll, search } from '@codemirror/search'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
-import { autocompletion, type Completion, type CompletionContext } from '@codemirror/autocomplete'
-import { Decoration, EditorView, type DecorationSet } from '@codemirror/view'
-import { RangeSetBuilder, StateField, type EditorState } from '@codemirror/state'
+import { acceptCompletion, autocompletion, startCompletion, type Completion, type CompletionContext } from '@codemirror/autocomplete'
+import { Decoration, EditorView, keymap, type DecorationSet } from '@codemirror/view'
+import { Prec, RangeSetBuilder, StateField, type EditorState } from '@codemirror/state'
 import { useEditorStore } from '@/stores/editorStore'
-import { queryKnowledge } from '@/knowledge/service'
+import { getKnowledgeGraph, queryKnowledge } from '@/knowledge/service'
 import { copyImageToLocalAssets, saveBlobImageToLocalAssets } from '@/utils/fileUtils'
 import { extractImageFileFromDataTransfer, readImageFromClipboardApi } from '@/utils/editorClipboard'
 import { buildMediaEmbedSnippet } from '@/utils/mediaEmbeds'
@@ -55,6 +55,103 @@ const sourceSearchHighlightField = StateField.define<DecorationSet>({
     provide: field => EditorView.decorations.from(field),
 })
 
+const wikilinkCompletionTrigger = EditorView.updateListener.of((update) => {
+    if (!update.docChanged) return
+
+    const selection = update.state.selection.main
+    if (!selection.empty) return
+
+    const line = update.state.doc.lineAt(selection.head)
+    const textBeforeCursor = line.text.slice(0, selection.head - line.from)
+    if (/\[\[[^\]\n]*$/.test(textBeforeCursor)) {
+        startCompletion(update.view)
+    }
+})
+
+function getTagCompletionMatch(state: EditorState, pos: number) {
+    const line = state.doc.lineAt(pos)
+    const offset = pos - line.from
+    const textBeforeCursor = line.text.slice(0, offset)
+    const match = textBeforeCursor.match(/(^|[\s([{])#([\p{L}\p{N}_/-]*)$/u)
+    if (!match) return null
+
+    const typed = match[2] ?? ''
+    const from = pos - typed.length - 1
+    const prefix = line.text.slice(0, offset)
+    if (/^#{1,6}\s?$/.test(prefix)) return null
+
+    return { from, typed }
+}
+
+const tagCompletionTrigger = EditorView.updateListener.of((update) => {
+    if (!update.docChanged) return
+
+    const selection = update.state.selection.main
+    if (!selection.empty) return
+
+    const match = getTagCompletionMatch(update.state, selection.head)
+    if (match?.typed) {
+        startCompletion(update.view)
+    }
+})
+
+const wikilinkCompletionKeymap = Prec.highest(keymap.of([
+    {
+        key: 'Enter',
+        run: acceptCompletion
+    }
+]))
+
+function normalizeCompletionPath(value: string) {
+    return value.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/\/$/, '')
+}
+
+function stripMarkdownExtension(value: string) {
+    return value.replace(/\.md$/i, '')
+}
+
+function pathDirname(value: string) {
+    const normalized = normalizeCompletionPath(value)
+    const index = normalized.lastIndexOf('/')
+    return index <= 0 ? normalized : normalized.slice(0, index)
+}
+
+function pathBasename(value: string) {
+    const normalized = normalizeCompletionPath(value)
+    const index = normalized.lastIndexOf('/')
+    return index >= 0 ? normalized.slice(index + 1) : normalized
+}
+
+function isSameOrInsidePath(basePath: string, filePath: string) {
+    const base = normalizeCompletionPath(basePath).toLowerCase()
+    const file = normalizeCompletionPath(filePath).toLowerCase()
+    return file === base || file.startsWith(`${base}/`)
+}
+
+function toWikilinkDocTarget(
+    filePath: string,
+    fallbackTitle: string,
+    activeFilePath: string | null,
+    activeWorkspace: string | null
+) {
+    const normalizedFile = normalizeCompletionPath(filePath)
+    const title = stripMarkdownExtension((fallbackTitle || pathBasename(normalizedFile)).trim())
+
+    if (!normalizedFile) return title
+
+    if (activeFilePath && pathDirname(activeFilePath).toLowerCase() === pathDirname(normalizedFile).toLowerCase()) {
+        return stripMarkdownExtension(pathBasename(normalizedFile))
+    }
+
+    if (activeWorkspace && isSameOrInsidePath(activeWorkspace, normalizedFile)) {
+        const workspaceRoot = normalizeCompletionPath(activeWorkspace)
+        const relativePath = normalizedFile.slice(workspaceRoot.length).replace(/^\/+/, '')
+        return `/${stripMarkdownExtension(relativePath)}`
+    }
+
+    return stripMarkdownExtension(normalizedFile)
+}
+
 // 检测实际使用的暗色模式（结合 store 和系统偏好）
 function useIsDark() {
     const themeMode = useEditorStore(s => s.themeMode)
@@ -84,6 +181,8 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
     const editorFontSize = useEditorStore(s => s.editorFontSize)
     const focusMode = useEditorStore(s => s.focusMode)
     const typewriterMode = useEditorStore(s => s.typewriterMode)
+    const activeWorkspace = useEditorStore(s => s.activeWorkspace)
+    const activeFilePath = useEditorStore(s => s.tabs.find(tab => tab.id === s.activeTabId)?.filePath ?? null)
     const editorRef = useRef<ReactCodeMirrorRef>(null)
 
     const blobToDataUrl = useCallback((blob: Blob) => {
@@ -158,41 +257,117 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
         if (before.from === before.to && !context.explicit) return null
 
         const typed = before.text.slice(2).trim()
-        if (!typed) return null
 
         try {
-            const result = await queryKnowledge(typed, 12, 0)
+            const [result, graph] = await Promise.all([
+                typed ? queryKnowledge(typed, 12, 0) : Promise.resolve({ documents: [], headings: [], tags: [] }),
+                getKnowledgeGraph(typed, 12)
+            ])
             const options: Completion[] = []
+            const seen = new Set<string>()
+
+            const pushOption = (option: Completion & { apply: string }) => {
+                const key = `${option.apply}:${option.detail ?? ''}`
+                if (seen.has(key)) return
+                seen.add(key)
+                options.push(option)
+            }
+
+            for (const node of graph.nodes.slice(0, 8)) {
+                const title = (node.title || '').trim() || node.file_path
+                const target = toWikilinkDocTarget(node.file_path, title, activeFilePath, activeWorkspace)
+                if (!target) continue
+                pushOption({
+                    label: title,
+                    type: 'text',
+                    apply: `[[${target}]]`,
+                    detail: typed ? 'Document' : 'Recent note',
+                    info: node.file_path,
+                    boost: typed ? 12 : 8
+                })
+            }
 
             for (const doc of result.documents.slice(0, 6)) {
                 const title = (doc.title || '').trim() || doc.file_path
-                options.push({
+                const target = toWikilinkDocTarget(doc.file_path, title, activeFilePath, activeWorkspace)
+                if (!target) continue
+                pushOption({
                     label: title,
                     type: 'text',
-                    apply: `[[${title}]]`,
-                    detail: 'Document'
+                    apply: `[[${target}]]`,
+                    detail: 'Document',
+                    info: doc.file_path,
+                    boost: 10
                 })
             }
 
             for (const heading of result.headings.slice(0, 6)) {
-                const base = (heading.document_title || '').trim() || heading.file_path
+                const base = toWikilinkDocTarget(
+                    heading.file_path,
+                    heading.document_title || heading.file_path,
+                    activeFilePath,
+                    activeWorkspace
+                )
                 const headingText = heading.heading_text.trim()
                 if (!base || !headingText) continue
-                options.push({
+                pushOption({
                     label: `${base}#${headingText}`,
                     type: 'text',
                     apply: `[[${base}#${headingText}]]`,
-                    detail: 'Heading'
+                    detail: 'Heading',
+                    info: heading.file_path,
+                    boost: 6
                 })
             }
 
             if (options.length === 0) return null
             return {
                 from: before.from,
-                options
+                options,
+                filter: false,
+                validFor: /^\[\[[^\]\n]*$/
             }
         } catch (error) {
             console.warn('wikilink completion failed:', error)
+            return null
+        }
+    }, [activeFilePath, activeWorkspace])
+
+    const completeTag = useCallback(async (context: CompletionContext) => {
+        const match = getTagCompletionMatch(context.state, context.pos)
+        if (!match) return null
+
+        const typed = match.typed.trim().toLowerCase()
+        if (!typed) return null
+
+        try {
+            const result = await queryKnowledge(typed, 12, 0)
+            const seen = new Set<string>()
+            const options: Completion[] = []
+
+            for (const item of result.tags.slice(0, 12)) {
+                const tag = item.tag.trim().toLowerCase()
+                if (!tag || seen.has(tag)) continue
+                seen.add(tag)
+                options.push({
+                    label: `#${tag}`,
+                    type: 'keyword',
+                    apply: `#${tag}`,
+                    detail: 'Tag',
+                    info: item.document_title || item.file_path,
+                    boost: 7
+                })
+            }
+
+            if (options.length === 0) return null
+            return {
+                from: match.from,
+                options,
+                filter: false,
+                validFor: /^#[\p{L}\p{N}_/-]*$/u
+            }
+        } catch (error) {
+            console.warn('tag completion failed:', error)
             return null
         }
     }, [])
@@ -342,7 +517,10 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
                     }),
                     sourceSearchHighlightField,
                     markdown({ base: markdownLanguage, codeLanguages: languages }),
-                    autocompletion({ override: [completeWikilink] }),
+                    wikilinkCompletionTrigger,
+                    tagCompletionTrigger,
+                    wikilinkCompletionKeymap,
+                    autocompletion({ override: [completeWikilink, completeTag], selectOnOpen: true }),
                     EditorView.domEventHandlers({
                         drop: (_event, view) => {
                             const event = _event as DragEvent

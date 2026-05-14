@@ -263,3 +263,228 @@
   - Re-ran `node tests/pages_smoke.mjs http://127.0.0.1:4173` against a local Vite static server on 2026-05-14 and it passed with title, logo, mobile menu, release version, and zero console errors verified.
 - Known risk:
   - The production build still reports large chunks for `WysiwygEditor`, `SourceEditor`, `mindmap-definition`, and `flowchart-elk-definition`; the warning reflects the current heavy editor and diagram stack.
+
+## 2026-05-15
+
+### Slice 12
+
+- Scope:
+  - long-running Markdown benchmark alignment goal
+  - project management baseline for version iteration and release governance
+- Planned touchpoints:
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/release-iteration-playbook.md`
+  - `README.md`
+  - `README_en.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added a mainstream Markdown product matrix covering Obsidian, Joplin, Typora, iA Writer, MarkText, Zettlr, Cherry Markdown, and doocs/md.
+  - Converted benchmark gaps into P0-P3 backlog lanes with acceptance evidence.
+  - Added a repeatable release iteration playbook covering slice planning, verification gates, desktop smoke checks, checksums, and GitHub release verification.
+  - Updated README version and release highlights to `v1.4.3-hotfix6`.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - documentation link/reference inspection
+
+### Slice 13
+
+- Scope:
+  - P0 release smoke automation
+  - make release readiness checks repeatable after Tauri/Electron packaging
+- Planned touchpoints:
+  - `scripts/release-smoke-check.mjs`
+  - `package.json`
+  - `docs/release-iteration-playbook.md`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added `npm run release:smoke` as the release verification entry point.
+  - Automated release asset and SHA256 validation for the latest `release/v*` staging folder.
+  - Automated Electron portable smoke through Chrome DevTools Protocol DOM markers, screenshot capture, and renderer error checks.
+  - Automated Tauri runtime smoke through Windows `PrintWindow` screenshot capture, window title verification, and image contrast checks.
+- Verification target:
+  - `npm run release:smoke`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 14
+
+- Scope:
+  - P0 CLI/file-association knowledge indexing smoke
+  - fold the open-file indexing gate into release verification
+- Planned touchpoints:
+  - `scripts/release-smoke-check.mjs`
+  - `src/knowledge/parser.ts`
+  - `docs/release-iteration-playbook.md`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Extended `npm run release:smoke` with a Tauri CLI-open test using `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` for CDP access.
+  - The smoke creates a temporary Markdown file, launches the release `app.exe` with that file as a path argument, confirms the opened document renders, and queries the native knowledge DB for document, heading, and tag hits.
+  - Fixed standalone hashtag parsing so `#topic` lines are indexed as tags while Markdown headings stay excluded from tag extraction.
+  - This turns the previous skipped `e2e_cli_indexing` placeholder into a release-bound runtime gate.
+- Verification target:
+  - `npm run release:smoke`
+  - `node --check scripts/release-smoke-check.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run build:tauri`
+  - `npm run release:smoke` with CLI indexing `documentHits: 1`, `headingHits: 2`, `tagHits: 1`, `blockingEventCount: 0`
+  - `node --check scripts/release-smoke-check.mjs`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 15
+
+- Scope:
+  - package and publish the CLI indexing smoke + standalone hashtag indexing release
+  - keep README, staging assets, checksums, release notes, and GitHub release state aligned
+- Planned touchpoints:
+  - `README.md`
+  - `README_en.md`
+  - `docs/release-iteration-playbook.md`
+  - `docs/upgrade-execution-log.md`
+  - `release/v1.4.3-hotfix7` staging assets
+- Product management baseline:
+  - Rebuilt Tauri NSIS/MSI installers from the latest `main` source with Cargo on `E:\EnvConfig\cargo\bin`.
+  - Rebuilt Electron portable runtime from the latest `main` source.
+  - Created `v1.4.3-hotfix7` staging with installer assets, Electron portable zip, SHA256 checksums, and release notes.
+  - Promoted the iteration from implementation evidence to release evidence.
+- Verification target:
+  - `npm run build:electron`
+  - `npm run build:tauri`
+  - `npm run release:smoke -- --release-dir release/v1.4.3-hotfix7`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run build:electron`
+  - `npm run build:tauri`
+  - `npm run release:smoke -- --release-dir release/v1.4.3-hotfix7`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - Electron portable zip root contains `MYmd.exe`
+
+### Slice 16
+
+- Scope:
+  - P1 Source/Split wikilink completion
+  - make lightweight knowledge linking discoverable through natural `[[` typing
+- Planned touchpoints:
+  - `src/components/Editor/SourceEditor.tsx`
+  - `tests/e2e_wikilink_completion.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Typing `[[` in the Source/Split editor now opens note suggestions from the local graph, including empty-query recent note discovery.
+  - Typing a query such as `[[Alpha` combines graph documents, knowledge search documents, and heading hits into one ranked completion list.
+  - Selected completion items insert valid wikilink Markdown with same-folder, workspace-relative, and fallback path targets.
+  - The roadmap now tracks Source/Split file/heading completion as shipped scope and keeps tag completion as a follow-up knowledge entry task.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_wikilink_completion.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_wikilink_completion.spec.ts --reporter=line` with 2 tests passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 17
+
+- Scope:
+  - P1 backlink context readability polish
+  - align the backlinks panel with linked/unlinked mention mental models
+- Planned touchpoints:
+  - `src/components/Sidebar/BacklinksPanel.tsx`
+  - `src/components/Sidebar/BacklinksPanel.css`
+  - `tests/e2e_wikilink_backlink.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Obsidian Backlinks separates `Linked mentions` and `Unlinked mentions`; MYmd now mirrors that vocabulary in the panel while preserving snippet and heading context.
+  - Source: https://help.obsidian.md/plugins/backlinks
+- Product management baseline:
+  - Replaced the broken heading marker text with a readable `Heading: ...` label.
+  - Added linked/unlinked section headings and counts so backlinks explain document context at a glance.
+  - Added keyboard-visible focus states, preserved visible card text for assistive tech, and labeled close/conversion actions.
+  - Updated the P1 roadmap acceptance wording for backlink context snippets.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_wikilink_backlink.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_wikilink_backlink.spec.ts --reporter=line` with 2 tests passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 18
+
+- Scope:
+  - P1 Source/Split tag completion
+  - make tags reusable from everyday typing instead of search-only recall
+- Planned touchpoints:
+  - `src/components/Editor/SourceEditor.tsx`
+  - `src/knowledge/parser.ts`
+  - `tests/e2e_tag_completion.spec.ts`
+  - `tests/knowledge_wikilink_rename.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Obsidian supports tags as first-class note organization and nested tags with `/`; MYmd now accepts nested tag parsing and suggests indexed tags while typing.
+  - Source: https://help.obsidian.md/tags
+- Product management baseline:
+  - Typing a tag prefix such as `#pro` in Source/Split now opens indexed tag suggestions from the local knowledge query path.
+  - Selecting a tag suggestion inserts a valid Markdown tag such as `#project/roadmap`.
+  - Tag parsing now accepts nested tags while keeping Markdown headings excluded from tag extraction.
+  - The roadmap now tracks Source/Split tag completion as shipped scope for this P1 lane.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_tag_completion.spec.ts tests/knowledge_wikilink_rename.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_tag_completion.spec.ts tests/knowledge_wikilink_rename.spec.ts --reporter=line` with 7 tests passed
+  - Browser preview on `http://127.0.0.1:1420/` with mocked Tauri APIs confirmed `#pro` opens tag suggestions and selecting `#project/roadmap` inserts the nested tag
+  - Browser console check reported zero warnings/errors during the tag completion smoke run
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Release lane v1.4.3-hotfix8
+
+- Scope:
+  - package the Slice 18 tag completion iteration into a Windows release
+  - keep the local-first Markdown knowledge workflow release loop complete
+- Release staging:
+  - `release/v1.4.3-hotfix8`
+  - `MYmd_1.4.3_x64-setup.exe`
+  - `MYmd_1.4.3_x64_en-US.msi`
+  - `MYmd-Electron-1.4.3-x64-portable.zip`
+  - `SHA256SUMS.txt`
+  - `RELEASE_NOTES.md`
+- Verification completed:
+  - `npm run build:tauri`
+  - `npm run build:electron`
+  - `npm run release:smoke -- --release-dir release/v1.4.3-hotfix8`
+  - release smoke verified asset hashes, Electron rendering, Tauri window rendering, and CLI-open knowledge indexing
+  - CLI indexing smoke reported `documentHits: 1`, `headingHits: 4`, `tagHits: 3`, `blockingEventCount: 0`
+- SHA256:
+  - `MYmd_1.4.3_x64-setup.exe`: `B7D5FA58C169E143A306B5CF05DAA1C70BADF727A6264BD9CCAF1BB665DBC50B`
+  - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
+  - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`

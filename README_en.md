@@ -18,7 +18,7 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 
 ## Version
 
-- Current version: `v1.4.3-hotfix5`
+- Current version: `v1.4.3-hotfix8`
 - Target platform: `Windows x64`
 - Latest releases: <https://github.com/LaplaceYoung/MYmd/releases>
 - Landing page: <https://laplaceyoung.github.io/MYmd/>
@@ -70,13 +70,13 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 - Single-instance behavior: file args from second launches are forwarded to the running window.
 - Startup open-file flow avoids welcome-page flicker before CLI file loading finishes.
 
-## v1.4.3-hotfix5 Highlights
+## v1.4.3-hotfix8 Highlights
 
-1. Restored the Welcome page to the previous concise Word-style layout and removed the redundant onboarding-heavy variant.
-2. Fixed global search modal transparency by switching to an opaque themed panel background and a stronger backdrop mask.
-3. Kept title-bar top search dropdown readability improvements and verified no background blending regression.
-4. Refreshed README screenshots for welcome page, top search dropdown, and global search modal.
-5. Completed release validation with `npm run typecheck`, `npm run build`, and `npm run tauri build`.
+1. Source/Split typing `#pro` now opens indexed tag suggestions and inserts nested tags such as `#project/roadmap`.
+2. Tag parsing supports nested tags such as `#project/roadmap`; Markdown headings keep heading semantics.
+3. Added E2E coverage for tag completion and regression coverage for nested tag extraction.
+4. Rebuilt the Windows NSIS/MSI installers and Electron portable package for `v1.4.3-hotfix8`.
+5. Verified release asset SHA256 checks, Electron rendering, Tauri desktop rendering, and CLI-open indexing.
 
 ## Tech Stack
 | Layer | Technology |
@@ -124,9 +124,9 @@ After a Tauri build on this machine, artifacts are generated in:
 - `E:\EnvConfig\rust_target\release\bundle\nsis\MYmd_1.4.3_x64-setup.exe`
 - `E:\EnvConfig\rust_target\release\bundle\msi\MYmd_1.4.3_x64_en-US.msi`
 
-Project distribution folder (tracked):
+Project distribution folder (local staging):
 
-- `release/MYmd_1.4.3_x64-setup.exe`
+- `release/v1.4.3-hotfix8/MYmd_1.4.3_x64-setup.exe`
 
 ## Project Structure
 

@@ -18,7 +18,7 @@ MYmd 是一个基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 
 ## 版本信息
 
-- 当前版本：`v1.4.3-hotfix5`
+- 当前版本：`v1.4.3-hotfix8`
 - 目标平台：`Windows x64`
 - 最新发布：<https://github.com/LaplaceYoung/MYmd/releases>
 - 宣传页面：<https://laplaceyoung.github.io/MYmd/>
@@ -70,13 +70,13 @@ MYmd 是一个基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 - 单实例运行：二次启动时将文件参数转发给当前窗口。
 - 启动参数文件打开链路已优化，避免欢迎页闪跳。
 
-## v1.4.3-hotfix5 重点更新
+## v1.4.3-hotfix8 重点更新
 
-1. 首页恢复为之前的仿 Word 简洁排版，移除冗余引导模块，回到高频写作优先路径。
-2. 修复全局搜索弹窗透明度：弹窗面板改为不透明主题背景，并加深遮罩层，避免与正文背景混淆。
-3. 保留并验证顶部搜索下拉菜单可读性修复，确保菜单与底层内容不再重叠干扰。
-4. 重新截取并更新 README 功能截图（欢迎页、顶部搜索下拉、全局搜索弹窗）。
-5. 完成发布前校验：`npm run typecheck`、`npm run build`、`npm run tauri build`。
+1. Source/Split 输入 `#pro` 会打开本地索引标签建议，选择后可插入 `#project/roadmap`。
+2. 标签解析支持 `#project/roadmap` 这类嵌套标签，Markdown 标题继续保持标题语义。
+3. 新增标签补全 E2E 与嵌套标签解析回归覆盖。
+4. 重建 Windows NSIS/MSI 安装包与 Electron 便携包，并整理 `v1.4.3-hotfix8` 发布 staging。
+5. 发布前验证 release asset SHA256、Electron 首页、Tauri 桌面窗口与 CLI 打开文件索引。
 
 ## 技术栈
 | 层级 | 技术 |
@@ -124,9 +124,9 @@ npm run tauri build
 - `E:\EnvConfig\rust_target\release\bundle\nsis\MYmd_1.4.3_x64-setup.exe`
 - `E:\EnvConfig\rust_target\release\bundle\msi\MYmd_1.4.3_x64_en-US.msi`
 
-项目内分发目录（已同步）：
+项目内分发目录（本地 staging）：
 
-- `release/MYmd_1.4.3_x64-setup.exe`
+- `release/v1.4.3-hotfix8/MYmd_1.4.3_x64-setup.exe`
 
 ## 目录结构
 
