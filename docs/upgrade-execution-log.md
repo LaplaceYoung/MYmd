@@ -591,3 +591,28 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
   - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+
+### Slice 29
+
+- Scope:
+  - merge queue refresh for build-health slice
+  - keep release waves aligned after PR #14 creation
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added PR #14 `young/vite-chunk-warning-cleanup` to Wave 0 as P0 build-health scope.
+  - Linked PR #14 verification evidence covering typecheck, build, production preview smoke, repo hygiene, and diff check.
+  - Updated the active-goal audit from PR #1-#13 to PR #1-#14.
+  - Marked the circular manual chunk warning lane as closed while keeping large editor/diagram chunks visible for a future performance slice.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`

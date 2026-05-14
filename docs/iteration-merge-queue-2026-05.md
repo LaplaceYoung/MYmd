@@ -30,10 +30,11 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 | #11 | `young/deterministic-image-assets` | P2 resource workflow | BLOCKED / REVIEW_REQUIRED | 3 | Include in editor production power release |
 | #12 | `young/iteration-merge-queue` | Release management | BLOCKED / REVIEW_REQUIRED | 0 | Merge before release packaging work so queue status stays authoritative |
 | #13 | `young/graph-view-filter-set` | P3 graph sensemaking | BLOCKED / REVIEW_REQUIRED | 4 | Include after core writing/export queue stabilizes |
+| #14 | `young/vite-chunk-warning-cleanup` | P0 build health | BLOCKED / REVIEW_REQUIRED | 0 | Merge before release packaging work so chunk warning ownership stays current |
 
 ## Readiness Snapshot
 
-Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 queue refresh, and PR #13 graph-filter verification.
+Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 queue refresh, PR #13 graph-filter verification, and PR #14 build-health verification.
 
 | PR | Latest Evidence | Evidence Surface |
 |---:|---|---|
@@ -50,12 +51,17 @@ Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 queue refresh, and PR #1
 | #11 | typecheck, build, repo hygiene, diff check, local asset tests | https://github.com/LaplaceYoung/MYmd/pull/11#issuecomment-4455248568 |
 | #12 | typecheck, repo hygiene, diff check, changelog link checks | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4455204178 |
 | #13 | typecheck, build, repo hygiene, diff check, graph panel E2E, cargo check | https://github.com/LaplaceYoung/MYmd/pull/13#issuecomment-4455401410 |
+| #14 | typecheck, build, production preview app shell smoke, repo hygiene, diff check | https://github.com/LaplaceYoung/MYmd/pull/14#issuecomment-4455477687 |
 
 ## Merge Waves
 
 ### Wave 0: Stabilize The Queue
 
-- Goal: Keep the stability PR and queue-management PR current before stacking more release packaging work.
+- Goal: Keep the stability PR, build-health PR, and queue-management PR current before stacking more release packaging work.
+- PRs:
+  - #1 `young/review-code-health-and-performance-stability`
+  - #12 `young/iteration-merge-queue`
+  - #14 `young/vite-chunk-warning-cleanup`
 - Gate:
   - `npm run typecheck`
   - `npm run build`
@@ -64,6 +70,7 @@ Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 queue refresh, and PR #1
 - Exit evidence:
   - PR #1 reports clean merge state and current verification evidence.
   - PR #12 records the current release-wave status before merge packaging begins.
+  - PR #14 confirms circular manual chunk warning ownership before the next release packaging lane.
 
 ### Wave 1: Knowledge Workflow Safety
 

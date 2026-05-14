@@ -25,13 +25,13 @@ This audit keeps that goal measurable. It maps the active objective to concrete 
 | Align with mainstream Markdown readers/editors | `docs/markdown-roadmap-2026-05.md` | Benchmark matrix covers Obsidian, Joplin, Typora, iA Writer, MarkText, Zettlr, Cherry Markdown, and doocs/md | Covered | Refresh when a new benchmark source changes product direction |
 | Close MYmd feature gaps | `docs/markdown-roadmap-2026-05.md` | P0-P3 backlog maps product reasons to acceptance evidence | Covered | Pull next slice from open P1/P2/P3 backlog after current PR wave clears review |
 | Build version iteration management | `docs/release-iteration-playbook.md` | Iteration loop, planning template, required gates, smoke checklist, and release asset checklist exist | Covered | Keep playbook aligned with new release automation |
-| Sequence current implementation work | `docs/iteration-merge-queue-2026-05.md` | PR #1-#13 have lanes, states, merge waves, triggers, and verification links | Covered | Update after any PR merge, close, replace, or rebase |
-| Attach verification evidence to slices | PR comments and `docs/iteration-merge-queue-2026-05.md` | PR #1-#13 readiness rows link to verification comments | Covered | Re-run gates after main sync or branch rebase |
-| Keep implementation history auditable | `docs/upgrade-execution-log.md` | Slices 12-18 and 25-26 record scope, touchpoints, baseline, and verification | Covered | Add a new dated entry for every meaningful slice |
+| Sequence current implementation work | `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 have lanes, states, merge waves, triggers, and verification links | Covered | Update after any PR merge, close, replace, or rebase |
+| Attach verification evidence to slices | PR comments and `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 readiness rows link to verification comments | Covered | Re-run gates after main sync or branch rebase |
+| Keep implementation history auditable | `docs/upgrade-execution-log.md` | Slices 12-19 and 25-29 record scope, touchpoints, baseline, and verification | Covered | Add a new dated entry for every meaningful slice |
 | Package and publish release builds | GitHub release `v1.4.3-hotfix8` | Latest release has NSIS setup, MSI, Electron portable zip, release notes, and SHA256 sums | Covered for latest shipped release | Package again after a merge wave reaches `main` |
 | Verify release runtime quality | `npm run release:smoke` and release notes | Hotfix8 release smoke covered asset hashes, Electron rendering, Tauri rendering, and CLI-open indexing | Covered for latest shipped release | Run smoke on the next release staging folder |
-| Maintain current blocker visibility | `gh pr list` output and merge queue | PR #1-#13 currently report `BLOCKED / REVIEW_REQUIRED` | Active blocker | Review gate must clear before merge and packaging |
-| Track known performance warnings | `docs/markdown-roadmap-2026-05.md`, release notes, build output | Large editor/diagram chunks and circular vendor chunks are tracked as current build warnings | Open risk | Assign a future performance slice after current release waves |
+| Maintain current blocker visibility | `gh pr list` output and merge queue | PR #1-#14 currently report `BLOCKED / REVIEW_REQUIRED` | Active blocker | Review gate must clear before merge and packaging |
+| Track known performance warnings | `docs/markdown-roadmap-2026-05.md`, release notes, build output | Circular manual chunk warnings are closed; large editor/diagram chunks remain tracked as current build warnings | Open risk | Assign a future editor/diagram chunk slice after current release waves |
 
 ## Current Evidence Snapshot
 
@@ -39,21 +39,21 @@ This audit keeps that goal measurable. It maps the active objective to concrete 
 
 - `docs/markdown-roadmap-2026-05.md` defines the benchmark matrix, capability backlog, success criteria, and iteration cadence.
 - `docs/release-iteration-playbook.md` defines slice planning, verification gates, release smoke, checksums, release evidence, and machine paths.
-- `docs/iteration-merge-queue-2026-05.md` maps PR #1-#13 into merge waves and release triggers.
+- `docs/iteration-merge-queue-2026-05.md` maps PR #1-#14 into merge waves and release triggers.
 - `docs/upgrade-execution-log.md` records completed implementation, validation, packaging, and queue-management slices.
 
 ### GitHub State
 
 - Latest release: `v1.4.3-hotfix8`
 - Release URL: https://github.com/LaplaceYoung/MYmd/releases/tag/v1.4.3-hotfix8
-- Open PR queue: PR #1-#13
+- Open PR queue: PR #1-#14
 - Current PR state: all open PRs are `BLOCKED / REVIEW_REQUIRED`
 
 ### Verification Commands Used For This Audit
 
 ```bash
 gh release view --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets
-gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 20
+gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25
 ```
 
 ## Release Completion Gate
