@@ -616,3 +616,29 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
   - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+
+### Slice 30
+
+- Scope:
+  - active goal completion audit refresh
+  - keep the long-running benchmark alignment goal tied to real repository and GitHub evidence
+- Planned touchpoints:
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added a deliverable-to-evidence completion audit table for benchmark alignment, gap closure, iteration management, implementation evidence, verification evidence, packaging, runtime smoke, and retrospective notes.
+  - Recorded the current completion decision as ongoing because PR #1-#14 are open and next packaging starts after a merge wave reaches `main`.
+  - Synchronized the roadmap build-warning row with PR #14: circular manual chunk warnings are closed, while WYSIWYG/source editor and Mermaid definition chunks remain tracked.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh release view v1.4.3-hotfix8 --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh release view v1.4.3-hotfix8 --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`

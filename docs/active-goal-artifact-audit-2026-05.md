@@ -18,6 +18,23 @@ This audit keeps that goal measurable. It maps the active objective to concrete 
 6. Retrospective/project-management notes are updated after meaningful slices.
 7. Current blockers and next actions are visible from repository docs.
 
+## Completion Audit Refresh
+
+Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading and PR #12 linked the latest build-health evidence.
+
+| Deliverable | Evidence Inspected | Current State | Gap To Close |
+|---|---|---|---|
+| Benchmark-aligned product direction | `docs/markdown-roadmap-2026-05.md` mainstream matrix and P0-P3 backlog | Covered | Refresh when benchmark sources change roadmap priority |
+| Feature-gap closure path | PR #1-#14 plus roadmap acceptance rows | In progress | Review gates must clear before merge waves can land |
+| Iteration management mechanism | `docs/release-iteration-playbook.md`, `docs/iteration-merge-queue-2026-05.md`, this audit | Covered | Keep queue synchronized after every PR update |
+| Implementation evidence | PR #1-#14 branches and linked verification comments | In progress | Merge Wave 0 into `main`, then continue waves 1-4 |
+| Verification evidence | PR comments, `npm run typecheck`, `npm run build`, targeted E2E/unit gates, repo hygiene, production preview smoke | Covered for current open slices | Re-run gates after branch sync or merge |
+| Packaging and release evidence | GitHub Release `v1.4.3-hotfix8` with NSIS, MSI, Electron portable, release notes, SHA256 sums | Covered for latest shipped release | Package the next release after a wave reaches `main` |
+| Runtime release quality | `npm run release:smoke` evidence in release lane v1.4.3-hotfix8 | Covered for latest shipped release | Run release smoke on the next staging folder |
+| Retrospective and project memory | `docs/upgrade-execution-log.md` slices, project memory notes | Covered | Add a slice entry after every meaningful implementation or queue change |
+
+Completion decision: the active goal remains ongoing because PR #1-#14 are open and the next release packaging lane starts after a merge wave reaches `main`.
+
 ## Prompt To Artifact Checklist
 
 | Requirement | Artifact | Current Evidence | Status | Next Action |
@@ -54,6 +71,7 @@ This audit keeps that goal measurable. It maps the active objective to concrete 
 ```bash
 gh release view --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets
 gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25
+rg -n "v1.4.3-hotfix8|PR #14|vite-chunk|Mermaid|chunk|release:smoke|build:tauri|build:electron" README.md README_en.md docs/markdown-roadmap-2026-05.md docs/release-iteration-playbook.md docs/iteration-merge-queue-2026-05.md docs/upgrade-execution-log.md docs/active-goal-artifact-audit-2026-05.md
 ```
 
 ## Release Completion Gate
