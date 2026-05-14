@@ -10,16 +10,18 @@ async function installGraphRuntime(page: Page) {
         let callbackId = 1
         const fileState: Record<string, string> = {
             [filePath]: '# Home\n\nLink to [[Alpha]].',
+            [`${workspacePath}/Research/Alpha.md`]: '# Alpha\n\nAlpha detail for graph navigation.',
+            [`${workspacePath}/Research/Alpha Plan.md`]: '# Alpha Plan\n\nPlan detail.',
         }
 
         const graphNodes = [
-            { id: 'home', title: 'Home', file_path: filePath },
-            { id: 'alpha', title: 'Alpha', file_path: `${workspacePath}/Alpha.md` },
-            { id: 'alpha-plan', title: 'Alpha Plan', file_path: `${workspacePath}/Alpha Plan.md` },
+            { id: 'home', title: 'Home', file_path: filePath, tags: ['daily'] },
+            { id: 'alpha', title: 'Alpha', file_path: `${workspacePath}/Research/Alpha.md`, tags: ['project/roadmap', 'alpha'] },
+            { id: 'alpha-plan', title: 'Alpha Plan', file_path: `${workspacePath}/Research/Alpha Plan.md`, tags: ['project/roadmap'] },
         ]
         const graphEdges = [
-            { from: 'Home', to: 'Alpha', raw_text: '[[Alpha]]' },
-            { from: 'Alpha', to: 'Alpha Plan', raw_text: '[[Alpha Plan]]' },
+            { from: 'home', to: 'alpha', raw_text: '[[Alpha]]' },
+            { from: 'alpha', to: 'alpha-plan', raw_text: '[[Alpha Plan]]' },
         ]
 
         const sessionSnapshot = {
@@ -136,7 +138,7 @@ async function openGraphPanel(page: Page) {
     await installGraphRuntime(page)
     await page.goto('http://127.0.0.1:1420')
     await page.waitForLoadState('networkidle')
-    await page.getByTitle('Advanced knowledge graph').dispatchEvent('click')
+    await page.locator('.statusbar__right').getByRole('button', { name: /Graph|图谱/ }).dispatchEvent('click')
     await expect(page.locator('.knowledge-graph-panel')).toBeVisible()
 }
 
@@ -160,4 +162,27 @@ test('knowledge graph panel can open AI graph workflow with contextual draft', a
     await expect(page.locator('.ai-panel')).toBeVisible()
     await expect(page.locator('.ai-panel__task-card.active')).toContainText('Graph Enrichment')
     await expect(page.locator('.ai-panel__textarea')).toHaveValue(/Alpha/i)
+})
+
+test('knowledge graph panel filters by folder tag and link depth', async ({ page }) => {
+    await openGraphPanel(page)
+
+    await page.getByLabel('Filter graph by folder').selectOption('Research')
+    await expect(page.locator('.knowledge-graph-panel__meta')).toContainText('2 nodes / 1 edges')
+    await expect(page.locator('.knowledge-graph-panel__node')).toContainText(['Alpha', 'Alpha Plan'])
+
+    await page.getByLabel('Filter graph by tag').selectOption('project/roadmap')
+    await expect(page.locator('.knowledge-graph-panel__filter-summary')).toContainText('Tag: #project/roadmap')
+    await expect(page.locator('.knowledge-graph-panel__meta')).toContainText('2 nodes / 1 edges')
+
+    await page.getByLabel('Filter graph by link depth').selectOption('hubs')
+    await expect(page.locator('.knowledge-graph-panel__meta')).toContainText('1 nodes / 0 edges')
+    await expect(page.locator('.knowledge-graph-panel__node')).toContainText('Alpha')
+})
+
+test('knowledge graph node buttons open the target note', async ({ page }) => {
+    await openGraphPanel(page)
+
+    await page.locator('.knowledge-graph-panel__node').nth(1).dispatchEvent('click')
+    await expect(page.locator('.editor-wysiwyg')).toContainText('Alpha detail for graph navigation')
 })
