@@ -40,6 +40,7 @@ export function BacklinksPanel() {
       updated_at: number;
     }[]
   >([]);
+  const totalContextCount = items.length + mentions.length;
 
   const refresh = useCallback(async () => {
     if (!backlinksVisible || !activePath) {
@@ -136,63 +137,84 @@ export function BacklinksPanel() {
         <div className="backlinks-panel__title">
           <Link2 size={16} />
           <span>Backlinks</span>
+          {totalContextCount > 0 && (
+            <span className="backlinks-panel__count">{totalContextCount}</span>
+          )}
         </div>
-        <button className="backlinks-panel__close" onClick={() => setBacklinksVisible(false)}>
+        <button
+          className="backlinks-panel__close"
+          onClick={() => setBacklinksVisible(false)}
+          aria-label="Close backlinks panel"
+        >
           <X size={16} />
         </button>
       </div>
       <div className="backlinks-panel__content">
         {!activePath && <div className="backlinks-panel__empty">先保存当前文档，反向链接和未链接提及就会出现在这里。</div>}
         {loading && <div className="backlinks-panel__empty">正在加载反向链接...</div>}
-        {!loading && activePath && items.length === 0 && (
-          <div className="backlinks-panel__empty">还没有反向链接。试试在别的文档里用 [[当前文档名]] 引用它。</div>
-        )}
-        {!loading &&
-          items.map((item) => (
-            <button
-              key={`${item.from_file_path}:${item.raw_text}`}
-              className="backlinks-panel__item"
-              onClick={() => void openBacklink(item.from_file_path, item.to_heading_slug)}
-              title={item.from_file_path}
-            >
-              <div className="backlinks-panel__item-title">{item.from_title || item.from_file_path}</div>
-              <div className="backlinks-panel__item-meta">[[{item.raw_text}]]</div>
-              {item.matched_heading_text && (
-                <div className="backlinks-panel__item-meta">鈫?{item.matched_heading_text}</div>
-              )}
-              {item.snippet && <div className="backlinks-panel__item-snippet">{item.snippet}</div>}
-            </button>
-          ))}
-        {!loading && activePath && mentions.length > 0 && (
-          <div className="backlinks-panel__mention-group">
-            <div className="backlinks-panel__mention-title">未链接提及</div>
-            {mentions.map((item) => {
-              const key = `${item.from_file_path}:${item.mention_text}`;
-              const isLinking = linkingKey === key;
-              return (
-                <div key={key} className="backlinks-panel__mention-item">
+        {!loading && activePath && (
+          <>
+            <section className="backlinks-panel__section" aria-label="Linked mentions">
+              <div className="backlinks-panel__section-heading">
+                <span>Linked mentions</span>
+                <span className="backlinks-panel__section-count">{items.length}</span>
+              </div>
+              {items.length === 0 ? (
+                <div className="backlinks-panel__empty">还没有反向链接。试试在别的文档里用 [[当前文档名]] 引用它。</div>
+              ) : (
+                items.map((item) => (
                   <button
-                    className="backlinks-panel__item backlinks-panel__item--mention"
-                    onClick={() => void openBacklink(item.from_file_path, "")}
+                    key={`${item.from_file_path}:${item.raw_text}`}
+                    className="backlinks-panel__item"
+                    onClick={() => void openBacklink(item.from_file_path, item.to_heading_slug)}
                     title={item.from_file_path}
                   >
-                    <div className="backlinks-panel__item-title">
-                      {item.from_title || item.from_file_path}
-                    </div>
-                    <div className="backlinks-panel__item-meta">{item.mention_text}</div>
+                    <div className="backlinks-panel__item-title">{item.from_title || item.from_file_path}</div>
+                    <div className="backlinks-panel__item-meta">[[{item.raw_text}]]</div>
+                    {item.matched_heading_text && (
+                      <div className="backlinks-panel__item-meta">Heading: {item.matched_heading_text}</div>
+                    )}
                     {item.snippet && <div className="backlinks-panel__item-snippet">{item.snippet}</div>}
                   </button>
-                  <button
-                    className="backlinks-panel__link-btn"
-                    onClick={() => void handleLinkMention(item)}
-                    disabled={isLinking}
-                  >
-                    {isLinking ? "链接中..." : "转为链接"}
-                  </button>
+                ))
+              )}
+            </section>
+            {mentions.length > 0 && (
+              <section className="backlinks-panel__section" aria-label="Unlinked mentions">
+                <div className="backlinks-panel__section-heading">
+                  <span>Unlinked mentions</span>
+                  <span className="backlinks-panel__section-count">{mentions.length}</span>
                 </div>
-              );
-            })}
-          </div>
+                {mentions.map((item) => {
+                  const key = `${item.from_file_path}:${item.mention_text}`;
+                  const isLinking = linkingKey === key;
+                  return (
+                    <div key={key} className="backlinks-panel__mention-item">
+                      <button
+                        className="backlinks-panel__item backlinks-panel__item--mention"
+                        onClick={() => void openBacklink(item.from_file_path, "")}
+                        title={item.from_file_path}
+                      >
+                        <div className="backlinks-panel__item-title">
+                          {item.from_title || item.from_file_path}
+                        </div>
+                        <div className="backlinks-panel__item-meta">{item.mention_text}</div>
+                        {item.snippet && <div className="backlinks-panel__item-snippet">{item.snippet}</div>}
+                      </button>
+                      <button
+                        className="backlinks-panel__link-btn"
+                        onClick={() => void handleLinkMention(item)}
+                        disabled={isLinking}
+                        aria-label={`Convert ${item.mention_text} mention to wikilink`}
+                      >
+                        {isLinking ? "链接中..." : "转为链接"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </section>
+            )}
+          </>
         )}
       </div>
     </div>

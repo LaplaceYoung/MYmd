@@ -431,9 +431,10 @@ test('renaming a linked workspace note keeps backlinks aligned after reindex', a
     await page.getByTitle('Backlinks').click()
     const backlinksPanel = page.locator('.backlinks-panel')
     await expect(backlinksPanel).toBeVisible()
+    await expect(backlinksPanel).toContainText('Linked mentions')
     await expect(backlinksPanel.locator('.backlinks-panel__item-title')).toHaveText('Ref')
     await expect(backlinksPanel).toContainText('[[Target#Section One]]')
-    await expect(backlinksPanel).toContainText('Section One')
+    await expect(backlinksPanel).toContainText('Heading: Section One')
 
     const targetNode = page
         .locator('.file-node')
@@ -476,6 +477,7 @@ test('renaming a linked workspace note keeps backlinks aligned after reindex', a
         .toBeTruthy()
 
     await expect(backlinksPanel).toContainText('[[Project Target#Section One]]')
+    await expect(backlinksPanel).toContainText('Heading: Section One')
     await expect(backlinksPanel.locator('.backlinks-panel__item-title')).toHaveText('Ref')
 })
 

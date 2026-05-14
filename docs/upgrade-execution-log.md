@@ -398,3 +398,35 @@
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 17
+
+- Scope:
+  - P1 backlink context readability polish
+  - align the backlinks panel with linked/unlinked mention mental models
+- Planned touchpoints:
+  - `src/components/Sidebar/BacklinksPanel.tsx`
+  - `src/components/Sidebar/BacklinksPanel.css`
+  - `tests/e2e_wikilink_backlink.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Obsidian Backlinks separates `Linked mentions` and `Unlinked mentions`; MYmd now mirrors that vocabulary in the panel while preserving snippet and heading context.
+  - Source: https://help.obsidian.md/plugins/backlinks
+- Product management baseline:
+  - Replaced the broken heading marker text with a readable `Heading: ...` label.
+  - Added linked/unlinked section headings and counts so backlinks explain document context at a glance.
+  - Added keyboard-visible focus states, preserved visible card text for assistive tech, and labeled close/conversion actions.
+  - Updated the P1 roadmap acceptance wording for backlink context snippets.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_wikilink_backlink.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_wikilink_backlink.spec.ts --reporter=line` with 2 tests passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
