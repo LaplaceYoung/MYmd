@@ -69,7 +69,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 | Footnotes end-to-end | Long-form notes need scholarly and technical references | Editor, preview, search, and export all handle footnotes |
 | Image/resource workflow | Local-first files need deterministic asset storage | Paste/drop image creates stable relative path and survives rename/move |
 | Export matrix | Users expect HTML, PDF, image, and Docx paths | Benchmark documents export with headings, tables, KaTeX, Mermaid, images |
-| Writing polish | Long-form writers need focus and quality signals | Word count, reading time, focus/typewriter regression, optional style hints |
+| Writing polish | Long-form writers need focus and quality signals | Word count, reading time, focus/typewriter WYSIWYG+Split regression, optional style hints |
 
 ### P3: Ecosystem And Automation
 
