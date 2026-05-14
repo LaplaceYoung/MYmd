@@ -488,3 +488,39 @@
   - `MYmd_1.4.3_x64-setup.exe`: `B7D5FA58C169E143A306B5CF05DAA1C70BADF727A6264BD9CCAF1BB665DBC50B`
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
+
+### Slice 19
+
+- Scope:
+  - P1 index progress and retry
+  - make workspace search/indexing status visible, trustworthy, and recoverable
+- Planned touchpoints:
+  - `src/knowledge/service.ts`
+  - `src/stores/editorStore.ts`
+  - `src/components/StatusBar/StatusBar.tsx`
+  - `src/components/Sidebar/FileExplorer.tsx`
+  - `src/utils/editorRuntime.ts`
+  - `tests/e2e_index_progress_retry.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Joplin exposes progress counts and retry flows around sync/index reliability; MYmd applies the same trust pattern to local workspace indexing.
+  - Obsidian-style status affordances informed the compact status-bar entry and details path.
+  - Sources checked by research agent: Joplin search/help/changelog and Obsidian search/sync/file-recovery docs.
+- Product management baseline:
+  - Workspace indexing now records skipped file count and per-file diagnostics while keeping the successful index usable.
+  - The status bar shows indexing progress, full indexed state, and partial-index retry state.
+  - The file explorer shows an indexing status card, skipped-file details, and a retry action that clears warnings after successful rebuild.
+  - Runtime state snapshots expose processed, total, and skipped counts for smoke/debug checks.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_index_progress_retry.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_index_progress_retry.spec.ts --reporter=line` with 1 test passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
