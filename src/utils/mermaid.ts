@@ -6,7 +6,12 @@ let mermaidInstance: typeof import('mermaid')['default'] | null = null
 async function loadMermaid() {
     if (mermaidInstance) return mermaidInstance
 
-    mermaidLoader ??= import('mermaid').then(module => module.default)
+    mermaidLoader ??= import('mermaid')
+        .then(module => module.default)
+        .catch(error => {
+            mermaidLoader = null
+            throw error
+        })
     mermaidInstance = await mermaidLoader
     return mermaidInstance
 }
