@@ -1,6 +1,38 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+function getPackageName(id: string) {
+  const normalized = id.split('node_modules/').pop()?.replace(/\\/g, '/')
+  if (!normalized) return null
+
+  const parts = normalized.split('/')
+  if (parts[0]?.startsWith('@')) {
+    return `${parts[0]}/${parts[1] ?? ''}`
+  }
+
+  return parts[0]
+}
+
+const milkdownPackages = new Set([
+  '@prosemirror-adapter/core',
+  '@prosemirror-adapter/react',
+  'crelt',
+  'orderedmap',
+  'prosemirror-changeset',
+  'prosemirror-commands',
+  'prosemirror-dropcursor',
+  'prosemirror-gapcursor',
+  'prosemirror-history',
+  'prosemirror-inputrules',
+  'prosemirror-keymap',
+  'prosemirror-model',
+  'prosemirror-schema-list',
+  'prosemirror-state',
+  'prosemirror-tables',
+  'prosemirror-transform',
+  'prosemirror-view',
+])
+
 export default defineConfig({
   base: './',
   plugins: [react()],
@@ -18,13 +50,22 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return
-          if (id.includes('react') || id.includes('react-dom')) return 'vendor-react'
-          if (id.includes('mermaid')) return 'vendor-mermaid'
-          if (id.includes('@milkdown') || id.includes('prosemirror')) return 'vendor-milkdown'
-          if (id.includes('@codemirror') || id.includes('codemirror')) return 'vendor-codemirror'
-          if (id.includes('katex')) return 'vendor-katex'
-          if (id.includes('lucide-react')) return 'vendor-icons'
-          return 'vendor-misc'
+
+          const packageName = getPackageName(id)
+          if (!packageName) return
+
+          if (packageName === 'react' || packageName === 'react-dom' || packageName === 'scheduler') {
+            return 'vendor-react'
+          }
+          if (packageName === 'lucide-react') return 'vendor-icons'
+          if (packageName.startsWith('@milkdown/') || milkdownPackages.has(packageName)) {
+            return 'vendor-milkdown'
+          }
+          if (packageName.startsWith('@codemirror/') || packageName === 'codemirror' || packageName.startsWith('@lezer/')) {
+            return 'vendor-codemirror'
+          }
+          if (packageName === 'katex') return 'vendor-katex'
+          if (packageName === 'marked') return 'vendor-markdown'
         },
       },
     },

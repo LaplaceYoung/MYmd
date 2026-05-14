@@ -1,19 +1,27 @@
-import mermaid from 'mermaid'
+type MermaidApi = typeof import('mermaid').default
 
+let mermaidApi: MermaidApi | null = null
+let mermaidLoadPromise: Promise<MermaidApi> | null = null
 let isMermaidInitialized = false
 let mermaidRenderCounter = 0
 
-function ensureMermaid() {
-    if (isMermaidInitialized) return mermaid
+async function ensureMermaid() {
+    if (!mermaidLoadPromise) {
+        mermaidLoadPromise = import('mermaid').then(module => module.default)
+    }
 
-    mermaid.initialize({
-        startOnLoad: false,
-        theme: 'default',
-        securityLevel: 'loose',
-    })
+    mermaidApi = await mermaidLoadPromise
 
-    isMermaidInitialized = true
-    return mermaid
+    if (!isMermaidInitialized) {
+        mermaidApi.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+        })
+        isMermaidInitialized = true
+    }
+
+    return mermaidApi
 }
 
 function escapeHtml(value: string) {
@@ -56,7 +64,7 @@ export function getMermaidErrorMarkup(source: string, error: unknown) {
 }
 
 export async function renderMermaidSvg(source: string, idPrefix = 'mermaid-svg') {
-    const renderer = ensureMermaid()
+    const renderer = await ensureMermaid()
     mermaidRenderCounter += 1
     const renderId = `${idPrefix}-${mermaidRenderCounter}`
     const { svg } = await renderer.render(renderId, source)
