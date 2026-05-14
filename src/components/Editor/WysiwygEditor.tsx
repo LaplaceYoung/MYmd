@@ -18,6 +18,7 @@ import { mathEditPlugin } from './plugins/mathEditPlugin'
 import { diagramViewPlugin } from './plugins/diagramPlugin'
 import { createActiveBlockPlugin } from './plugins/activeBlockPlugin'
 import { createMediaEmbedPlugin } from './plugins/mediaEmbedPlugin'
+import { createTaskListTogglePlugin } from './plugins/taskListTogglePlugin'
 import { EditorContextMenu } from './EditorContextMenu'
 import { copyImageToLocalAssets, saveBlobImageToLocalAssets } from '@/utils/fileUtils'
 import { convertFileSrc } from '@tauri-apps/api/core'
@@ -289,7 +290,8 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                             createSyntaxHintPlugin(),
                             prosemirrorSearchPlugin(),
                             createActiveBlockPlugin(),
-                            createMediaEmbedPlugin()
+                            createMediaEmbedPlugin(),
+                            createTaskListTogglePlugin(readOnly)
                         ]
                     })
                     view.updateState(newState)

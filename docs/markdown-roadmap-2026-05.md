@@ -66,6 +66,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 | Task | Product Reason | Acceptance Evidence |
 |---|---|---|
 | Table editing controls | Typora/Cherry-level table comfort is a daily editing win | Add/delete row/column, align, width, and valid Markdown persistence |
+| Task list direct toggles | Typora/MarkText-style visual task editing keeps checklist updates inside the reading/editing flow | WYSIWYG renders GFM task checkboxes, click toggles update Markdown, and split source reflects the same state |
 | Footnotes end-to-end | Long-form notes need scholarly and technical references | Editor, preview, search, and export all handle footnotes |
 | Image/resource workflow | Local-first files need deterministic asset storage | Paste/drop image creates stable relative path and survives rename/move |
 | Export matrix | Users expect HTML, PDF, image, and Docx paths | Benchmark documents export with headings, tables, KaTeX, Mermaid, images |
