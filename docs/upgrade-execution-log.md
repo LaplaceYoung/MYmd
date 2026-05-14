@@ -642,3 +642,34 @@
   - `git diff --check`
   - `gh release view v1.4.3-hotfix8 --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets`
   - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+
+### Slice 31
+
+- Scope:
+  - PR #14 Mermaid runtime loader retry hardening
+  - merge queue evidence refresh for the latest build-health verification
+- Planned touchpoints:
+  - `src/utils/mermaid.ts`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Hardened the lazy Mermaid loader so transient dynamic import failures clear the cached loader promise and the next render/export attempt can retry.
+  - Updated PR #14 readiness evidence to the latest verification comment covering typecheck, build, targeted Mermaid/export regression, production preview smoke, repo hygiene, and diff check.
+  - Refreshed the active-goal audit history reference so the release-management trail includes this build-health hardening slice.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run build`
+  - `npx playwright test tests/e2e_mermaid_export_fallback.spec.ts tests/render_api.spec.ts --reporter=line`
+  - production preview smoke on `http://127.0.0.1:4173`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run build`
+  - `npx playwright test tests/e2e_mermaid_export_fallback.spec.ts tests/render_api.spec.ts --reporter=line`
+  - production preview smoke on `http://127.0.0.1:4173`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`

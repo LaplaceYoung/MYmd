@@ -20,7 +20,7 @@ This audit keeps that goal measurable. It maps the active objective to concrete 
 
 ## Completion Audit Refresh
 
-Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading and PR #12 linked the latest build-health evidence.
+Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading, retry hardening, and PR #12 linked the latest build-health evidence.
 
 | Deliverable | Evidence Inspected | Current State | Gap To Close |
 |---|---|---|---|
@@ -44,7 +44,7 @@ Completion decision: the active goal remains ongoing because PR #1-#14 are open 
 | Build version iteration management | `docs/release-iteration-playbook.md` | Iteration loop, planning template, required gates, smoke checklist, and release asset checklist exist | Covered | Keep playbook aligned with new release automation |
 | Sequence current implementation work | `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 have lanes, states, merge waves, triggers, and verification links | Covered | Update after any PR merge, close, replace, or rebase |
 | Attach verification evidence to slices | PR comments and `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 readiness rows link to verification comments | Covered | Re-run gates after main sync or branch rebase |
-| Keep implementation history auditable | `docs/upgrade-execution-log.md` | Slices 12-19 and 25-29 record scope, touchpoints, baseline, and verification | Covered | Add a new dated entry for every meaningful slice |
+| Keep implementation history auditable | `docs/upgrade-execution-log.md` | Slices 12-19 and 25-31 record scope, touchpoints, baseline, and verification | Covered | Add a new dated entry for every meaningful slice |
 | Package and publish release builds | GitHub release `v1.4.3-hotfix8` | Latest release has NSIS setup, MSI, Electron portable zip, release notes, and SHA256 sums | Covered for latest shipped release | Package again after a merge wave reaches `main` |
 | Verify release runtime quality | `npm run release:smoke` and release notes | Hotfix8 release smoke covered asset hashes, Electron rendering, Tauri rendering, and CLI-open indexing | Covered for latest shipped release | Run smoke on the next release staging folder |
 | Maintain current blocker visibility | `gh pr list` output and merge queue | PR #1-#14 currently report `BLOCKED / REVIEW_REQUIRED` | Active blocker | Review gate must clear before merge and packaging |
