@@ -1,4 +1,5 @@
 import { readFile, writeFile, mkdir, exists } from '@tauri-apps/plugin-fs'
+import { buildLocalAssetFileName, buildLocalAssetRelativePath, LOCAL_ASSETS_DIR_NAME } from '@/utils/localAssets'
 
 async function ensureDir(dirPath: string) {
     if (!await exists(dirPath)) {
@@ -10,42 +11,6 @@ function getParentDir(filePath: string): string | null {
     const lastSlashIndex = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'))
     if (lastSlashIndex === -1) return null
     return filePath.substring(0, lastSlashIndex)
-}
-
-function sanitizeFileSegment(value: string): string {
-    return value
-        .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '-')
-        .replace(/\s+/g, '-')
-        .trim()
-}
-
-function extensionFromMime(mimeType?: string): string | null {
-    switch ((mimeType || '').toLowerCase()) {
-        case 'image/png':
-            return 'png'
-        case 'image/jpeg':
-            return 'jpg'
-        case 'image/gif':
-            return 'gif'
-        case 'image/webp':
-            return 'webp'
-        case 'image/svg+xml':
-            return 'svg'
-        case 'image/bmp':
-            return 'bmp'
-        default:
-            return null
-    }
-}
-
-function buildAssetFileName(preferredName?: string, mimeType?: string): string {
-    const originalName = preferredName?.trim() || ''
-    const baseName = originalName.replace(/\.[^.]+$/, '')
-    const sanitizedBase = sanitizeFileSegment(baseName) || 'image'
-    const explicitExt = originalName.includes('.') ? originalName.split('.').pop()?.toLowerCase() : null
-    const ext = explicitExt || extensionFromMime(mimeType) || 'png'
-    const stamp = `${Date.now()}-${Math.floor(Math.random() * 1000)}`
-    return `${sanitizedBase}-${stamp}.${ext}`
 }
 
 async function writeImageBytesToLocalAssets(
@@ -63,14 +28,14 @@ async function writeImageBytesToLocalAssets(
         const docDir = getParentDir(activeTabFilePath)
         if (!docDir) return null
 
-        const assetsDir = `${docDir}/assets`
+        const assetsDir = `${docDir}/${LOCAL_ASSETS_DIR_NAME}`
         await ensureDir(assetsDir)
 
-        const fileName = buildAssetFileName(preferredName, mimeType)
+        const fileName = buildLocalAssetFileName(fileData, preferredName, mimeType)
         const targetPath = `${assetsDir}/${fileName}`
         await writeFile(targetPath, fileData)
 
-        return `assets/${fileName}`
+        return buildLocalAssetRelativePath(fileName)
     } catch (e) {
         console.error('Failed to persist image into local assets:', e)
         return null
