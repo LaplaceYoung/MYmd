@@ -488,3 +488,38 @@
   - `MYmd_1.4.3_x64-setup.exe`: `B7D5FA58C169E143A306B5CF05DAA1C70BADF727A6264BD9CCAF1BB665DBC50B`
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
+
+### Slice 23
+
+- Scope:
+  - P2 writing statistics polish
+  - make the status bar count visible Markdown text and mixed Chinese/Latin prose more accurately
+- Planned touchpoints:
+  - `src/utils/writingStats.ts`
+  - `src/components/StatusBar/StatusBar.tsx`
+  - `tests/writing_stats.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Typora treats word count as a writing aid and excludes Markdown syntax markers from the count.
+  - iA Writer surfaces Stats as lightweight writing progress feedback in the editor chrome.
+  - Sources: https://support.typora.io/Word-Count/ and https://ia.net/writer/support/editor/stats
+- Product management baseline:
+  - Status bar statistics now use a shared Markdown-aware writing stats utility.
+  - Headings, links, wikilinks, inline code, tables, comments, and frontmatter are normalized toward visible writing text before counting.
+  - Mixed CJK and Latin prose gets CJK-aware word units and reading-time estimation.
+  - Empty documents show zero reading time, keeping the status feedback literal at startup.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/writing_stats.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/writing_stats.spec.ts --reporter=line` with 4 tests passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Known risk:
+  - Production build still reports existing circular chunk and over-500 kB chunk warnings for the heavy editor and diagram vendor stack.
