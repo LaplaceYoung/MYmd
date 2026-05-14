@@ -221,3 +221,45 @@
   - Removed the duplicate template-content store update; `addTab(null, content)` already initializes new tab content.
   - Made global search async queries cancellable and stabilized result-opening callbacks.
   - Re-ran `npm run typecheck`, `npm run build`, `npm run ci:repo-hygiene`, `npx playwright test tests/ai_runtime.spec.ts tests/ai_draft_entry.spec.ts`, and `npx playwright test tests/e2e_unsaved_close.spec.ts tests/e2e_layout_profile.spec.ts --workers=1` on 2026-05-14.
+
+### Slice 11
+
+- Scope:
+  - UI layout, responsive behavior, accessibility, and perceived performance pass
+  - competitor-informed interaction health review for local-first Markdown workflows
+  - landing-page smoke coverage alignment with current promotional page structure
+- Planned touchpoints:
+  - `src/App.tsx`
+  - `src/styles/index.css`
+  - `src/styles/editor.css`
+  - `src/components/Editor/EditorContainer.tsx`
+  - `src/components/Editor/GlobalSearchModal.tsx`
+  - `src/components/Editor/GlobalSearchModal.css`
+  - `src/components/Editor/TemplateGallery.tsx`
+  - `src/components/Editor/TemplateGallery.css`
+  - `src/components/Editor/WelcomeView.tsx`
+  - `src/components/Ribbon/Ribbon.css`
+  - `src/components/Settings/SettingsPanel.css`
+  - `src/components/Sidebar/*.css`
+  - `src/components/StatusBar/StatusBar.css`
+  - `src/components/TitleBar/TitleBar.css`
+  - `apps/site/index.html`
+  - `apps/site/main.js`
+  - `tests/pages_smoke.mjs`
+- Competitor research:
+  - Obsidian, Joplin, Typora, iA Writer, MarkText, and Zettlr all point toward a stronger default loop for MYmd: local folder entry, visual Markdown editing, collapsible three-column layout, quick command/search, long-form writing support, and lightweight frontmatter views.
+  - The best MYmd positioning remains a Word-like local-first editor with natural knowledge enhancements surfaced through search, links, backlinks, and context panels.
+- Functional health:
+  - Core desktop shell health improved through fixed responsive shell classes, tokenized side-panel widths, mobile overlay panels, titlebar/ribbon/statusbar breakpoints, and welcome-page mobile reflow.
+  - Search health improved through dialog semantics, keyboard result activation, responsive result previews, stable hover activation using a result-id map, and clear-query loading reset.
+  - Editing performance health improved by throttling wide-table measurement and avoiding state writes when the measured width is unchanged.
+  - Welcome and template entry health improved through keyboard-accessible recent rows and template cards implemented as native buttons.
+  - Landing-page health improved through current version wording, logo smoke validation, and mobile menu coverage.
+- Evidence:
+  - Re-ran `npm run typecheck` on 2026-05-14 and it passed.
+  - Re-ran `npx playwright test tests/e2e_layout_profile.spec.ts tests/e2e_search_unified.spec.ts tests/e2e_unsaved_close.spec.ts --workers=1 --reporter=line` on 2026-05-14 and all 6 tests passed.
+  - Re-ran `npm run ci:repo-hygiene` on 2026-05-14 and it passed.
+  - Re-ran `npm run build` on 2026-05-14 and it passed.
+  - Re-ran `node tests/pages_smoke.mjs http://127.0.0.1:4173` against a local Vite static server on 2026-05-14 and it passed with title, logo, mobile menu, release version, and zero console errors verified.
+- Known risk:
+  - The production build still reports large chunks for `WysiwygEditor`, `SourceEditor`, `mindmap-definition`, and `flowchart-elk-definition`; the warning reflects the current heavy editor and diagram stack.

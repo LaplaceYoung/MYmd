@@ -2,6 +2,7 @@
     flex: 1;
     padding: var(--space-8) var(--space-10);
     overflow-y: auto;
+    min-width: 0;
     animation: welcomeFadeIn 300ms ease-out;
 }
 
@@ -58,7 +59,7 @@
     font-size: var(--text-sm);
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: border-color var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
     min-width: 100px;
 }
 
@@ -160,7 +161,7 @@
     background: var(--bg-surface);
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: border-color var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
     text-align: left;
 }
 
@@ -232,7 +233,7 @@
     font-size: var(--text-sm);
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: border-color var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
 .settings-panel__scheme-card:hover {
@@ -326,6 +327,10 @@
 }
 
 @media (max-width: 640px) {
+    .settings-panel {
+        padding: var(--space-5) var(--space-4);
+    }
+
     .settings-panel__scheme-grid,
     .settings-panel__paper-grid,
     .settings-panel__custom-paper-grid {
@@ -334,5 +339,24 @@
 
     .settings-panel__theme-btn {
         flex: 1 1 120px;
+        min-width: min(100%, 120px);
+    }
+
+    .settings-panel__theme-btn--inline {
+        min-width: 100%;
+    }
+
+    .settings-panel__font-size-row,
+    .settings-panel__toggle-row {
+        align-items: stretch;
+    }
+
+    .settings-panel__font-size-row {
+        flex-wrap: wrap;
+    }
+
+    .settings-panel__slider {
+        max-width: none;
+        min-width: 180px;
     }
 }

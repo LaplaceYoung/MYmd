@@ -6,6 +6,8 @@
 :root {
   /* 颜色系统 - 默认使用浅色模式 (Word 默认样式) */
   --bg-base: #f3f2f1;
+  --bg-primary: #ffffff;
+  --bg-secondary: #faf9f8;
   --bg-surface: #ffffff;
   --bg-elevated: #ffffff;
   --bg-hover: rgba(0, 0, 0, 0.04);
@@ -31,6 +33,7 @@
 
   /* 阴影体系 (Fluent Elevation) */
   --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 2px rgba(0, 0, 0, 0.12);
+  --shadow-sm: var(--shadow-2);
   --shadow-4: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 2px rgba(0, 0, 0, 0.12);
   --shadow-8: 0 4px 8px rgba(0, 0, 0, 0.12), 0 0 2px rgba(0, 0, 0, 0.12);
   --shadow-16: 0 8px 16px rgba(0, 0, 0, 0.12), 0 0 2px rgba(0, 0, 0, 0.12);
@@ -73,6 +76,8 @@
   --ribbon-tab-height: 32px;
   --ribbon-panel-height: 96px;
   --statusbar-height: 26px;
+  --side-panel-width: 260px;
+  --wide-side-panel-width: 320px;
 
   /* 过渡 */
   --transition-fast: 100ms ease;
@@ -83,6 +88,8 @@
 /* 深色主题 — 手动切换 data-theme="dark" */
 [data-theme="dark"] {
   --bg-base: #202020;
+  --bg-primary: #2d2d2d;
+  --bg-secondary: #252525;
   --bg-surface: #2d2d2d;
   --bg-elevated: #323232;
   --bg-hover: rgba(255, 255, 255, 0.06);
@@ -102,6 +109,8 @@
 /* 浅色主题 — 手动切换 data-theme="light" 强制浅色（覆盖系统深色） */
 [data-theme="light"] {
   --bg-base: #f3f2f1;
+  --bg-primary: #ffffff;
+  --bg-secondary: #faf9f8;
   --bg-surface: #ffffff;
   --bg-elevated: #ffffff;
   --bg-hover: rgba(0, 0, 0, 0.04);
@@ -122,6 +131,8 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --bg-base: #202020;
+    --bg-primary: #2d2d2d;
+    --bg-secondary: #252525;
     --bg-surface: #2d2d2d;
     --bg-elevated: #323232;
     --bg-hover: rgba(255, 255, 255, 0.06);
@@ -201,6 +212,43 @@ body {
   flex-direction: column;
 }
 
+.app-header {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.app-main-shell {
+  position: relative;
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.app-editor-frame {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+@media (max-width: 980px) {
+  :root {
+    --side-panel-width: 232px;
+    --wide-side-panel-width: 280px;
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --side-panel-width: min(220px, 52vw);
+    --wide-side-panel-width: min(248px, 58vw);
+    --ribbon-panel-height: 88px;
+  }
+}
+
 /* ---- 通用按钮重置 ---- */
 button {
   font: inherit;
@@ -248,5 +296,16 @@ button:focus-visible {
 
   50% {
     opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }

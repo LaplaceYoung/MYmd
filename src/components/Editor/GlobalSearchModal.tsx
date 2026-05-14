@@ -54,6 +54,7 @@ export function GlobalSearchModal() {
 
     const normalized = query.trim();
     if (!normalized) {
+      setLoading(false);
       setResults(EMPTY_RESULTS);
       setPluginResults([]);
       return;
@@ -152,6 +153,16 @@ export function GlobalSearchModal() {
     [closeGlobalSearch, openResult, pluginResults, results.documents, results.headings, results.tags]
   );
 
+  const listIndexById = useMemo(
+    () => new Map(listItems.map((item, index) => [item.id, index])),
+    [listItems]
+  );
+
+  const activateItem = useCallback((itemId: string) => {
+    const nextIndex = listIndexById.get(itemId);
+    if (typeof nextIndex === "number") setActiveIndex(nextIndex);
+  }, [listIndexById]);
+
   useEffect(() => {
     if (!visible) {
       setActiveIndex(0);
@@ -197,26 +208,34 @@ export function GlobalSearchModal() {
 
   return (
     <div className="global-search" onClick={closeGlobalSearch}>
-      <div className="global-search__panel" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="global-search__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Search notes, headings, tags"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="global-search__head">
           <div className="global-search__input-wrap">
             <Search size={14} />
             <input
               autoFocus
+              aria-label="Search notes, headings, tags"
+              aria-controls="global-search-results"
               value={query}
               onChange={(e) => setGlobalSearchQuery(e.target.value)}
               onKeyDown={handleInputKeyDown}
               placeholder="Search notes, headings, tags..."
             />
           </div>
-          <button className="global-search__close" onClick={closeGlobalSearch}>
+          <button className="global-search__close" aria-label="Close search" onClick={closeGlobalSearch}>
             <X size={15} />
           </button>
         </div>
         <div className="global-search__meta">
           {loading ? "Searching..." : `${aggregateCount} result(s)`}
         </div>
-        <div className="global-search__results">
+        <div className="global-search__results" id="global-search-results" role="listbox">
           {results.documents.length > 0 && (
             <section>
               <div className="global-search__group-title">Documents</div>
@@ -227,10 +246,9 @@ export function GlobalSearchModal() {
                 <button
                   key={itemId}
                   className={`global-search__item${isActive ? " global-search__item--active" : ""}`}
-                  onMouseEnter={() => {
-                    const nextIndex = listItems.findIndex((listItem) => listItem.id === itemId);
-                    if (nextIndex >= 0) setActiveIndex(nextIndex);
-                  }}
+                  role="option"
+                  aria-selected={isActive}
+                  onMouseEnter={() => activateItem(itemId)}
                   onClick={() => void openResult(item.file_path)}
                 >
                   <div className="global-search__item-title">{item.title || item.file_path}</div>
@@ -251,10 +269,9 @@ export function GlobalSearchModal() {
                 <button
                   key={itemId}
                   className={`global-search__item${isActive ? " global-search__item--active" : ""}`}
-                  onMouseEnter={() => {
-                    const nextIndex = listItems.findIndex((listItem) => listItem.id === itemId);
-                    if (nextIndex >= 0) setActiveIndex(nextIndex);
-                  }}
+                  role="option"
+                  aria-selected={isActive}
+                  onMouseEnter={() => activateItem(itemId)}
                   onClick={() => void openResult(item.file_path, item.heading_slug)}
                 >
                   <div className="global-search__item-title">
@@ -276,10 +293,9 @@ export function GlobalSearchModal() {
                 <button
                   key={itemId}
                   className={`global-search__item${isActive ? " global-search__item--active" : ""}`}
-                  onMouseEnter={() => {
-                    const nextIndex = listItems.findIndex((listItem) => listItem.id === itemId);
-                    if (nextIndex >= 0) setActiveIndex(nextIndex);
-                  }}
+                  role="option"
+                  aria-selected={isActive}
+                  onMouseEnter={() => activateItem(itemId)}
                   onClick={() => void openResult(item.file_path)}
                 >
                   <div className="global-search__item-title">#{item.tag}</div>
@@ -299,10 +315,9 @@ export function GlobalSearchModal() {
                 <button
                   key={itemId}
                   className={`global-search__item${isActive ? " global-search__item--active" : ""}`}
-                  onMouseEnter={() => {
-                    const nextIndex = listItems.findIndex((listItem) => listItem.id === itemId);
-                    if (nextIndex >= 0) setActiveIndex(nextIndex);
-                  }}
+                  role="option"
+                  aria-selected={isActive}
+                  onMouseEnter={() => activateItem(itemId)}
                   onClick={() => {
                     item.onSelect();
                     closeGlobalSearch();

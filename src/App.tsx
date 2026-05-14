@@ -103,7 +103,7 @@ export default function App() {
                     <TabBar />
                 </div>
             )}
-            <div style={{ display: 'flex', flex: 1, overflow: 'hidden', width: '100%' }}>
+            <div className="app-main-shell">
                 <Suspense fallback={null}>
                     {fileExplorerVisible && <FileExplorer />}
                     {tocVisible && <TOCPanel />}
@@ -111,7 +111,7 @@ export default function App() {
                     {knowledgeGraphVisible && <KnowledgeGraphPanel />}
                     {aiPanelVisible && <AiPanel />}
                 </Suspense>
-                <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div className="app-editor-frame">
                     <EditorContainer suppressWelcome={suppressWelcome} />
                 </div>
             </div>

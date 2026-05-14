@@ -50,6 +50,7 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
         return window.localStorage.getItem('mymd:view-mode-guide:v1') !== 'dismissed'
     })
     const [wideTableWidthPx, setWideTableWidthPx] = useState<number | null>(null)
+    const lastWideTableWidthRef = useRef<number | null>(null)
 
     const splitContainerRef = useRef<HTMLDivElement>(null)
     const perfInfo = useMemo(
@@ -113,6 +114,7 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
 
     useEffect(() => {
         if (!autoExpandPaperForWideTables) {
+            lastWideTableWidthRef.current = null
             setWideTableWidthPx(null)
             return
         }
@@ -121,20 +123,33 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
         if (!root) return
 
         let rafId = 0
+        let measureTimer = 0
         let observedTables: HTMLTableElement[] = []
         const selector = '.editor-wysiwyg .milkdown table'
 
-        const measure = () => {
+        const measureNow = () => {
             window.cancelAnimationFrame(rafId)
             rafId = window.requestAnimationFrame(() => {
                 const tables = Array.from(root.querySelectorAll<HTMLTableElement>(selector))
                 if (tables.length === 0) {
-                    setWideTableWidthPx(null)
+                    if (lastWideTableWidthRef.current !== null) {
+                        lastWideTableWidthRef.current = null
+                        setWideTableWidthPx(null)
+                    }
                     return
                 }
                 const widest = tables.reduce((max, table) => Math.max(max, Math.ceil(table.scrollWidth)), 0)
-                setWideTableWidthPx(widest > 0 ? widest : null)
+                const nextWidth = widest > 0 ? widest : null
+                if (lastWideTableWidthRef.current !== nextWidth) {
+                    lastWideTableWidthRef.current = nextWidth
+                    setWideTableWidthPx(nextWidth)
+                }
             })
+        }
+
+        const measure = () => {
+            window.clearTimeout(measureTimer)
+            measureTimer = window.setTimeout(measureNow, 120)
         }
 
         const resizeObserver = new ResizeObserver(() => measure())
@@ -154,6 +169,7 @@ export function EditorContainer({ suppressWelcome = false }: EditorContainerProp
         mutationObserver.observe(root, { childList: true, subtree: true })
 
         return () => {
+            window.clearTimeout(measureTimer)
             window.cancelAnimationFrame(rafId)
             resizeObserver.disconnect()
             mutationObserver.disconnect()

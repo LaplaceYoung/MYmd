@@ -18,6 +18,8 @@
     background: var(--accent);
     /* Windows Word 模式下顶层 Tab 会带主题底色或沉降到云母 */
     color: var(--accent-text);
+    overflow-x: auto;
+    scrollbar-width: thin;
 }
 
 .ribbon__tab {
@@ -49,6 +51,9 @@
     /* 96px */
     background: var(--bg-surface);
     color: var(--text-primary);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
 }
 
 .ribbon__panel {
@@ -56,6 +61,7 @@
     align-items: stretch;
     padding: var(--space-1) var(--space-2);
     width: 100%;
+    min-width: max-content;
     animation: ribbonPanelIn 150ms ease-out;
 }
 
@@ -176,4 +182,20 @@
 
 .ribbon-select.font-size {
     width: 48px;
+}
+
+@media (max-width: 760px) {
+    .ribbon__tab {
+        padding: 0 var(--space-3);
+        flex: 0 0 auto;
+    }
+
+    .ribbon-group {
+        padding: 0 var(--space-1);
+    }
+
+    .ribbon-divider {
+        margin-left: var(--space-2);
+        margin-right: var(--space-2);
+    }
 }

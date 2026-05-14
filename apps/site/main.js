@@ -2,7 +2,7 @@
 
 const i18nDict = {
   zh: {
-    nav_version: "MYmd / v1.3.0",
+    nav_version: "MYmd / v1.4.3",
     nav_workflow: "上手路径",
     nav_spec: "核心能力",
     nav_modules: "使用场景",
@@ -33,14 +33,14 @@ const i18nDict = {
     foot_save_1: "AUTO SAVE: ON",
     foot_save_2: "INDEX: SYNCING",
     foot_save_3: "BACKLINKS: LIVE",
-    cmp_1: "更快上手：不先学 vault / graph / plugin",
+    cmp_1: "更快上手：先写作，再逐步使用 vault / graph / plugin",
     cmp_2: "更轻负担：默认就是打开文件开始写",
     cmp_3: "更稳本地：离线可用，数据留在本机",
     flow_tag: "上手路径",
     flow_title: "四步进入稳定写作节奏。",
     flow_1_t: "打开 / 接入",
     flow_1_d:
-      "像 Word 一样直接打开本地文件，支持最近文件恢复和工作区浏览，不需要额外导入流程。",
+      "像 Word 一样直接打开本地文件，支持最近文件恢复和工作区浏览，直接进入文件写作流程。",
     flow_2_t: "专注写作",
     flow_2_d:
       "WYSIWYG、分屏、源码三种模式随时切换，自动保存持续托底，不打断你的思路。",
@@ -60,7 +60,7 @@ const i18nDict = {
     f3_t: "拓扑知识 (Topology)",
     f3_d: "文件树、全局检索、文档级反向链接与后续知识连接能力逐步增强。",
     f4_t: "环境独立 (Air-Gapped)",
-    f4_d: "local-first 架构，数据保留在本地文件系统，在离线环境下也能稳定使用。",
+    f4_d: "local-first 架构，数据保留在本地文件系统，离线环境下保持稳定可用。",
     rls_tag: "下载与版本",
     rls_title: "获取可直接安装的稳定版。",
     btn_dl_full: "下载最新安装包",
@@ -71,7 +71,7 @@ const i18nDict = {
     log_5: "> 现在可以开始写作了。",
   },
   en: {
-    nav_version: "MYmd / v1.3.0",
+    nav_version: "MYmd / v1.4.3",
     nav_workflow: "Onboarding",
     nav_spec: "Core Features",
     nav_modules: "Use Cases",
@@ -102,7 +102,7 @@ const i18nDict = {
     foot_save_1: "AUTO SAVE: ON",
     foot_save_2: "INDEX: SYNCING",
     foot_save_3: "BACKLINKS: LIVE",
-    cmp_1: "Faster onboarding: no vault/graph/plugin learning first",
+    cmp_1: "Faster onboarding: write first, then grow into vault/graph/plugin",
     cmp_2: "Lower friction: open a file and start writing",
     cmp_3: "Stronger local-first: offline-ready, data stays local",
     flow_tag: "Onboarding",

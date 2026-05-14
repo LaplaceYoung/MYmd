@@ -20,6 +20,7 @@
     flex-direction: column;
     overflow: hidden;
     position: relative;
+    min-width: 0;
     animation: editorFadeIn 200ms ease-out;
 }
 
@@ -48,6 +49,8 @@
     background: var(--bg-hover);
     padding: var(--space-4);
     position: relative;
+    min-width: 0;
+    overscroll-behavior: contain;
     /* padding 移出，由内部缩放容器处理 */
 }
 
@@ -409,6 +412,7 @@
     display: flex;
     flex: 1;
     overflow: hidden;
+    min-width: 0;
     animation: editorFadeIn 200ms ease-out;
 }
 
@@ -416,6 +420,7 @@
     flex: 1;
     overflow-y: auto;
     border-right: 1px solid var(--border);
+    min-width: 0;
     animation: slideFromLeft 250ms ease-out;
 }
 
@@ -434,6 +439,7 @@
 .editor-split__preview {
     flex: 1;
     overflow-y: auto;
+    min-width: 0;
     animation: slideFromRight 250ms ease-out;
 }
 
@@ -490,6 +496,7 @@
     flex: 1;
     display: flex;
     min-height: 0;
+    min-width: 0;
     /* 防止子元素撑破容器导致无法滚动 */
     background: var(--bg-surface);
     color: var(--text-primary);
@@ -511,6 +518,7 @@
 
 .welcome-word__sidebar {
     width: 110px;
+    flex: 0 0 110px;
     background: var(--bg-elevated);
     display: flex;
     flex-direction: column;
@@ -580,7 +588,7 @@
     /* Regular weight */
     color: var(--text-secondary);
     /* 未选中时颜色较暗 */
-    transition: all var(--transition-fast);
+    transition: background var(--transition-fast), color var(--transition-fast);
     background: transparent;
     border: none;
     position: relative;
@@ -626,6 +634,7 @@
     flex-direction: column;
     gap: var(--space-8);
     overflow-y: auto;
+    min-width: 0;
     background: var(--bg-base);
     /* 浅灰色或深色 */
 }
@@ -661,6 +670,9 @@
 .welcome-word__templates {
     display: flex;
     gap: var(--space-4);
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+    scrollbar-width: thin;
 }
 
 .welcome-word__template-card {
@@ -675,7 +687,7 @@
     justify-content: center;
     gap: var(--space-4);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
     box-shadow: var(--shadow-2);
 }
 
@@ -713,6 +725,7 @@
 
 .welcome-word__recent-list {
     background: transparent;
+    overflow-x: auto;
 }
 
 /* 列表区采用流畅的多栏表格 */
@@ -737,14 +750,37 @@
     border-bottom: 1px solid var(--border-light);
 }
 
+.welcome-word__recent-row {
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.welcome-word__recent-row:focus-visible td {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    background: var(--bg-hover);
+}
+
+.welcome-word__recent-name {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.welcome-word__recent-location {
+    color: var(--text-muted);
+    font-size: 12px;
+    max-width: 38vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* 最近文件行悬停效果 */
 .welcome-word__recent-row:hover td {
     background: var(--bg-hover);
     color: var(--accent);
-}
-
-.welcome-word__recent-row {
-    transition: background var(--transition-fast);
 }
 
 .welcome-word__recent-empty {
@@ -812,6 +848,98 @@
     border-radius: 2px;
 }
 
+@media (max-width: 900px) {
+    .welcome-word__main {
+        padding: var(--space-6);
+        gap: var(--space-6);
+    }
+
+    .welcome-word__title {
+        font-size: clamp(20px, 4vw, 24px);
+    }
+
+    .welcome-word__template-card {
+        width: 140px;
+        height: 176px;
+    }
+}
+
+@media (max-width: 720px) {
+    .welcome-word {
+        flex-direction: column;
+    }
+
+    .welcome-word__sidebar {
+        width: 100%;
+        flex: 0 0 auto;
+        min-height: 68px;
+        flex-direction: row;
+        align-items: stretch;
+        padding: 0 var(--space-2);
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .welcome-word__sidebar-brand {
+        flex: 0 0 auto;
+        padding: 0 var(--space-3);
+    }
+
+    .welcome-word__sidebar-top,
+    .welcome-word__sidebar-bottom {
+        flex-direction: row;
+        align-items: stretch;
+    }
+
+    .welcome-word__sidebar-bottom {
+        margin-top: 0;
+        margin-left: auto;
+    }
+
+    .welcome-word__sidebar-divider {
+        width: 1px;
+        height: auto;
+        margin: var(--space-3) var(--space-2);
+    }
+
+    .welcome-word__sidebar-btn,
+    .welcome-word__sidebar-btn.text-only {
+        width: auto;
+        min-width: 72px;
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .welcome-word__sidebar-btn.active::before {
+        left: 50%;
+        top: auto;
+        bottom: 0;
+        width: 28px;
+        height: 3px;
+        transform: translateX(-50%);
+        border-radius: 4px 4px 0 0;
+    }
+
+    .welcome-word__header {
+        align-items: flex-start;
+    }
+
+    .welcome-word__recent-table th:nth-child(3),
+    .welcome-word__recent-table td:nth-child(3) {
+        display: none;
+    }
+}
+
+@media (max-width: 520px) {
+    .welcome-word__main {
+        padding: var(--space-5) var(--space-4);
+    }
+
+    .welcome-word__recent-table th:nth-child(2),
+    .welcome-word__recent-table td:nth-child(2) {
+        display: none;
+    }
+}
+
 .search-match-selected,
 .cm-searchMatch-selected,
 .ProseMirror-active-search-match {
@@ -871,7 +999,7 @@
 .editor-wysiwyg .milkdown .math-block {
     cursor: text;
     border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
+    transition: background-color var(--transition-fast), box-shadow var(--transition-fast), outline-color var(--transition-fast);
 }
 
 .editor-wysiwyg .milkdown .math-block {

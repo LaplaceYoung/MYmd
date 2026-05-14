@@ -16,8 +16,9 @@ page.on("console", (msg) => {
 
 try {
   await page.goto(url, { waitUntil: "networkidle", timeout: 60_000 });
-  await page.waitForSelector("#release-cta", { state: "attached", timeout: 15_000 });
-  await page.waitForSelector("#celebrate-btn", { state: "attached", timeout: 15_000 });
+  await page.waitForSelector("#hero", { state: "attached", timeout: 15_000 });
+  await page.waitForSelector(".brand-logo", { state: "attached", timeout: 15_000 });
+  await page.waitForSelector("#mobile-toggle", { state: "attached", timeout: 15_000 });
   await page.waitForSelector("#latest-version", { state: "attached", timeout: 15_000 });
 
   const title = await page.title();
@@ -25,21 +26,21 @@ try {
     throw new Error(`Unexpected page title: ${title}`);
   }
 
-  await page.evaluate(() => {
-    const button = document.getElementById("celebrate-btn");
-    if (button instanceof HTMLButtonElement) {
-      button.click();
-    }
+  const logoReady = await page.locator(".brand-logo").evaluate((img) => {
+    return img instanceof HTMLImageElement && img.complete && img.naturalWidth > 0;
   });
-  await page.waitForTimeout(220);
+  if (!logoReady) throw new Error("Brand logo did not load.");
 
-  const burstCount = await page.locator("#burst-layer .burst").count();
-  if (burstCount === 0) {
-    throw new Error("Celebrate button did not create burst particles.");
-  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator("#mobile-toggle").click();
+  await page.waitForSelector("#mobile-menu.is-active", { state: "attached", timeout: 5_000 });
+  await page.locator("#mobile-close").click();
+  await page.waitForFunction(() => !document.getElementById("mobile-menu")?.classList.contains("is-active"));
 
   const latestVersion = (await page.locator("#latest-version").innerText()).trim();
-  const starsText = (await page.locator("#stars-count").innerText()).trim();
+  const starsText = await page.locator("#stars-count").count()
+    ? (await page.locator("#stars-count").innerText()).trim()
+    : "hidden";
 
   await page.evaluate(async () => {
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

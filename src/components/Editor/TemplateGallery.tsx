@@ -66,9 +66,11 @@ export function TemplateGallery() {
             <h2 className="template-gallery__title">{t('template.title')}</h2>
             <div className="template-gallery__grid">
                 {templates.map(template => (
-                    <div
+                    <button
+                        type="button"
                         key={template.id}
                         className="template-card"
+                        aria-label={`Template: ${template.title}`}
                         onClick={() => handleNewDocument(template)}
                     >
                         <div className="template-card__preview">
@@ -95,7 +97,7 @@ export function TemplateGallery() {
                         <div className="template-card__info">
                             <span className="template-card__name">{template.title}</span>
                         </div>
-                    </div>
+                    </button>
                 ))}
             </div>
         </div>

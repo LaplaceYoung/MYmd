@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type KeyboardEvent } from 'react'
 import { FilePlus, FolderOpen, Home, Clock, FileText } from 'lucide-react'
 import { TemplateGallery } from './TemplateGallery'
 import { SettingsPanel } from '../Settings/SettingsPanel'
@@ -36,6 +36,12 @@ export function WelcomeView({ handleNewFile, handleOpenFile, handleOpenRecentFil
         if (hours < 24) return t('welcome.hoursAgo', { count: hours })
         const days = Math.floor(hours / 24)
         return t('welcome.daysAgo', { count: days })
+    }
+
+    const openRecentFromKeyboard = (event: KeyboardEvent<HTMLTableRowElement>, path: string) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        handleOpenRecentFile(path)
     }
 
     return (
@@ -110,21 +116,24 @@ export function WelcomeView({ handleNewFile, handleOpenFile, handleOpenRecentFil
                                 </thead>
                                 <tbody>
                                     {recentFiles.length > 0 ? (
-                                        recentFiles.map((file, idx) => (
+                                        recentFiles.map((file) => (
                                             <tr
-                                                key={idx}
+                                                key={file.path}
                                                 className="welcome-word__recent-row"
+                                                role="button"
+                                                tabIndex={0}
+                                                aria-label={`${t('welcome.open')} ${file.title}`}
                                                 onClick={() => handleOpenRecentFile(file.path)}
-                                                style={{ cursor: 'pointer' }}
+                                                onKeyDown={(event) => openRecentFromKeyboard(event, file.path)}
                                             >
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <div className="welcome-word__recent-name">
                                                         <FileText size={16} color="var(--accent)" strokeWidth={1.5} />
                                                         {file.title}
                                                     </div>
                                                 </td>
                                                 <td>{formatRelativeTime(file.time)}</td>
-                                                <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
+                                                <td className="welcome-word__recent-location">
                                                     {file.path.split(/[\\/]/).slice(0, -1).join('\\')}
                                                 </td>
                                             </tr>

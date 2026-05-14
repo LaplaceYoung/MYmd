@@ -1,5 +1,6 @@
 .template-gallery {
     margin-bottom: var(--space-8);
+    container-type: inline-size;
 }
 
 .template-gallery__title {
@@ -38,21 +39,27 @@
 
 /* 整个卡片容器 */
 .template-card {
+    --template-card-width: clamp(118px, 24cqi, 140px);
     flex-shrink: 0;
     /* 防止宽度被挤压 */
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    width: 140px;
+    width: var(--template-card-width);
     cursor: pointer;
     border-radius: var(--radius-md);
+    border: 0;
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    text-align: left;
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* 缩略图外观区 */
 .template-card__preview {
-    width: 140px;
-    height: 198px;
+    width: var(--template-card-width);
+    aspect-ratio: 1 / 1.414;
     /* 严格符合 1:1.414 的 A4 比例 */
     border-radius: var(--radius-md);
     background-color: transparent;
@@ -60,7 +67,7 @@
     /* 默认无显性边框，以纸张颜色区分 */
     padding: var(--space-1);
     /* 让纸张稍小一点，和系统焦点框分离开 */
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
 /* 内部真正的“纸张” */
@@ -83,6 +90,15 @@
 /* 悬停交互 (与 Word 行为一致) */
 .template-card:hover .template-card__preview {
     border-color: var(--accent);
+}
+
+.template-card:focus-visible {
+    outline: none;
+}
+
+.template-card:focus-visible .template-card__preview {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .template-card:hover .template-card__paper {
@@ -149,4 +165,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
+}
+
+@container (max-width: 520px) {
+    .template-gallery__grid {
+        gap: var(--space-3);
+    }
 }
