@@ -4,6 +4,7 @@ const WORKSPACE_ROOT = 'C:/mock-workspace'
 const TARGET_PATH = `${WORKSPACE_ROOT}/Target.md`
 const RENAMED_TARGET_PATH = `${WORKSPACE_ROOT}/Project Target.md`
 const REF_PATH = `${WORKSPACE_ROOT}/Ref.md`
+const LOOSE_MENTION_PATH = `${WORKSPACE_ROOT}/Loose Mention.md`
 const NOTES_DIR = `${WORKSPACE_ROOT}/Notes`
 const EXISTING_NOTE_PATH = `${NOTES_DIR}/Existing.md`
 const CREATED_NOTE_PATH = `${NOTES_DIR}/Fresh Note.md`
@@ -21,6 +22,11 @@ const INITIAL_FILES = {
         '# Ref',
         '',
         'See [[Target#Section One]] for the current plan.',
+    ].join('\n'),
+    [LOOSE_MENTION_PATH]: [
+        '# Loose Mention',
+        '',
+        'Target appears here as plain text before it becomes a link.',
     ].join('\n'),
     [EXISTING_NOTE_PATH]: [
         '# Existing',
@@ -71,6 +77,11 @@ test.beforeEach(async ({ page }) => {
                 const normalized = normalizePath(value)
                 const index = normalized.lastIndexOf('/')
                 return index >= 0 ? normalized.slice(index + 1) : normalized
+            }
+
+            const fileStem = (value: string) => {
+                const name = basename(value)
+                return name.toLowerCase().endsWith('.md') ? name.slice(0, -3) : name
             }
 
             const decodeTextPayload = (payload: unknown) => {
@@ -242,6 +253,29 @@ test.beforeEach(async ({ page }) => {
                 return backlinks
             }
 
+            const getUnlinkedMentions = (filePath: string) => {
+                const normalizedPath = normalizePath(filePath)
+                const targetDoc = knowledgeDocs[normalizedPath]
+                const mentionText = (targetDoc?.title || fileStem(normalizedPath)).trim()
+                if (!mentionText) return []
+
+                const mentionNeedle = mentionText.toLowerCase()
+                return Object.values(knowledgeDocs)
+                    .filter((doc) => {
+                        if (doc.file_path === normalizedPath) return false
+                        if (!doc.content.toLowerCase().includes(mentionNeedle)) return false
+                        return !doc.wikilinks.some((link) => normalizePath(link.to_doc_path) === normalizedPath)
+                    })
+                    .map((doc) => ({
+                        from_file_path: doc.file_path,
+                        from_title: doc.title,
+                        mention_text: mentionText,
+                        snippet: extractSnippet(doc.content, mentionText),
+                        updated_at: doc.mtime,
+                    }))
+                    .sort((left, right) => right.updated_at - left.updated_at)
+            }
+
             Object.defineProperty(window, '__MYMD_TEST_RUNTIME__', {
                 value: {
                     workspaceRoot: normalizePath(workspaceRoot),
@@ -385,10 +419,28 @@ test.beforeEach(async ({ page }) => {
                                 const args = payload as { file_path: string }
                                 return getBacklinks(args.file_path)
                             }
-                            case 'knowledge_get_unlinked_mentions':
-                                return []
-                            case 'knowledge_link_unlinked_mention':
-                                return false
+                            case 'knowledge_get_unlinked_mentions': {
+                                const args = payload as { file_path: string }
+                                return getUnlinkedMentions(args.file_path)
+                            }
+                            case 'knowledge_link_unlinked_mention': {
+                                const args = payload as {
+                                    from_file_path: string
+                                    target_file_path: string
+                                    mention_text: string
+                                }
+                                const sourcePath = normalizePath(args.from_file_path)
+                                const sourceContent = fileState[sourcePath] || ''
+                                const targetTitle = fileStem(args.target_file_path)
+                                const replacement =
+                                    args.mention_text.toLowerCase() === targetTitle.toLowerCase()
+                                        ? `[[${targetTitle}]]`
+                                        : `[[${targetTitle}|${args.mention_text}]]`
+
+                                if (!sourceContent.includes(args.mention_text)) return false
+                                fileState[sourcePath] = sourceContent.replace(args.mention_text, replacement)
+                                return true
+                            }
                             case 'knowledge_graph':
                                 return { nodes: [], edges: [] }
                             case 'knowledge_query':
@@ -423,7 +475,7 @@ test('renaming a linked workspace note keeps backlinks aligned after reindex', a
                 __MYMD_TEST_RUNTIME__: { knowledgeDocs: Record<string, unknown> }
             }).__MYMD_TEST_RUNTIME__.knowledgeDocs).length)
         )
-        .toBe(3)
+        .toBe(4)
 
     await page.locator('.file-node__name', { hasText: 'Target.md' }).click()
     await expect(page.locator('.tabbar__tab--active .tabbar__tab-title')).toHaveText('Target.md')
@@ -432,7 +484,8 @@ test('renaming a linked workspace note keeps backlinks aligned after reindex', a
     const backlinksPanel = page.locator('.backlinks-panel')
     await expect(backlinksPanel).toBeVisible()
     await expect(backlinksPanel).toContainText('Linked mentions')
-    await expect(backlinksPanel.locator('.backlinks-panel__item-title')).toHaveText('Ref')
+    const linkedSection = backlinksPanel.locator('section[aria-label="Linked mentions"]')
+    await expect(linkedSection.locator('.backlinks-panel__item-title')).toHaveText('Ref')
     await expect(backlinksPanel).toContainText('[[Target#Section One]]')
     await expect(backlinksPanel).toContainText('Heading: Section One')
 
@@ -478,7 +531,71 @@ test('renaming a linked workspace note keeps backlinks aligned after reindex', a
 
     await expect(backlinksPanel).toContainText('[[Project Target#Section One]]')
     await expect(backlinksPanel).toContainText('Heading: Section One')
-    await expect(backlinksPanel.locator('.backlinks-panel__item-title')).toHaveText('Ref')
+    await expect(linkedSection.locator('.backlinks-panel__item-title')).toHaveText('Ref')
+})
+
+test('converting an unlinked mention updates the source note and refreshes backlinks', async ({ page }) => {
+    await page.goto('http://127.0.0.1:1420')
+    await page.waitForLoadState('networkidle')
+
+    await page.locator('.file-explorer__empty .btn-primary').click()
+    await expect(page.locator('.file-explorer__workspace-name')).toHaveText('mock-workspace')
+
+    await expect
+        .poll(() =>
+            page.evaluate(() => Object.keys((window as typeof window & {
+                __MYMD_TEST_RUNTIME__: { knowledgeDocs: Record<string, unknown> }
+            }).__MYMD_TEST_RUNTIME__.knowledgeDocs).length)
+        )
+        .toBe(4)
+
+    await page.locator('.file-node__name', { hasText: 'Target.md' }).click()
+    await expect(page.locator('.tabbar__tab--active .tabbar__tab-title')).toHaveText('Target.md')
+
+    await page.getByTitle('Backlinks').click()
+    const backlinksPanel = page.locator('.backlinks-panel')
+    const linkedSection = backlinksPanel.locator('section[aria-label="Linked mentions"]')
+    const unlinkedSection = backlinksPanel.locator('section[aria-label="Unlinked mentions"]')
+
+    await expect(backlinksPanel).toBeVisible()
+    await expect(linkedSection.locator('.backlinks-panel__item-title')).toHaveText('Ref')
+    await expect(unlinkedSection).toBeVisible()
+    await expect(unlinkedSection.locator('.backlinks-panel__item-title')).toHaveText('Loose Mention')
+    await expect(unlinkedSection).toContainText('Target appears here')
+
+    await unlinkedSection.getByRole('button', { name: 'Convert Target mention to wikilink' }).click()
+
+    await expect
+        .poll(() =>
+            page.evaluate(
+                ({ looseMentionPath }) =>
+                    (window as typeof window & {
+                        __MYMD_TEST_RUNTIME__: { files: Record<string, string> }
+                    }).__MYMD_TEST_RUNTIME__.files[looseMentionPath],
+                { looseMentionPath: LOOSE_MENTION_PATH }
+            )
+        )
+        .toContain('[[Target]] appears here as plain text before it becomes a link.')
+
+    await expect
+        .poll(() =>
+            page.evaluate(
+                ({ looseMentionPath }) =>
+                    (window as typeof window & {
+                        __MYMD_TEST_RUNTIME__: {
+                            knowledgeDocs: Record<string, {
+                                wikilinks: Array<{ raw_text: string; to_doc_path: string }>
+                            }>
+                        }
+                    }).__MYMD_TEST_RUNTIME__.knowledgeDocs[looseMentionPath]?.wikilinks,
+                { looseMentionPath: LOOSE_MENTION_PATH }
+            )
+        )
+        .toEqual([{ raw_text: 'Target', to_doc_path: TARGET_PATH, to_heading_slug: '', alias_text: '' }])
+
+    await expect(unlinkedSection).toHaveCount(0)
+    await expect(linkedSection.locator('.backlinks-panel__item-title')).toContainText(['Loose Mention', 'Ref'])
+    await expect(linkedSection).toContainText('[[Target]]')
 })
 
 test('workspace file actions preserve open folders across refresh and close clean tabs on delete', async ({ page }) => {

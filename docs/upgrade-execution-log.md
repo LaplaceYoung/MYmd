@@ -426,6 +426,12 @@
   - `git diff --check`
 - Verification completed:
   - `npm run typecheck`
+  - `npx playwright test tests/e2e_wikilink_backlink.spec.ts --reporter=line` with 3 tests passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
   - `npx playwright test tests/e2e_wikilink_backlink.spec.ts --reporter=line` with 2 tests passed
   - `npm run build`
   - `npm run ci:repo-hygiene`
@@ -488,3 +494,26 @@
   - `MYmd_1.4.3_x64-setup.exe`: `B7D5FA58C169E143A306B5CF05DAA1C70BADF727A6264BD9CCAF1BB665DBC50B`
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
+
+### Slice 21
+
+- Scope:
+  - P1 unlinked mention conversion closure
+  - turn the backlinks panel `Unlinked mentions` path into a verified knowledge-network loop
+- Planned touchpoints:
+  - `tests/e2e_wikilink_backlink.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Obsidian surfaces unlinked mentions inside Backlinks so existing writing can become an explicit note connection.
+  - Source: https://help.obsidian.md/plugins/backlinks
+- Product management baseline:
+  - The mocked Tauri knowledge layer now returns unlinked mention candidates and applies `knowledge_link_unlinked_mention` writes in E2E.
+  - The regression verifies candidate display, `转为链接`, source-file Markdown update, source-note reindexing, unlinked-section removal, and linked backlink refresh.
+  - The roadmap acceptance wording now requires conversion plus reindex and panel refresh evidence.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_wikilink_backlink.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
