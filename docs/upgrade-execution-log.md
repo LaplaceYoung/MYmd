@@ -263,3 +263,26 @@
   - Re-ran `node tests/pages_smoke.mjs http://127.0.0.1:4173` against a local Vite static server on 2026-05-14 and it passed with title, logo, mobile menu, release version, and zero console errors verified.
 - Known risk:
   - The production build still reports large chunks for `WysiwygEditor`, `SourceEditor`, `mindmap-definition`, and `flowchart-elk-definition`; the warning reflects the current heavy editor and diagram stack.
+
+## 2026-05-15
+
+### Slice 12
+
+- Scope:
+  - long-running Markdown benchmark alignment goal
+  - project management baseline for version iteration and release governance
+- Planned touchpoints:
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/release-iteration-playbook.md`
+  - `README.md`
+  - `README_en.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added a mainstream Markdown product matrix covering Obsidian, Joplin, Typora, iA Writer, MarkText, Zettlr, Cherry Markdown, and doocs/md.
+  - Converted benchmark gaps into P0-P3 backlog lanes with acceptance evidence.
+  - Added a repeatable release iteration playbook covering slice planning, verification gates, desktop smoke checks, checksums, and GitHub release verification.
+  - Updated README version and release highlights to `v1.4.3-hotfix6`.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - documentation link/reference inspection

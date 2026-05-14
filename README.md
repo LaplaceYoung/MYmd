@@ -18,7 +18,7 @@ MYmd 是一个基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 
 ## 版本信息
 
-- 当前版本：`v1.4.3-hotfix5`
+- 当前版本：`v1.4.3-hotfix6`
 - 目标平台：`Windows x64`
 - 最新发布：<https://github.com/LaplaceYoung/MYmd/releases>
 - 宣传页面：<https://laplaceyoung.github.io/MYmd/>
@@ -70,13 +70,13 @@ MYmd 是一个基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 - 单实例运行：二次启动时将文件参数转发给当前窗口。
 - 启动参数文件打开链路已优化，避免欢迎页闪跳。
 
-## v1.4.3-hotfix5 重点更新
+## v1.4.3-hotfix6 重点更新
 
-1. 首页恢复为之前的仿 Word 简洁排版，移除冗余引导模块，回到高频写作优先路径。
-2. 修复全局搜索弹窗透明度：弹窗面板改为不透明主题背景，并加深遮罩层，避免与正文背景混淆。
-3. 保留并验证顶部搜索下拉菜单可读性修复，确保菜单与底层内容不再重叠干扰。
-4. 重新截取并更新 README 功能截图（欢迎页、顶部搜索下拉、全局搜索弹窗）。
-5. 完成发布前校验：`npm run typecheck`、`npm run build`、`npm run tauri build`。
+1. 完成最新 Windows 安装包与 Electron 便携包发布，Release 标记为 Latest。
+2. 发布前验证 Tauri 桌面版窗口截图与 Electron CDP 首页截图，确认启动后能渲染真实 MYmd UI。
+3. 修复 Electron 打包链路中的 Vite 配置遮蔽风险，确保 `file://` 生产包资源使用相对路径加载。
+4. 生成并上传 `SHA256SUMS.txt`，为安装包和便携包提供校验依据。
+5. 完成发布前校验：`npm run typecheck`、`npm run ci:repo-hygiene`、`npm run build:electron`、`npm run build:tauri`。
 
 ## 技术栈
 | 层级 | 技术 |

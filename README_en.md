@@ -18,7 +18,7 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 
 ## Version
 
-- Current version: `v1.4.3-hotfix5`
+- Current version: `v1.4.3-hotfix6`
 - Target platform: `Windows x64`
 - Latest releases: <https://github.com/LaplaceYoung/MYmd/releases>
 - Landing page: <https://laplaceyoung.github.io/MYmd/>
@@ -70,13 +70,13 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 - Single-instance behavior: file args from second launches are forwarded to the running window.
 - Startup open-file flow avoids welcome-page flicker before CLI file loading finishes.
 
-## v1.4.3-hotfix5 Highlights
+## v1.4.3-hotfix6 Highlights
 
-1. Restored the Welcome page to the previous concise Word-style layout and removed the redundant onboarding-heavy variant.
-2. Fixed global search modal transparency by switching to an opaque themed panel background and a stronger backdrop mask.
-3. Kept title-bar top search dropdown readability improvements and verified no background blending regression.
-4. Refreshed README screenshots for welcome page, top search dropdown, and global search modal.
-5. Completed release validation with `npm run typecheck`, `npm run build`, and `npm run tauri build`.
+1. Published the latest Windows installers and Electron portable package as the Latest GitHub Release.
+2. Verified the Tauri desktop build with a window screenshot and the Electron portable build with a CDP homepage screenshot.
+3. Hardened the Electron packaging path against shadowed Vite config files so `file://` production assets load from relative paths.
+4. Generated and uploaded `SHA256SUMS.txt` for release asset verification.
+5. Completed release validation with `npm run typecheck`, `npm run ci:repo-hygiene`, `npm run build:electron`, and `npm run build:tauri`.
 
 ## Tech Stack
 | Layer | Technology |
