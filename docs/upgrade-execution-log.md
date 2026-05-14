@@ -603,7 +603,7 @@
   - `docs/upgrade-execution-log.md`
 - Product management baseline:
   - Added PR #14 `young/vite-chunk-warning-cleanup` to Wave 0 as P0 build-health scope.
-  - Linked PR #14 verification evidence covering typecheck, build, production preview smoke, repo hygiene, and diff check.
+  - Linked PR #14 verification evidence covering typecheck, build, Mermaid export regression, production preview smoke, repo hygiene, and diff check.
   - Updated the active-goal audit from PR #1-#13 to PR #1-#14.
   - Marked the circular manual chunk warning lane as closed while keeping large editor/diagram chunks visible for a future performance slice.
 - Verification target:

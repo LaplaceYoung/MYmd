@@ -51,7 +51,7 @@ Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 queue refresh, PR #13 gr
 | #11 | typecheck, build, repo hygiene, diff check, local asset tests | https://github.com/LaplaceYoung/MYmd/pull/11#issuecomment-4455248568 |
 | #12 | typecheck, repo hygiene, diff check, changelog link checks | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4455204178 |
 | #13 | typecheck, build, repo hygiene, diff check, graph panel E2E, cargo check | https://github.com/LaplaceYoung/MYmd/pull/13#issuecomment-4455401410 |
-| #14 | typecheck, build, production preview app shell smoke, repo hygiene, diff check | https://github.com/LaplaceYoung/MYmd/pull/14#issuecomment-4455477687 |
+| #14 | typecheck, build, Mermaid export regression, production preview app shell smoke, repo hygiene, diff check | https://github.com/LaplaceYoung/MYmd/pull/14#issuecomment-4455512064 |
 
 ## Merge Waves
 
@@ -70,7 +70,7 @@ Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 queue refresh, PR #13 gr
 - Exit evidence:
   - PR #1 reports clean merge state and current verification evidence.
   - PR #12 records the current release-wave status before merge packaging begins.
-  - PR #14 confirms circular manual chunk warning ownership before the next release packaging lane.
+  - PR #14 confirms circular manual chunk warning ownership and Mermaid runtime lazy loading before the next release packaging lane.
 
 ### Wave 1: Knowledge Workflow Safety
 
