@@ -20,7 +20,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 |---|---|---:|---|
 | Local editor loop | Multi-tab editing, WYSIWYG/source/split views, autosave, unsaved-close guard | High | Keep startup and close flows covered by regression tests |
 | Markdown rendering | KaTeX, Mermaid, code highlighting, TOC, HTML export | High | Add footnotes, stronger table controls, export fidelity checks |
-| Knowledge workflow | Workspace, global search, backlinks, graph path, local index | Medium-high | Add wikilink completion, unlinked mentions, index progress and retry |
+| Knowledge workflow | Workspace, global search, backlinks, graph path, local index | Medium-high | Extend wikilink completion coverage, add unlinked mentions, index progress and retry |
 | File workflow | Open/save/save-as, workspace tree, CLI/file association path, rename/link rewrite coverage | High | Add batch import/export and resource folder policy |
 | Interaction model | Word-like ribbon, titlebar search, side panels, responsive pass completed | Medium-high | Keep command/search semantics unified and reduce hidden entry mismatch |
 | Packaging | Tauri installer, MSI, Electron portable, checksum release flow | High | Turn release smoke into a repeatable checklist |
@@ -54,7 +54,8 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 
 | Task | Product Reason | Acceptance Evidence |
 |---|---|---|
-| Wikilink/file/tag completion | Users should discover linking by typing naturally | Typing `[[` shows ranked file suggestions and inserts valid Markdown |
+| Wikilink file/heading completion | Users should discover linking by typing naturally | Source/Split typing `[[` shows ranked file suggestions, `[[Alpha` shows heading targets, and selection inserts valid Markdown |
+| Tag completion in knowledge entry points | Tags should feel searchable and reusable from everyday writing | Typing a tag trigger shows indexed tags and opens matching search or inserts a valid tag |
 | Backlink context snippets | Backlinks should answer why a document is connected | Panel shows snippet, heading, and jump target |
 | Unlinked mentions | Knowledge network should grow from existing writing | Mention query finds candidate text and converts it into a link |
 | Index progress and retry | Workspace indexing should feel reliable and explainable | UI shows idle/indexing/error/progress and retry path |

@@ -370,3 +370,31 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
   - Electron portable zip root contains `MYmd.exe`
+
+### Slice 16
+
+- Scope:
+  - P1 Source/Split wikilink completion
+  - make lightweight knowledge linking discoverable through natural `[[` typing
+- Planned touchpoints:
+  - `src/components/Editor/SourceEditor.tsx`
+  - `tests/e2e_wikilink_completion.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Typing `[[` in the Source/Split editor now opens note suggestions from the local graph, including empty-query recent note discovery.
+  - Typing a query such as `[[Alpha` combines graph documents, knowledge search documents, and heading hits into one ranked completion list.
+  - Selected completion items insert valid wikilink Markdown with same-folder, workspace-relative, and fallback path targets.
+  - The roadmap now tracks Source/Split file/heading completion as shipped scope and keeps tag completion as a follow-up knowledge entry task.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_wikilink_completion.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_wikilink_completion.spec.ts --reporter=line` with 2 tests passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
