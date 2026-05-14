@@ -465,3 +465,26 @@
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Release lane v1.4.3-hotfix8
+
+- Scope:
+  - package the Slice 18 tag completion iteration into a Windows release
+  - keep the local-first Markdown knowledge workflow release loop complete
+- Release staging:
+  - `release/v1.4.3-hotfix8`
+  - `MYmd_1.4.3_x64-setup.exe`
+  - `MYmd_1.4.3_x64_en-US.msi`
+  - `MYmd-Electron-1.4.3-x64-portable.zip`
+  - `SHA256SUMS.txt`
+  - `RELEASE_NOTES.md`
+- Verification completed:
+  - `npm run build:tauri`
+  - `npm run build:electron`
+  - `npm run release:smoke -- --release-dir release/v1.4.3-hotfix8`
+  - release smoke verified asset hashes, Electron rendering, Tauri window rendering, and CLI-open knowledge indexing
+  - CLI indexing smoke reported `documentHits: 1`, `headingHits: 4`, `tagHits: 3`, `blockingEventCount: 0`
+- SHA256:
+  - `MYmd_1.4.3_x64-setup.exe`: `B7D5FA58C169E143A306B5CF05DAA1C70BADF727A6264BD9CCAF1BB665DBC50B`
+  - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
+  - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
