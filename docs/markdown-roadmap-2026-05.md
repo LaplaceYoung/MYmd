@@ -66,7 +66,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 | Task | Product Reason | Acceptance Evidence |
 |---|---|---|
 | Table editing controls | Typora/Cherry-level table comfort is a daily editing win | Add/delete row/column, align, width, and valid Markdown persistence |
-| Footnotes end-to-end | Long-form notes need scholarly and technical references | Editor, preview, search, and export all handle footnotes |
+| Footnotes end-to-end | Long-form notes need scholarly and technical references | Milkdown GFM editor support stays available, shared HTML export renders references/endnotes, and raw Markdown remains searchable |
 | Image/resource workflow | Local-first files need deterministic asset storage | Paste/drop image creates stable relative path and survives rename/move |
 | Export matrix | Users expect HTML, PDF, image, and Docx paths | Benchmark documents export with headings, tables, KaTeX, Mermaid, images |
 | Writing polish | Long-form writers need focus and quality signals | Word count, reading time, focus/typewriter regression, optional style hints |
@@ -96,9 +96,11 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 - Joplin product overview: https://joplinapp.org/help/
 - Joplin Markdown support: https://joplinapp.org/help/apps/markdown/
 - Typora Markdown reference: https://support.typora.io/Markdown-Reference/
+- Obsidian basic formatting syntax: https://help.obsidian.md/syntax
 - iA Writer Focus Mode: https://ia.net/writer/support/editor/focus-mode
 - iA Writer Style Check: https://ia.net/writer/support/editor/style-check
 - MarkText README: https://github.com/marktext/marktext
+- Zettlr footnotes: https://docs.zettlr.com/en/editor/footnotes/
 - Zettlr features: https://www.zettlr.com/features
 - Cherry Markdown: https://github.com/Tencent/cherry-markdown
 - doocs/md: https://github.com/doocs/md

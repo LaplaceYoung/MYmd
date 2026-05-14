@@ -488,3 +488,40 @@
   - `MYmd_1.4.3_x64-setup.exe`: `B7D5FA58C169E143A306B5CF05DAA1C70BADF727A6264BD9CCAF1BB665DBC50B`
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
+
+### Slice 22
+
+- Scope:
+  - P2 footnote export rendering closure
+  - align long-form Markdown export with mainstream editor footnote syntax
+- Planned touchpoints:
+  - `src/utils/footnotes.ts`
+  - `src/utils/renderApi.ts`
+  - `src/components/Ribbon/Ribbon.tsx`
+  - `src/utils/paper.ts`
+  - `tests/render_api.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Typora, Obsidian, and Zettlr all document `[^label]` style footnotes for long-form Markdown writing.
+  - Sources:
+    - https://support.typora.io/Markdown-Reference/
+    - https://help.obsidian.md/syntax
+    - https://docs.zettlr.com/en/editor/footnotes/
+- Product management baseline:
+  - Milkdown GFM already provides editor-side footnote schema support.
+  - The shared export lane now converts raw Markdown footnote references into accessible HTML noterefs and an endnotes section.
+  - Ribbon HTML export uses the same footnote preprocessor as the automation-facing render API.
+  - Export CSS adds visible footnote reference, endnote, target-highlight, and backlink styling.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/render_api.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npx playwright test tests/render_api.spec.ts --reporter=line` with 3 tests passed
+  - `npm run typecheck`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`

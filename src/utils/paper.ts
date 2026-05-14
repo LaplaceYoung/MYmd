@@ -441,6 +441,36 @@ export function buildExportHtmlStyle(
             background: rgba(37, 99, 235, 0.06);
             color: #334155;
         }
+        .footnote-ref {
+            font-size: 0.78em;
+            vertical-align: super;
+            line-height: 0;
+        }
+        .footnote-ref a {
+            padding: 0 0.15em;
+        }
+        .footnotes {
+            margin-top: 2.4em;
+            color: #475569;
+            font-size: 0.9em;
+        }
+        .footnotes hr {
+            width: 34%;
+            margin: 0 0 1em;
+            border: 0;
+            border-top: 1px solid rgba(15, 23, 42, 0.18);
+        }
+        .footnotes ol {
+            padding-left: 1.4em;
+        }
+        .footnotes__item:target {
+            background: rgba(37, 99, 235, 0.08);
+            border-radius: 8px;
+        }
+        .footnote-backref {
+            margin-left: 0.35em;
+            font-size: 0.84em;
+        }
         table {
             width: max-content;
             min-width: 100%;
