@@ -147,6 +147,8 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
     }, [setActiveMarks])
 
     const syncMarkdownFromEditor = useCallback((editor: Editor) => {
+        if (readOnly) return
+
         try {
             editor.action(ctx => {
                 const serializer = ctx.get(serializerCtx)
@@ -158,7 +160,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
         } catch (error) {
             console.warn('Failed to sync markdown after paste conversion:', error)
         }
-    }, [tabId, updateContent])
+    }, [readOnly, tabId, updateContent])
 
     const applyTableWidthsToDom = useCallback((markdownContent: string) => {
         const root = containerRef.current
@@ -212,6 +214,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
     }, [])
 
     const setSelectedTableWidth = useCallback((nextWidthPx: number | null) => {
+        if (readOnly) return false
         if (!editorRef.current) return false
 
         const editor = editorRef.current
@@ -231,7 +234,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
         updateContent(tabId, updatedMarkdown)
         applyTableWidthsToDom(updatedMarkdown)
         return true
-    }, [applyTableWidthsToDom, getSelectedTableContext, tabId, updateContent])
+    }, [applyTableWidthsToDom, getSelectedTableContext, readOnly, tabId, updateContent])
 
     // 创建编辑器
     useEffect(() => {
@@ -257,6 +260,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                     listenerManager.markdownUpdated((_ctx, markdown) => {
                         if (!isUpdatingRef.current && !destroyed) {
                             lastEditorMarkdownRef.current = markdown
+                            if (readOnly) return
                             updateContent(tabId, markdown)
                         }
                     })
