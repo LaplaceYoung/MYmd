@@ -58,6 +58,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 | Tag completion in knowledge entry points | Tags should feel searchable and reusable from everyday writing | Source/Split typing `#pro` shows indexed tag suggestions, supports nested tags, and inserts a valid tag |
 | Backlink context snippets | Backlinks should answer why a document is connected | Panel groups linked/unlinked mentions, shows snippet, heading label, and jump target |
 | Unlinked mentions | Knowledge network should grow from existing writing | Mention query finds candidate text and converts it into a link |
+| Frontmatter properties | Imported Obsidian/Zettlr notes should keep metadata readable in exported documents | YAML frontmatter renders as a properties card and raw metadata stays out of the document body |
 | Index progress and retry | Workspace indexing should feel reliable and explainable | UI shows idle/indexing/error/progress and retry path |
 | Preview/edit isolation | Reading mode should stay stable during navigation | Regression prevents pure preview from entering edit state unexpectedly |
 
@@ -93,6 +94,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 ## Source Anchors
 
 - Obsidian core plugins: https://obsidian.md/help/plugins
+- Obsidian properties: https://obsidian.md/help/properties
 - Joplin product overview: https://joplinapp.org/help/
 - Joplin Markdown support: https://joplinapp.org/help/apps/markdown/
 - Typora Markdown reference: https://support.typora.io/Markdown-Reference/

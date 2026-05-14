@@ -47,6 +47,7 @@ import {
 } from '@/utils/paper'
 import { copyFromEditor, cutFromEditor, pasteToEditor } from '@/utils/editorClipboard'
 import { buildContextualAiDraft } from '@/utils/aiDrafts'
+import { prepareFrontmatterForRender } from '@/utils/frontmatter'
 import { applyTableWidthDirectivesToHtml } from '@/utils/tableWidths'
 import './Ribbon.css'
 
@@ -207,9 +208,13 @@ export function Ribbon() {
                 tab.content,
                 exportOptions.pageBreakMode !== 'flow'
             )
-            const rawBodyHtml = marked.parse(preprocessedMarkdown, { gfm: true }) as string
-            const widthAwareBodyHtml = applyTableWidthDirectivesToHtml(rawBodyHtml, preprocessedMarkdown)
-            const bodyHtml = applyExportPageBreakMode(widthAwareBodyHtml, exportOptions.pageBreakMode)
+            const { bodyMarkdown, frontmatterHtml } = prepareFrontmatterForRender(preprocessedMarkdown)
+            const rawBodyHtml = marked.parse(bodyMarkdown, { gfm: true }) as string
+            const widthAwareBodyHtml = applyTableWidthDirectivesToHtml(rawBodyHtml, bodyMarkdown)
+            const bodyHtml = applyExportPageBreakMode(
+                [frontmatterHtml, widthAwareBodyHtml].filter(Boolean).join('\n'),
+                exportOptions.pageBreakMode
+            )
             const htmlTemplate = buildExportHtmlDocument({
                 title: tab.title,
                 bodyHtml,

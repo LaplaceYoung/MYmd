@@ -4,6 +4,7 @@ import {
     getDefaultExportOptions,
     prepareMarkdownForExport,
 } from '@/utils/paper'
+import { prepareFrontmatterForRender } from '@/utils/frontmatter'
 import { applyTableWidthDirectivesToHtml } from '@/utils/tableWidths'
 import type {
     CustomPaperSize,
@@ -48,8 +49,10 @@ function resolveExportTimestamp(value?: string) {
 
 export async function renderMarkdownBodyHtml(markdown: string, preservePageBreakMarkers = true) {
     const preparedMarkdown = await prepareMarkdownForExport(markdown, preservePageBreakMarkers)
-    const rawBodyHtml = marked.parse(preparedMarkdown) as string
-    const bodyHtml = applyTableWidthDirectivesToHtml(rawBodyHtml, preparedMarkdown)
+    const { bodyMarkdown, frontmatterHtml } = prepareFrontmatterForRender(preparedMarkdown)
+    const rawBodyHtml = marked.parse(bodyMarkdown) as string
+    const widthAwareBodyHtml = applyTableWidthDirectivesToHtml(rawBodyHtml, bodyMarkdown)
+    const bodyHtml = [frontmatterHtml, widthAwareBodyHtml].filter(Boolean).join('\n')
     return {
         preparedMarkdown,
         bodyHtml,

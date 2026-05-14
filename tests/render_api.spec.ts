@@ -23,6 +23,31 @@ test('renders markdown body html through the shared export preparation lane', as
     expect(result.bodyHtml).toContain('data-mermaid-export=')
 })
 
+test('renders leading yaml frontmatter as export properties', async () => {
+    const result = await renderMarkdownBodyHtml([
+        '---',
+        'title: "Launch Plan"',
+        'status: draft',
+        'tags: [alpha, beta]',
+        'owner: "<Ops>"',
+        '---',
+        '',
+        '# Launch Plan',
+        '',
+        'Keep the document body focused.',
+    ].join('\n'))
+
+    expect(result.bodyHtml).toContain('class="frontmatter-properties"')
+    expect(result.bodyHtml).toContain('<dt>title</dt>')
+    expect(result.bodyHtml).toContain('<dd>Launch Plan</dd>')
+    expect(result.bodyHtml).toContain('<dd>alpha, beta</dd>')
+    expect(result.bodyHtml).toContain('&lt;Ops&gt;')
+    expect(result.bodyHtml).toContain('<h1>Launch Plan</h1>')
+    expect(result.bodyHtml).toContain('Keep the document body focused.')
+    expect(result.bodyHtml).not.toContain('title:')
+    expect(result.bodyHtml).not.toContain('<hr>')
+})
+
 test('builds a full export html document from raw markdown input', async () => {
     const result = await renderMarkdownDocumentToHtml({
         title: 'Automation Brief',

@@ -488,3 +488,38 @@
   - `MYmd_1.4.3_x64-setup.exe`: `B7D5FA58C169E143A306B5CF05DAA1C70BADF727A6264BD9CCAF1BB665DBC50B`
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
+
+### Slice 21
+
+- Scope:
+  - P1 frontmatter properties export readability
+  - keep Obsidian/Zettlr-style YAML metadata readable during local HTML export and render API use
+- Planned touchpoints:
+  - `src/utils/frontmatter.ts`
+  - `src/utils/renderApi.ts`
+  - `src/utils/paper.ts`
+  - `src/components/Ribbon/Ribbon.tsx`
+  - `tests/render_api.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Obsidian stores properties in YAML frontmatter at the top of Markdown files; MYmd now turns that metadata into a readable export properties card while keeping the body focused on document content.
+  - Source: https://obsidian.md/help/properties
+- Product management baseline:
+  - Shared frontmatter parsing extracts simple `key: value` and inline array values from leading YAML blocks.
+  - Render API body HTML prepends a properties card and renders the remaining Markdown body.
+  - Ribbon HTML export uses the same frontmatter render path as the automation render API.
+  - Export CSS gives properties a Word-like document metadata card with light and dark-mode support.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/render_api.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/render_api.spec.ts --reporter=line` with 3 tests passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - Build keeps the existing vendor chunk size and circular chunk warnings for the current editor/diagram dependency stack.
