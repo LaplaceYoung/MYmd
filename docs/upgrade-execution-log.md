@@ -488,3 +488,36 @@
   - `MYmd_1.4.3_x64-setup.exe`: `B7D5FA58C169E143A306B5CF05DAA1C70BADF727A6264BD9CCAF1BB665DBC50B`
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
+
+### Slice 22
+
+- Scope:
+  - P3 read-only plugin API contract
+  - stabilize extension-facing registration ids for commands, sidebar cards, and search providers
+- Planned touchpoints:
+  - `src/plugins/api.ts`
+  - `tests/plugin_api.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Obsidian and Joplin both demonstrate that extension ecosystems need predictable registration surfaces before broader plugin workflows scale.
+  - Sources: https://obsidian.md/plugins and https://joplinapp.org/api/references/plugin_api/
+- Product management baseline:
+  - Read-only plugins can now provide explicit stable entry ids for commands, sidebar cards, and search providers.
+  - Command ids keep the `plugin:{pluginId}.{entryId}` namespace while sidebar cards and search providers keep the `{pluginId}:{entryId}` namespace.
+  - Title-based fallback ids remain available for lightweight plugin entries.
+  - Every registration API returns a cleanup function so plugin teardown leaves the command, sidebar, and search surfaces clean.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/plugin_api.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/plugin_api.spec.ts --reporter=line` with 3 tests passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Known risk:
+  - Production build still reports existing circular chunk and over-500 kB chunk warnings for the heavy editor and diagram vendor stack.

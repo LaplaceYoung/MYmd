@@ -13,17 +13,45 @@ export interface ReadonlyPluginManifest {
     description?: string
 }
 
+export type ReadonlyPluginCommandRegistration = Omit<PluginCommand, 'id'> & {
+    id?: string
+}
+
+export type ReadonlyPluginSidebarCardRegistration = Omit<PluginSidebarCard, 'id'> & {
+    id?: string
+}
+
+export interface ReadonlyPluginSearchProviderRegistration {
+    id?: string
+    search: (query: string) => Promise<PluginSearchHit[]>
+}
+
+function slugifyPluginEntryId(value: string) {
+    const normalized = value
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9._-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+
+    return normalized || 'entry'
+}
+
 function namespacedCommandId(pluginId: string, commandId: string): string {
-    return `plugin:${pluginId}.${commandId}`
+    return `plugin:${pluginId}.${slugifyPluginEntryId(commandId)}`
+}
+
+function namespacedPluginEntryId(pluginId: string, entryId: string): string {
+    return `${pluginId}:${slugifyPluginEntryId(entryId)}`
 }
 
 export function registerReadonlyPluginCommand(
     manifest: ReadonlyPluginManifest,
-    command: Omit<PluginCommand, 'id'>
+    command: ReadonlyPluginCommandRegistration
 ) {
-    const id = namespacedCommandId(manifest.id, command.title.toLowerCase().replace(/\s+/g, '-'))
+    const { id: entryId, ...commandInput } = command
+    const id = namespacedCommandId(manifest.id, entryId ?? command.title)
     const registered: PluginCommand = {
-        ...command,
+        ...commandInput,
         id
     }
     useEditorStore.getState().registerPluginCommand(registered)
@@ -32,20 +60,19 @@ export function registerReadonlyPluginCommand(
 
 export function registerReadonlyPluginSidebarCard(
     manifest: ReadonlyPluginManifest,
-    card: Omit<PluginSidebarCard, 'id'>
+    card: ReadonlyPluginSidebarCardRegistration
 ) {
-    const id = `${manifest.id}:${card.title.toLowerCase().replace(/\s+/g, '-')}`
-    useEditorStore.getState().registerPluginSidebarCard({ ...card, id })
+    const { id: entryId, ...cardInput } = card
+    const id = namespacedPluginEntryId(manifest.id, entryId ?? card.title)
+    useEditorStore.getState().registerPluginSidebarCard({ ...cardInput, id })
     return () => useEditorStore.getState().unregisterPluginSidebarCard(id)
 }
 
 export function registerReadonlyPluginSearchProvider(
     manifest: ReadonlyPluginManifest,
-    provider: {
-        search: (query: string) => Promise<PluginSearchHit[]>
-    }
+    provider: ReadonlyPluginSearchProviderRegistration
 ) {
-    const id = `${manifest.id}:search`
+    const id = namespacedPluginEntryId(manifest.id, provider.id ?? 'search')
     const wrapped: PluginSearchProvider = {
         id,
         search: provider.search
