@@ -338,3 +338,35 @@
   - `node --check scripts/release-smoke-check.mjs`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 15
+
+- Scope:
+  - package and publish the CLI indexing smoke + standalone hashtag indexing release
+  - keep README, staging assets, checksums, release notes, and GitHub release state aligned
+- Planned touchpoints:
+  - `README.md`
+  - `README_en.md`
+  - `docs/release-iteration-playbook.md`
+  - `docs/upgrade-execution-log.md`
+  - `release/v1.4.3-hotfix7` staging assets
+- Product management baseline:
+  - Rebuilt Tauri NSIS/MSI installers from the latest `main` source with Cargo on `E:\EnvConfig\cargo\bin`.
+  - Rebuilt Electron portable runtime from the latest `main` source.
+  - Created `v1.4.3-hotfix7` staging with installer assets, Electron portable zip, SHA256 checksums, and release notes.
+  - Promoted the iteration from implementation evidence to release evidence.
+- Verification target:
+  - `npm run build:electron`
+  - `npm run build:tauri`
+  - `npm run release:smoke -- --release-dir release/v1.4.3-hotfix7`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run build:electron`
+  - `npm run build:tauri`
+  - `npm run release:smoke -- --release-dir release/v1.4.3-hotfix7`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - Electron portable zip root contains `MYmd.exe`

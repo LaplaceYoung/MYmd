@@ -96,7 +96,7 @@ Useful options:
 npm run release:smoke -- --skip-tauri
 npm run release:smoke -- --skip-electron
 npm run release:smoke -- --skip-cli-indexing
-npm run release:smoke -- --release-dir release/v1.4.3-hotfix6
+npm run release:smoke -- --release-dir release/v1.4.3-hotfix7
 npm run release:smoke -- --tauri-exe E:\EnvConfig\rust_target\release\app.exe
 ```
 

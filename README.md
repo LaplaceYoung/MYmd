@@ -18,7 +18,7 @@ MYmd 是一个基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 
 ## 版本信息
 
-- 当前版本：`v1.4.3-hotfix6`
+- 当前版本：`v1.4.3-hotfix7`
 - 目标平台：`Windows x64`
 - 最新发布：<https://github.com/LaplaceYoung/MYmd/releases>
 - 宣传页面：<https://laplaceyoung.github.io/MYmd/>
@@ -70,13 +70,13 @@ MYmd 是一个基于 **Tauri + React + TypeScript** 的本地优先 Markdown 编
 - 单实例运行：二次启动时将文件参数转发给当前窗口。
 - 启动参数文件打开链路已优化，避免欢迎页闪跳。
 
-## v1.4.3-hotfix6 重点更新
+## v1.4.3-hotfix7 重点更新
 
-1. 完成最新 Windows 安装包与 Electron 便携包发布，Release 标记为 Latest。
-2. 发布前验证 Tauri 桌面版窗口截图与 Electron CDP 首页截图，确认启动后能渲染真实 MYmd UI。
-3. 修复 Electron 打包链路中的 Vite 配置遮蔽风险，确保 `file://` 生产包资源使用相对路径加载。
-4. 生成并上传 `SHA256SUMS.txt`，为安装包和便携包提供校验依据。
-5. 完成发布前校验：`npm run typecheck`、`npm run ci:repo-hygiene`、`npm run build:electron`、`npm run build:tauri`。
+1. 新增 CLI/文件关联打开的知识索引 release smoke gate，覆盖文档、标题、标签召回。
+2. 修复独立 hashtag 行标签解析，`#topic` 现在会进入本地知识索引。
+3. 重建 Windows NSIS/MSI 安装包与 Electron 便携包，并整理 `v1.4.3-hotfix7` 发布 staging。
+4. 发布前验证 Tauri 桌面窗口、Electron CDP 首页、CLI 打开文件索引与 release asset SHA256。
+5. 更新 roadmap、release playbook、执行日志与项目记忆，形成可复用迭代闭环。
 
 ## 技术栈
 | 层级 | 技术 |
