@@ -68,6 +68,33 @@ const wikilinkCompletionTrigger = EditorView.updateListener.of((update) => {
     }
 })
 
+function getTagCompletionMatch(state: EditorState, pos: number) {
+    const line = state.doc.lineAt(pos)
+    const offset = pos - line.from
+    const textBeforeCursor = line.text.slice(0, offset)
+    const match = textBeforeCursor.match(/(^|[\s([{])#([\p{L}\p{N}_/-]*)$/u)
+    if (!match) return null
+
+    const typed = match[2] ?? ''
+    const from = pos - typed.length - 1
+    const prefix = line.text.slice(0, offset)
+    if (/^#{1,6}\s?$/.test(prefix)) return null
+
+    return { from, typed }
+}
+
+const tagCompletionTrigger = EditorView.updateListener.of((update) => {
+    if (!update.docChanged) return
+
+    const selection = update.state.selection.main
+    if (!selection.empty) return
+
+    const match = getTagCompletionMatch(update.state, selection.head)
+    if (match?.typed) {
+        startCompletion(update.view)
+    }
+})
+
 const wikilinkCompletionKeymap = Prec.highest(keymap.of([
     {
         key: 'Enter',
@@ -306,6 +333,45 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
         }
     }, [activeFilePath, activeWorkspace])
 
+    const completeTag = useCallback(async (context: CompletionContext) => {
+        const match = getTagCompletionMatch(context.state, context.pos)
+        if (!match) return null
+
+        const typed = match.typed.trim().toLowerCase()
+        if (!typed) return null
+
+        try {
+            const result = await queryKnowledge(typed, 12, 0)
+            const seen = new Set<string>()
+            const options: Completion[] = []
+
+            for (const item of result.tags.slice(0, 12)) {
+                const tag = item.tag.trim().toLowerCase()
+                if (!tag || seen.has(tag)) continue
+                seen.add(tag)
+                options.push({
+                    label: `#${tag}`,
+                    type: 'keyword',
+                    apply: `#${tag}`,
+                    detail: 'Tag',
+                    info: item.document_title || item.file_path,
+                    boost: 7
+                })
+            }
+
+            if (options.length === 0) return null
+            return {
+                from: match.from,
+                options,
+                filter: false,
+                validFor: /^#[\p{L}\p{N}_/-]*$/u
+            }
+        } catch (error) {
+            console.warn('tag completion failed:', error)
+            return null
+        }
+    }, [])
+
     const executeCommand = useCallback((cmd: string, payload?: unknown) => {
         const view = editorRef.current?.view;
         if (!view) return;
@@ -452,8 +518,9 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
                     sourceSearchHighlightField,
                     markdown({ base: markdownLanguage, codeLanguages: languages }),
                     wikilinkCompletionTrigger,
+                    tagCompletionTrigger,
                     wikilinkCompletionKeymap,
-                    autocompletion({ override: [completeWikilink], selectOnOpen: true }),
+                    autocompletion({ override: [completeWikilink, completeTag], selectOnOpen: true }),
                     EditorView.domEventHandlers({
                         drop: (_event, view) => {
                             const event = _event as DragEvent

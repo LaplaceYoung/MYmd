@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { extractWikilinks, rewriteWikilinksForPathChange } from '../src/knowledge/parser'
+import { extractTags, extractWikilinks, rewriteWikilinksForPathChange } from '../src/knowledge/parser'
 
 test('rewrites same-directory wikilinks when a file is renamed', () => {
     const content = [
@@ -21,6 +21,17 @@ test('rewrites same-directory wikilinks when a file is renamed', () => {
     expect(result.content).toContain('[[Product Alpha]]')
     expect(result.content).toContain('[[Product Alpha#Plan|project plan]]')
     expect(result.content).toContain('[[Beta]]')
+})
+
+test('extracts inline and nested tags while skipping markdown headings', () => {
+    const tags = extractTags([
+        '# Project Overview',
+        '',
+        '#project #project/roadmap #Project',
+        'Keep #writing-notes and #team_1 visible.',
+    ].join('\n'))
+
+    expect(tags).toEqual(['project', 'project/roadmap', 'writing-notes', 'team_1'])
 })
 
 test('rewrites workspace-relative wikilinks when a folder is renamed', () => {

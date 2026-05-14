@@ -430,3 +430,38 @@
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 18
+
+- Scope:
+  - P1 Source/Split tag completion
+  - make tags reusable from everyday typing instead of search-only recall
+- Planned touchpoints:
+  - `src/components/Editor/SourceEditor.tsx`
+  - `src/knowledge/parser.ts`
+  - `tests/e2e_tag_completion.spec.ts`
+  - `tests/knowledge_wikilink_rename.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Obsidian supports tags as first-class note organization and nested tags with `/`; MYmd now accepts nested tag parsing and suggests indexed tags while typing.
+  - Source: https://help.obsidian.md/tags
+- Product management baseline:
+  - Typing a tag prefix such as `#pro` in Source/Split now opens indexed tag suggestions from the local knowledge query path.
+  - Selecting a tag suggestion inserts a valid Markdown tag such as `#project/roadmap`.
+  - Tag parsing now accepts nested tags while keeping Markdown headings excluded from tag extraction.
+  - The roadmap now tracks Source/Split tag completion as shipped scope for this P1 lane.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_tag_completion.spec.ts tests/knowledge_wikilink_rename.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_tag_completion.spec.ts tests/knowledge_wikilink_rename.spec.ts --reporter=line` with 7 tests passed
+  - Browser preview on `http://127.0.0.1:1420/` with mocked Tauri APIs confirmed `#pro` opens tag suggestions and selecting `#project/roadmap` inserts the nested tag
+  - Browser console check reported zero warnings/errors during the tag completion smoke run
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
