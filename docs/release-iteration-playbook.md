@@ -14,8 +14,9 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 4. Implement the slice with minimal dependency and layout churn.
 5. Verify with targeted tests first, then broad build checks.
 6. Record evidence in `docs/upgrade-execution-log.md`.
-7. Package and publish only after desktop smoke evidence exists.
-8. Update project memory with environment, release, or debugging lessons.
+7. Update `docs/iteration-merge-queue-2026-05.md` when the slice creates or changes a PR.
+8. Package and publish only after desktop smoke evidence exists.
+9. Update project memory with environment, release, or debugging lessons.
 
 ## Planning Template
 
@@ -141,6 +142,7 @@ npm run release:smoke -- --tauri-exe E:\EnvConfig\rust_target\release\app.exe
 4. Keep user/unrelated untracked files untouched during release and roadmap work.
 5. Add a dated execution-log entry for every meaningful slice.
 6. Record machine-specific build paths in project memory after they affect a release.
+7. Use `docs/iteration-merge-queue-2026-05.md` as the active PR-to-release sequencing surface.
 
 ## Current Machine Notes
 

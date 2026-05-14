@@ -488,3 +488,31 @@
   - `MYmd_1.4.3_x64-setup.exe`: `B7D5FA58C169E143A306B5CF05DAA1C70BADF727A6264BD9CCAF1BB665DBC50B`
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
+
+### Slice 25
+
+- Scope:
+  - project management merge queue
+  - turn open benchmark-alignment PRs into release waves with explicit gates
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/release-iteration-playbook.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Obsidian and Joplin both publish visible changelog streams that connect version history to user-facing product improvements.
+  - Sources: https://obsidian.md/changelog and https://joplinapp.org/help/about/changelog/desktop
+- Product management baseline:
+  - Open PRs #1-#11 now have a merge wave, product lane, current state, and release trigger.
+  - The release playbook now points to the merge queue as the active PR-to-release sequencing surface.
+  - Release packaging remains tied to merged `main` evidence and the existing smoke gate.
+- Verification target:
+  - `git diff --check`
+  - `npm run ci:repo-hygiene`
+  - `npm run typecheck`
+  - official changelog link checks
+- Verification completed:
+  - `git diff --check`
+  - `npm run ci:repo-hygiene`
+  - `npm run typecheck`
+  - Obsidian changelog HEAD request returned 200
+  - Joplin desktop changelog HEAD request returned 200
