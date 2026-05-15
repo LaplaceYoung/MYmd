@@ -10,6 +10,13 @@ test('editor runtime query api reflects current mode and surface state', async (
     await page.waitForLoadState('networkidle')
     await page.locator('.welcome-word__sidebar-btn').nth(1).click()
 
+    await expect.poll(async () => {
+        return await page.evaluate(async () => {
+            const { getEditorRuntimeStateSnapshot } = await import('/src/utils/editorRuntime.ts')
+            return getEditorRuntimeStateSnapshot().registeredEditorCommandIds.some((id: string) => id.startsWith('wysiwyg-'))
+        })
+    }).toBe(true)
+
     const initialState = await page.evaluate(async () => {
         const { getEditorRuntimeStateSnapshot, canQueryEditorState, isSplitEditorRuntime } = await import('/src/utils/editorRuntime.ts')
         return {

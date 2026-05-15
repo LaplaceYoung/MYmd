@@ -1,6 +1,6 @@
 ﻿import { create } from 'zustand'
 import { invoke } from '@tauri-apps/api/core'
-import { indexKnowledgeDocument, rebuildWorkspaceIndex } from '@/knowledge/service'
+import { indexKnowledgeDocument, rebuildWorkspaceIndex, type KnowledgeIndexSkippedFile } from '@/knowledge/service'
 import PQueue from 'p-queue'
 import { resolveAppLocale, type AppLocale } from '@/i18n'
 import {
@@ -197,6 +197,10 @@ interface EditorState {
     knowledgeIndexTotal: number
     /** 知识索引错误信息 */
     knowledgeIndexError: string | null
+    /** 知识索引跳过文件数 */
+    knowledgeIndexSkipped: number
+    /** 知识索引跳过文件明细 */
+    knowledgeIndexFailedFiles: KnowledgeIndexSkippedFile[]
     /** 当前数学公式编辑浮层 */
     mathEdit: MathEditState | null
     /** 只读插件命令注册表 */
@@ -634,6 +638,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     knowledgeIndexProcessed: 0,
     knowledgeIndexTotal: 0,
     knowledgeIndexError: null,
+    knowledgeIndexSkipped: 0,
+    knowledgeIndexFailedFiles: [],
     mathEdit: null,
     pluginCommands: {},
     pluginSidebarCards: {},
@@ -1024,7 +1030,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
                 knowledgeIndexStatus: 'idle',
                 knowledgeIndexProcessed: 0,
                 knowledgeIndexTotal: 0,
-                knowledgeIndexError: null
+                knowledgeIndexError: null,
+                knowledgeIndexSkipped: 0,
+                knowledgeIndexFailedFiles: []
             })
             return
         }
@@ -1059,7 +1067,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
             knowledgeIndexStatus: 'indexing',
             knowledgeIndexProcessed: 0,
             knowledgeIndexTotal: 0,
-            knowledgeIndexError: null
+            knowledgeIndexError: null,
+            knowledgeIndexSkipped: 0,
+            knowledgeIndexFailedFiles: []
         })
 
         try {
@@ -1071,31 +1081,38 @@ export const useEditorStore = create<EditorState>((set, get) => ({
                         knowledgeIndexStatus: 'indexing',
                         knowledgeIndexProcessed: 0,
                         knowledgeIndexTotal: total,
-                        knowledgeIndexError: null
+                        knowledgeIndexError: null,
+                        knowledgeIndexSkipped: 0,
+                        knowledgeIndexFailedFiles: []
                     })
                 },
-                onProgress: ({ processed, total }) => {
+                onProgress: ({ processed, total, skipped }) => {
                     set({
                         knowledgeIndexStatus: 'indexing',
                         knowledgeIndexProcessed: processed,
-                        knowledgeIndexTotal: total
+                        knowledgeIndexTotal: total,
+                        knowledgeIndexSkipped: skipped
                     })
                 },
-                onComplete: ({ processed, total }) => {
+                onComplete: ({ processed, total, skipped, skippedFiles }) => {
                     set({
                         knowledgeIndexStatus: 'idle',
                         knowledgeIndexProcessed: processed,
                         knowledgeIndexTotal: total,
-                        knowledgeIndexError: null
+                        knowledgeIndexError: null,
+                        knowledgeIndexSkipped: skipped,
+                        knowledgeIndexFailedFiles: skippedFiles
                     })
                 },
-                onError: ({ message, processed, total }) => {
+                onError: ({ message, processed, total, skipped, skippedFiles }) => {
                     if (signal?.aborted || message === 'Knowledge indexing cancelled') {
                         set({
                             knowledgeIndexStatus: 'idle',
                             knowledgeIndexProcessed: processed,
                             knowledgeIndexTotal: total,
-                            knowledgeIndexError: null
+                            knowledgeIndexError: null,
+                            knowledgeIndexSkipped: skipped,
+                            knowledgeIndexFailedFiles: skippedFiles
                         })
                         return
                     }
@@ -1104,7 +1121,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
                         knowledgeIndexStatus: 'error',
                         knowledgeIndexProcessed: processed,
                         knowledgeIndexTotal: total,
-                        knowledgeIndexError: message
+                        knowledgeIndexError: message,
+                        knowledgeIndexSkipped: skipped,
+                        knowledgeIndexFailedFiles: skippedFiles
                     })
                 }
             })
