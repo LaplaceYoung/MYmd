@@ -524,3 +524,961 @@
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 19
+
+- Scope:
+  - P0 build-health cleanup
+  - reduce noisy Vite manual chunk warnings while preserving lazy editor/sidebar entrypoints
+- Planned touchpoints:
+  - `vite.config.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Replaced broad vendor chunk buckets with stable low-risk package buckets for React, KaTeX, icons, Tauri, and state helpers.
+  - Let Rollup place editor, diagram, and Markdown runtime packages with their lazy entrypoints so the production build has a clearer chunk graph.
+  - Switched the Mermaid renderer to first-render dynamic loading so routine startup and non-diagram editing paths avoid eager Mermaid core execution.
+  - Reduced the production `index` JavaScript chunk from about 483.57 kB to about 224.14 kB in the local Vite build output.
+  - Closed the circular manual chunk warning lane in the current Vite build.
+  - Kept remaining large chunks visible for the next performance lane: `WysiwygEditor`, `SourceEditor`, `mindmap-definition`, and `flowchart-elk-definition`.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run build`
+  - `npx playwright test tests/e2e_mermaid_export_fallback.spec.ts tests/render_api.spec.ts --reporter=line`
+  - production preview app shell smoke on `http://127.0.0.1:4173`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run build` with the circular manual chunk warning lane closed
+  - `npx playwright test tests/e2e_mermaid_export_fallback.spec.ts tests/render_api.spec.ts --reporter=line` with 3 tests passed
+  - production preview app shell smoke on `http://127.0.0.1:4173` rendered `.app-main-shell` with title `MYmd - Markdown Editor` and screenshot `test-results/app-production-smoke.png`
+
+### Slice 25
+
+- Scope:
+  - project management merge queue
+  - turn open benchmark-alignment PRs into release waves with explicit gates
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/release-iteration-playbook.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Obsidian and Joplin both publish visible changelog streams that connect version history to user-facing product improvements.
+  - Sources: https://obsidian.md/changelog and https://joplinapp.org/help/about/changelog/desktop
+- Product management baseline:
+  - Open PRs #1-#11 now have a merge wave, product lane, current state, and release trigger.
+  - The release playbook now points to the merge queue as the active PR-to-release sequencing surface.
+  - Release packaging remains tied to merged `main` evidence and the existing smoke gate.
+- Verification target:
+  - `git diff --check`
+  - `npm run ci:repo-hygiene`
+  - `npm run typecheck`
+  - official changelog link checks
+- Verification completed:
+  - `git diff --check`
+  - `npm run ci:repo-hygiene`
+  - `npm run typecheck`
+  - Obsidian changelog HEAD request returned 200
+  - Joplin desktop changelog HEAD request returned 200
+
+### Slice 26
+
+- Scope:
+  - release readiness queue refresh
+  - capture PR #1-#12 gate state after the latest review-pass updates
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - PR #1 now shows `BLOCKED / REVIEW_REQUIRED` after the main-sync verification pass.
+  - PR #12 is now represented in the queue as the release-management PR for Wave 0.
+  - The queue records a dated readiness snapshot linking PR #1-#12 verification comments.
+  - PR #9, #10, and #11 now point to concrete verification comments for plugin API, writing stats, and deterministic local asset gates.
+  - Release packaging remains tied to merged `main` evidence and the desktop smoke gate.
+- Verification target:
+  - `git diff --check`
+  - `npm run ci:repo-hygiene`
+  - `npm run typecheck`
+- Verification completed:
+  - `git diff --check`
+  - `npm run ci:repo-hygiene`
+  - `npm run typecheck`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 20`
+
+### Slice 27
+
+- Scope:
+  - active goal artifact audit
+  - map the long-running Markdown benchmark alignment objective to repository evidence and current blockers
+- Planned touchpoints:
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/release-iteration-playbook.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added a prompt-to-artifact checklist covering benchmark alignment, gap backlog, implementation slices, verification evidence, release packaging, runtime smoke, retrospective logs, and current blockers.
+  - Recorded the latest published release evidence for `v1.4.3-hotfix8`.
+  - Recorded the current open PR state as `BLOCKED / REVIEW_REQUIRED` for PR #1-#12.
+  - Linked the release playbook to the active goal audit so future iteration work has one evidence checklist.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh release view --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 20`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh release view --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 20`
+
+### Slice 28
+
+- Scope:
+  - merge queue refresh for graph view filter slice
+  - keep release waves aligned after PR #13 creation
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added PR #13 `young/graph-view-filter-set` to Wave 4 as P3 graph sensemaking scope.
+  - Linked PR #13 verification evidence covering typecheck, graph panel E2E, build, repo hygiene, diff check, and cargo check.
+  - Updated the active-goal audit from PR #1-#12 to PR #1-#13.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 20`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+
+### Slice 29
+
+- Scope:
+  - merge queue refresh for build-health slice
+  - keep release waves aligned after PR #14 creation
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added PR #14 `young/vite-chunk-warning-cleanup` to Wave 0 as P0 build-health scope.
+  - Linked PR #14 verification evidence covering typecheck, build, Mermaid export regression, production preview smoke, repo hygiene, and diff check.
+  - Updated the active-goal audit from PR #1-#13 to PR #1-#14.
+  - Marked the circular manual chunk warning lane as closed while keeping large editor/diagram chunks visible for a future performance slice.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+
+### Slice 30
+
+- Scope:
+  - active goal completion audit refresh
+  - keep the long-running benchmark alignment goal tied to real repository and GitHub evidence
+- Planned touchpoints:
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added a deliverable-to-evidence completion audit table for benchmark alignment, gap closure, iteration management, implementation evidence, verification evidence, packaging, runtime smoke, and retrospective notes.
+  - Recorded the current completion decision as ongoing because PR #1-#14 are open and next packaging starts after a merge wave reaches `main`.
+  - Synchronized the roadmap build-warning row with PR #14: circular manual chunk warnings are closed, while WYSIWYG/source editor and Mermaid definition chunks remain tracked.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh release view v1.4.3-hotfix8 --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh release view v1.4.3-hotfix8 --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+
+### Slice 31
+
+- Scope:
+  - PR #14 Mermaid runtime loader retry hardening
+  - merge queue evidence refresh for the latest build-health verification
+- Planned touchpoints:
+  - `src/utils/mermaid.ts`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Hardened the lazy Mermaid loader so transient dynamic import failures clear the cached loader promise and the next render/export attempt can retry.
+  - Updated PR #14 readiness evidence to the latest verification comment covering typecheck, build, targeted Mermaid/export regression, production preview smoke, repo hygiene, and diff check.
+  - Refreshed the active-goal audit history reference so the release-management trail includes this build-health hardening slice.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run build`
+  - `npx playwright test tests/e2e_mermaid_export_fallback.spec.ts tests/render_api.spec.ts --reporter=line`
+  - production preview smoke on `http://127.0.0.1:4173`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run build`
+  - `npx playwright test tests/e2e_mermaid_export_fallback.spec.ts tests/render_api.spec.ts --reporter=line`
+  - production preview smoke on `http://127.0.0.1:4173`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+
+### Slice 32
+
+- Scope:
+  - PR #14 SourceEditor code-fence language loading budget
+  - build-health queue evidence refresh after SourceEditor chunk reduction
+- Planned touchpoints:
+  - `src/components/Editor/SourceEditor.tsx`
+  - `src/components/Editor/commonMarkdownCodeLanguages.ts`
+  - `package.json`
+  - `package-lock.json`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Replaced the full `@codemirror/language-data` catalog in SourceEditor with a curated Markdown code-fence language budget covering JS/TS/JSX/TSX, JSON, HTML, CSS, Python, SQL, XML, and YAML.
+  - Removed rare CodeMirror language packages pulled only by `@codemirror/language-data` from the lockfile.
+  - Reduced the PR #14 build graph from 3745 to 3632 transformed modules and reduced the SourceEditor production chunk from about 650.43 kB / 220.21 kB gzip to about 619.98 kB / 212.27 kB gzip.
+  - Updated the merge queue and active-goal audit to point at the latest PR #14 verification comment.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run build`
+  - `npx playwright test tests/e2e_document_search_recent.spec.ts tests/e2e_source_html_paste.spec.ts --reporter=line`
+  - production preview SourceEditor smoke on `http://127.0.0.1:4173`
+  - `rg` language-data reference check across `package.json`, `package-lock.json`, and `src`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run build`
+  - `npx playwright test tests/e2e_document_search_recent.spec.ts tests/e2e_source_html_paste.spec.ts --reporter=line`
+  - production preview SourceEditor smoke on `http://127.0.0.1:4173`
+  - `rg` language-data reference check across `package.json`, `package-lock.json`, and `src`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 33
+
+- Scope:
+  - PR #14 split-preview editor sync timing stabilization
+  - build-health queue evidence refresh after Wysiwyg startup smoke
+- Planned touchpoints:
+  - `src/components/Editor/WysiwygEditor.tsx`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added a guarded retry around external Markdown sync when Milkdown exposes content changes before the `editorView` context is ready during split preview startup.
+  - Cleared the retry timer during component cleanup so editor sync remains bounded to the active Wysiwyg instance.
+  - Updated PR #14 readiness evidence to the latest verification comment covering typecheck, build, repo hygiene, diff check, and the production preview smoke evidence for the previous console-noise regression.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `npm run build`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `npm run build`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+
+### Slice 34
+
+- Scope:
+  - Wave 0 review handoff for release readiness
+  - reduce review friction before the next packaging lane
+- Planned touchpoints:
+  - `docs/wave0-review-handoff-2026-05.md`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added a reviewer handoff for PR #1, #14, and #12 with review order, focus areas, evidence links, main-branch gates, packaging trigger, and rollback boundaries.
+  - Linked the handoff from the merge queue and active-goal audit so Wave 0 review has one current execution surface.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+
+### Slice 35
+
+- Scope:
+  - active-goal evidence audit automation
+  - make release-management checks repeatable from `npm`
+- Planned touchpoints:
+  - `scripts/iteration-goal-audit.mjs`
+  - `package.json`
+  - `docs/release-iteration-playbook.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added `npm run iteration:audit` to verify the roadmap, release playbook, merge queue, active-goal audit, execution log, Wave 0 handoff, open PR queue state, and latest release assets.
+  - Added an `--offline` option for docs-only checks and `--json` output for machine-readable audit reports.
+- Verification target:
+  - `npm run iteration:audit`
+  - `npm run iteration:audit -- --offline`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run iteration:audit`
+  - `npm run iteration:audit -- --offline`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 36
+
+- Scope:
+  - `v1.4.3-hotfix8` release retrospective
+  - close the review loop for the latest shipped tag-completion release lane
+- Planned touchpoints:
+  - `docs/release-retrospective-v1.4.3-hotfix8.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/release-iteration-playbook.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added a release retrospective mapping benchmark input, requirement scope, implementation evidence, verification, packaging, runtime smoke, published release link, friction, and follow-ups.
+  - Added the retrospective to the repeatable iteration audit so future goal checks cover the release review loop.
+- Verification target:
+  - `npm run iteration:audit`
+  - `npm run iteration:audit -- --offline`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run iteration:audit`
+  - `npm run iteration:audit -- --offline`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 37
+
+- Scope:
+  - mainstream Markdown benchmark source refresh
+  - keep roadmap priority pressure grounded in current upstream evidence
+- Planned touchpoints:
+  - `docs/benchmark-source-refresh-2026-05-15.md`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Refreshed source-backed observations for Obsidian, Joplin, Typora, iA Writer, MarkText, Zettlr, Cherry Markdown, and doocs/md.
+  - Preserved the current MYmd positioning around local-first editing, natural knowledge affordances, release reliability, and staged advanced lanes.
+  - Added the source refresh artifact to `npm run iteration:audit`.
+  - Hardened the GitHub-backed audit command with bounded retries after a transient `gh release view` EOF surfaced during verification.
+- Verification target:
+  - `npm run iteration:audit`
+  - `npm run iteration:audit -- --check-sources`
+  - `npm run iteration:audit -- --offline`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run iteration:audit`
+  - `npm run iteration:audit -- --check-sources`
+  - `npm run iteration:audit -- --offline`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 38
+
+- Scope:
+  - Wave 0 main-branch gate automation
+  - make the post-review validation path executable
+- Planned touchpoints:
+  - `scripts/wave-gate-check.mjs`
+  - `package.json`
+  - `docs/wave0-review-handoff-2026-05.md`
+  - `docs/release-iteration-playbook.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added `npm run wave0:gate` to run the post-merge Wave 0 validation sequence from one command.
+  - The gate runs iteration audit, TypeScript health, production build, repo hygiene, and whitespace diff checks.
+  - Added `--dry-run` and `--skip-build` options for command preview and faster local diagnosis.
+  - Unsupported wave values fail fast so later release waves can add explicit gates instead of silently reusing Wave 0 behavior.
+  - Hardened Windows command execution and spawn-error reporting after the first full gate run exposed a `spawnSync npm.cmd EINVAL` failure.
+- Verification target:
+  - `npm run wave0:gate -- --dry-run`
+  - `npm run wave0:gate`
+  - `node --check scripts/wave-gate-check.mjs`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/wave-gate-check.mjs`
+  - `npm run wave0:gate -- --dry-run`
+  - `npm run wave0:gate -- --wave 1 --dry-run` exits with the expected unsupported-wave failure.
+  - `npm run iteration:audit`
+  - `npm run wave0:gate`
+  - Gate output passed iteration audit, TypeScript health, production web build, repo hygiene, and whitespace diff check.
+
+### Slice 39
+
+- Scope:
+  - Wave 0 gate audit coverage
+  - keep release-management automation self-checking
+- Planned touchpoints:
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Extended `npm run iteration:audit` so it verifies the `wave0:gate` package command.
+  - Added script-marker checks for the Wave 0 gate sequence, including iteration audit, typecheck, build, repo hygiene, diff check, dry-run, and skip-build support.
+  - Updated the active-goal audit evidence row so Wave 0 gate wiring is part of the durable project-management checklist.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run wave0:gate -- --dry-run`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 12 checks passed.
+  - `npm run wave0:gate -- --dry-run`
+  - `npm run wave0:gate` with 40 iteration-audit checks and all 5 gate steps passed.
+
+### Slice 40
+
+- Scope:
+  - active-goal audit freshness
+  - keep the completion audit aligned with the latest release-management slices
+- Planned touchpoints:
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Updated the active-goal audit refresh note to include Wave 0 gate automation and self-audit coverage.
+  - Updated implementation-history evidence from slices 12-19 and 25-32 to slices 12-19 and 25-39.
+  - Extended `npm run iteration:audit` document markers so the execution log must include `### Slice 39`.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 14 checks passed.
+  - `npm run iteration:audit` with 42 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 43
+
+- Scope:
+  - release packaging gate automation
+  - make post-merge installer packaging validation executable from one command
+- Planned touchpoints:
+  - `scripts/release-gate-check.mjs`
+  - `scripts/iteration-goal-audit.mjs`
+  - `package.json`
+  - `docs/release-iteration-playbook.md`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added `npm run release:gate` for the post-merge packaging lane.
+  - The gate runs Tauri packaging, Electron packaging, release smoke, typecheck, repo hygiene, and whitespace diff checks.
+  - Added dry-run and skip options so the command can be previewed while Wave 0 is still review-gated.
+  - The gate prepends `E:\EnvConfig\cargo\bin` to `PATH` on Windows before native packaging.
+  - Extended `npm run iteration:audit` so it verifies the release gate package command, script markers, and docs markers.
+- Verification target:
+  - `node --check scripts/release-gate-check.mjs`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run release:gate -- --dry-run`
+  - `npm run release:gate -- --skip-packaging --skip-smoke`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/release-gate-check.mjs`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run release:gate -- --dry-run`
+  - `npm run release:gate -- --skip-packaging --skip-smoke` with typecheck, repo hygiene, and diff check passed.
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 12 checks passed.
+  - `npm run iteration:audit` with 40 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 42
+
+- Scope:
+  - README release alignment audit
+  - make landing-page release references part of the active-goal evidence loop
+- Planned touchpoints:
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added README/README_en release-marker checks to `npm run iteration:audit`.
+  - The audit now checks the latest release tag, Tauri NSIS/MSI asset names, and local release staging path in both README files.
+  - Updated the active-goal audit checklist so README release references are part of release evidence.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 12 checks passed.
+  - `npm run iteration:audit` with 40 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 41
+
+- Scope:
+  - Wave 0 evidence link refresh
+  - keep review handoff and merge queue aligned with the latest PR #12 validation comments
+- Planned touchpoints:
+  - `docs/wave0-review-handoff-2026-05.md`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Updated PR #12 evidence links to the latest active-goal audit freshness comment.
+  - Updated the Wave 0 gate description in the merge queue to use `npm run wave0:gate`.
+  - Extended `npm run iteration:audit` document markers so the merge queue must mention `npm run wave0:gate`.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 44
+
+- Scope:
+  - release gate environment preflight
+  - verify Windows Cargo availability before native packaging starts
+- Planned touchpoints:
+  - `scripts/release-gate-check.mjs`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/release-iteration-playbook.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added `npm run release:gate -- --check-env-only` as a fast packaging-readiness check.
+  - The release gate now checks `E:\EnvConfig\cargo\bin\cargo.exe` before Tauri packaging and prints the resolved Cargo executable path.
+  - Extended `npm run iteration:audit` so the playbook, active-goal audit, execution log, and release-gate script markers cover the environment preflight.
+- Verification target:
+  - `node --check scripts/release-gate-check.mjs`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run release:gate -- --check-env-only`
+  - `npm run release:gate -- --dry-run`
+  - `npm run release:gate -- --skip-packaging --skip-smoke`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/release-gate-check.mjs`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run release:gate -- --check-env-only` with Cargo available at `E:\EnvConfig\cargo\bin\cargo.exe`.
+  - `npm run release:gate -- --dry-run` with all 6 release gate steps listed.
+  - `npm run release:gate -- --skip-packaging --skip-smoke` with typecheck, repo hygiene, and diff check passed.
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 45
+
+- Scope:
+  - Wave 0 review handoff refresh
+  - align reviewer-facing merge and packaging steps with the release gate preflight
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/wave0-review-handoff-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Updated PR #12 readiness evidence to the latest release gate preflight verification comment.
+  - Updated the Wave 0 reviewer handoff so the main-branch gate includes `npm run iteration:audit`.
+  - Updated the packaging trigger to run `npm run release:gate -- --check-env-only` before `npm run release:gate`.
+  - Extended `npm run iteration:audit` so the merge queue and Wave 0 handoff must keep the preflight command visible.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 47
+
+- Scope:
+  - Wave 1 index reliability evidence refresh
+  - keep PR #2 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #2 current head with typecheck, production build, repo hygiene, diff check, and index progress/retry E2E.
+  - Updated the merge queue PR #2 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 1 evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 48
+
+- Scope:
+  - Wave 1 preview/edit isolation evidence refresh
+  - keep PR #3 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #3 current head with typecheck, production build, repo hygiene, diff check, and preview isolation/runtime E2E.
+  - Confirmed split preview readonly behavior and editor runtime state isolation through targeted Playwright coverage.
+  - Updated the merge queue PR #3 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 1 preview/edit safety evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 49
+
+- Scope:
+  - Wave 2 knowledge network evidence refresh
+  - keep PR #4 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #4 current head with typecheck, production build, repo hygiene, diff check, and targeted Playwright coverage.
+  - Confirmed wikilink completion, backlink alignment, unlinked mention conversion, rename parsing, and file action behavior through 11 tests.
+  - Updated the merge queue PR #4 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 2 knowledge network evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 50
+
+- Scope:
+  - Wave 3 render/export fidelity evidence refresh
+  - keep PR #5 merge-queue evidence aligned with current branch verification and follow-up fix
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #5 current head with typecheck, production build, repo hygiene, diff check, and targeted Playwright coverage.
+  - Fixed custom paper status feedback so the status bar exposes resolved dimensions alongside the persisted export canvas settings.
+  - Confirmed render API footnotes, export HTML document fidelity, and export profile interactions through 13 tests.
+  - Updated the merge queue PR #5 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 3 render/export fidelity evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 51
+
+- Scope:
+  - Wave 3 daily editing evidence refresh
+  - keep PR #6 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #6 current head with typecheck, production build, repo hygiene, diff check, and task-list direct-toggle E2E.
+  - Confirmed WYSIWYG task checkboxes update Markdown source directly, split source reflects the toggled state, and split preview checkboxes stay readonly.
+  - Updated the merge queue PR #6 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 3 daily editing evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 52
+
+- Scope:
+  - Wave 3 writing polish evidence refresh
+  - keep PR #7 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #7 current head with typecheck, production build, repo hygiene, diff check, immersive modes E2E, and layout profile status-bar regression coverage.
+  - Confirmed focus and typewriter behavior stays aligned across WYSIWYG, split source, and split preview editing surfaces.
+  - Updated the merge queue PR #7 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 3 writing polish evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 53
+
+- Scope:
+  - Wave 3 export/properties evidence refresh
+  - keep PR #8 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #8 current head with typecheck, render API frontmatter/export document tests, production build, repo hygiene, and diff check.
+  - Confirmed leading YAML renders as an export properties card and the full HTML export document path stays covered through the shared render API.
+  - Updated the merge queue PR #8 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 3 export/properties evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 54
+
+- Scope:
+  - Wave 3 writing stats evidence refresh
+  - keep PR #10 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #10 current head with typecheck, Markdown-aware writing stats tests, benchmark source link checks, production build, repo hygiene, and diff check.
+  - Confirmed writing stats count visible Markdown text across syntax stripping, frontmatter/comment/table handling, mixed CJK and Latin prose, and empty documents.
+  - Updated the merge queue PR #10 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 3 writing stats evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 55
+
+- Scope:
+  - Wave 3 deterministic local asset evidence refresh
+  - keep PR #11 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #11 current head with typecheck, deterministic local asset tests, production build, repo hygiene, and diff check.
+  - Confirmed local image asset names stay stable for identical bytes, separate changed bytes by hash, sanitize unsafe path and extension input, and infer image extensions from MIME types.
+  - Updated the merge queue PR #11 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 3 deterministic local asset evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 56
+
+- Scope:
+  - Wave 4 readonly plugin API evidence refresh
+  - keep PR #9 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #9 current head with typecheck, plugin API registration/cleanup tests, production build, repo hygiene, and diff check.
+  - Confirmed readonly plugin commands use stable namespaced ids, title fallback ids remain available, and sidebar cards plus search providers clean up safely.
+  - Updated the merge queue PR #9 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 4 readonly plugin API evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 57
+
+- Scope:
+  - post-Wave 0 merge queue state refresh
+  - make iteration audit understand merged PRs as first-class queue states
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Marked PR #1, #12, and #14 as merged after the Wave 0 main integration.
+  - Marked the remaining open PRs as dirty after Wave 0 main changes so the next merge work starts with explicit branch re-sync.
+  - Updated `npm run iteration:audit` to inspect each tracked PR directly and accept merged lifecycle states alongside open PR states.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 46
+
+- Scope:
+  - Wave 0 evidence link refresh
+  - keep reviewer-facing queue links aligned with the latest PR #1, #12, and #14 validation comments
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/wave0-review-handoff-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Updated PR #1 evidence to the latest stability, build, and Mermaid/export regression comment.
+  - Updated PR #12 evidence to the latest current-branch Wave 0 gate comment.
+  - Updated PR #14 evidence to the latest build-health comment confirming circular chunk warnings are cleared on that branch.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks this evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
