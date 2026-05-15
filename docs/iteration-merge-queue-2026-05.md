@@ -18,8 +18,8 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 | PR | Branch | Product Lane | Current State | Merge Wave | Release Trigger |
 |---:|---|---|---|---:|---|
 | #1 | `young/review-code-health-and-performance-stability` | Performance and stability | MERGED / REVIEW_REQUIRED | 0 | Wave 0 merged to main |
-| #2 | `young/index-progress-retry` | P1 index reliability | DIRTY / REVIEW_REQUIRED | 1 | Re-sync after Wave 0 main changes before merge |
-| #3 | `young/preview-edit-isolation` | P1 reading/editing safety | DIRTY / REVIEW_REQUIRED | 1 | Re-sync after Wave 0 main changes before merge |
+| #2 | `young/index-progress-retry` | P1 index reliability | MERGED / REVIEW_REQUIRED | 1 | Wave 1 merged to main |
+| #3 | `young/preview-edit-isolation` | P1 reading/editing safety | MERGED / REVIEW_REQUIRED | 1 | Wave 1 merged to main |
 | #4 | `young/unlinked-mentions-closure` | P1 knowledge network | DIRTY / REVIEW_REQUIRED | 2 | Re-sync after Wave 0 main changes before merge |
 | #5 | `young/footnotes-render-export-coverage` | P2 render/export fidelity | DIRTY / REVIEW_REQUIRED | 3 | Re-sync after Wave 0 main changes before merge |
 | #6 | `young/task-list-direct-toggle` | P2 daily editing | DIRTY / REVIEW_REQUIRED | 3 | Re-sync after Wave 0 main changes before merge |
