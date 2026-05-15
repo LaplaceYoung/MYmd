@@ -158,6 +158,24 @@
 .statusbar__btn--danger {
     color: var(--danger);
 }
+.statusbar__btn--warning {
+    color: var(--accent);
+}
+.statusbar__btn--busy {
+    color: var(--accent);
+    cursor: progress;
+}
+.statusbar__btn:disabled {
+    opacity: 0.78;
+}
+.statusbar__spin {
+    animation: statusbar-spin 1s linear infinite;
+}
+@keyframes statusbar-spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
 .statusbar__text-btn {
     display: inline-flex;
     align-items: center;
