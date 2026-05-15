@@ -27,7 +27,7 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 | #8 | `young/frontmatter-export-properties` | P2 export/properties | MERGED / REVIEW_REQUIRED | 3 | Wave 3 PR #8 merged to main |
 | #9 | `young/readonly-plugin-api-contract` | P3 extension surface | DIRTY / REVIEW_REQUIRED | 4 | Re-sync after Wave 0 main changes before merge |
 | #10 | `young/writing-stats-markdown-aware` | P2 writing polish | MERGED / REVIEW_REQUIRED | 3 | Wave 3 PR #10 merged to main |
-| #11 | `young/deterministic-image-assets` | P2 resource workflow | DIRTY / REVIEW_REQUIRED | 3 | Re-sync after Wave 0 main changes before merge |
+| #11 | `young/deterministic-image-assets` | P2 resource workflow | MERGED / REVIEW_REQUIRED | 3 | Wave 3 PR #11 merged to main |
 | #12 | `young/iteration-merge-queue` | Release management | MERGED / REVIEW_REQUIRED | 0 | Wave 0 merged to main |
 | #13 | `young/graph-view-filter-set` | P3 graph sensemaking | DIRTY / REVIEW_REQUIRED | 4 | Re-sync after Wave 0 main changes before merge |
 | #14 | `young/vite-chunk-warning-cleanup` | P0 build health | MERGED / REVIEW_REQUIRED | 0 | Wave 0 merged to main |
