@@ -13,6 +13,9 @@ export interface EditorRuntimeQueryState {
     insertDialogOpen: boolean
     activeWorkspace: string | null
     knowledgeIndexStatus: 'idle' | 'indexing' | 'error'
+    knowledgeIndexProcessed: number
+    knowledgeIndexTotal: number
+    knowledgeIndexSkipped: number
     panels: {
         toc: boolean
         backlinks: boolean
@@ -45,6 +48,9 @@ export function getEditorRuntimeStateSnapshot(): EditorRuntimeQueryState {
         insertDialogOpen: state.insertDialog !== null,
         activeWorkspace: state.activeWorkspace,
         knowledgeIndexStatus: state.knowledgeIndexStatus,
+        knowledgeIndexProcessed: state.knowledgeIndexProcessed,
+        knowledgeIndexTotal: state.knowledgeIndexTotal,
+        knowledgeIndexSkipped: state.knowledgeIndexSkipped,
         panels: {
             toc: state.tocVisible,
             backlinks: state.backlinksVisible,

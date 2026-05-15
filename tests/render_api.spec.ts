@@ -80,3 +80,44 @@ test('builds a full export html document from raw markdown input', async () => {
     expect(result.html).toContain('Ship a stable export lane.')
     expect(result.html).not.toContain('cdn.jsdelivr.net')
 })
+
+test('renders footnote references and endnotes in the shared export lane', async () => {
+    const result = await renderMarkdownBodyHtml([
+        '# Research Note',
+        '',
+        'MYmd should keep source footnotes readable while exporting linked endnotes.[^mymd]',
+        '',
+        '[^mymd]: Footnotes support **long-form** writing and research notes.',
+    ].join('\n'))
+
+    expect(result.preparedMarkdown).toContain('[^mymd]: Footnotes support')
+    expect(result.bodyHtml).toContain('role="doc-noteref"')
+    expect(result.bodyHtml).toContain('href="#fn-1-mymd"')
+    expect(result.bodyHtml).toContain('id="fn-1-mymd"')
+    expect(result.bodyHtml).toContain('<strong>long-form</strong>')
+    expect(result.bodyHtml).toContain('role="doc-endnotes"')
+    expect(result.bodyHtml).not.toContain('<p>[^mymd]:')
+})
+
+test('keeps frontmatter properties and footnotes in one export body', async () => {
+    const result = await renderMarkdownBodyHtml([
+        '---',
+        'title: "Research Plan"',
+        'status: reviewed',
+        '---',
+        '',
+        '# Research Plan',
+        '',
+        'A referenced plan keeps metadata visible and notes linked.[^plan]',
+        '',
+        '[^plan]: Exported notes should keep context and citations together.',
+    ].join('\n'))
+
+    expect(result.bodyHtml).toContain('class="frontmatter-properties"')
+    expect(result.bodyHtml).toContain('<dd>Research Plan</dd>')
+    expect(result.bodyHtml).toContain('<h1>Research Plan</h1>')
+    expect(result.bodyHtml).toContain('role="doc-noteref"')
+    expect(result.bodyHtml).toContain('role="doc-endnotes"')
+    expect(result.bodyHtml).not.toContain('title:')
+    expect(result.bodyHtml).not.toContain('<p>[^plan]:')
+})

@@ -45,6 +45,7 @@ import {
     buildExportHtmlDocument,
     prepareMarkdownForExport,
 } from '@/utils/paper'
+import { prepareFootnotesForMarked } from '@/utils/footnotes'
 import { copyFromEditor, cutFromEditor, pasteToEditor } from '@/utils/editorClipboard'
 import { buildContextualAiDraft } from '@/utils/aiDrafts'
 import { prepareFrontmatterForRender } from '@/utils/frontmatter'
@@ -209,7 +210,8 @@ export function Ribbon() {
                 exportOptions.pageBreakMode !== 'flow'
             )
             const { bodyMarkdown, frontmatterHtml } = prepareFrontmatterForRender(preprocessedMarkdown)
-            const rawBodyHtml = marked.parse(bodyMarkdown, { gfm: true }) as string
+            const markdownWithFootnotes = prepareFootnotesForMarked(bodyMarkdown)
+            const rawBodyHtml = marked.parse(markdownWithFootnotes, { gfm: true }) as string
             const widthAwareBodyHtml = applyTableWidthDirectivesToHtml(rawBodyHtml, bodyMarkdown)
             const bodyHtml = applyExportPageBreakMode(
                 [frontmatterHtml, widthAwareBodyHtml].filter(Boolean).join('\n'),
