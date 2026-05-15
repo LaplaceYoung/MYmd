@@ -75,6 +75,16 @@ const REQUIRED_SCRIPT_MARKERS = [
     ],
   },
 ];
+const REQUIRED_README_RELEASE_MARKERS = [
+  {
+    path: "README.md",
+    markers: ["v1.4.3-hotfix8", "MYmd_1.4.3_x64-setup.exe", "MYmd_1.4.3_x64_en-US.msi", "release/v1.4.3-hotfix8"],
+  },
+  {
+    path: "README_en.md",
+    markers: ["v1.4.3-hotfix8", "MYmd_1.4.3_x64-setup.exe", "MYmd_1.4.3_x64_en-US.msi", "release/v1.4.3-hotfix8"],
+  },
+];
 
 const checks = [];
 const blockers = [];
@@ -240,6 +250,28 @@ function verifyPackageScript() {
     );
     if (!passed) {
       fail(`${script.path} is missing required markers: ${missingMarkers.join(", ")}`);
+    }
+  }
+
+  for (const readme of REQUIRED_README_RELEASE_MARKERS) {
+    const absolutePath = path.join(ROOT, readme.path);
+    if (!existsSync(absolutePath)) {
+      addCheck(`release readme exists: ${readme.path}`, false, "missing file");
+      fail(`${readme.path} is missing`);
+      continue;
+    }
+
+    const content = readRepoFile(readme.path);
+    const missingMarkers = readme.markers.filter((marker) => !content.includes(marker));
+    const passed = missingMarkers.length === 0;
+    addCheck(
+      `release readme markers: ${readme.path}`,
+      passed,
+      passed ? "all required markers present" : `missing: ${missingMarkers.join(", ")}`,
+      { markers: readme.markers },
+    );
+    if (!passed) {
+      fail(`${readme.path} is missing release markers: ${missingMarkers.join(", ")}`);
     }
   }
 }

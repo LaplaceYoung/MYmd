@@ -932,8 +932,34 @@
   - `git diff --check`
 - Verification completed:
   - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 14 checks passed.
+  - `npm run iteration:audit` with 42 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
   - `npm run iteration:audit -- --offline` with 12 checks passed.
   - `npm run iteration:audit` with 40 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 42
+
+- Scope:
+  - README release alignment audit
+  - make landing-page release references part of the active-goal evidence loop
+- Planned touchpoints:
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added README/README_en release-marker checks to `npm run iteration:audit`.
+  - The audit now checks the latest release tag, Tauri NSIS/MSI asset names, and local release staging path in both README files.
+  - Updated the active-goal audit checklist so README release references are part of release evidence.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
 - Verification completed:
