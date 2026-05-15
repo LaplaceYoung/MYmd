@@ -58,6 +58,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 | Tag completion in knowledge entry points | Tags should feel searchable and reusable from everyday writing | Source/Split typing `#pro` shows indexed tag suggestions, supports nested tags, and inserts a valid tag |
 | Backlink context snippets | Backlinks should answer why a document is connected | Panel groups linked/unlinked mentions, shows snippet, heading label, and jump target |
 | Unlinked mentions | Knowledge network should grow from existing writing | Mention query finds candidate text, converts it into a link, reindexes the source note, and refreshes the backlink panel |
+| Frontmatter properties | Imported Obsidian/Zettlr notes should keep metadata readable in exported documents | YAML frontmatter renders as a properties card and raw metadata stays out of the document body |
 | Index progress and retry | Workspace indexing should feel reliable and explainable | UI shows idle/indexing/error/progress, skipped-file details, and retry recovery |
 | Preview/edit isolation | Reading mode should stay stable during navigation | Regression prevents split preview from writing content, dirtying clean tabs, or registering editing commands |
 

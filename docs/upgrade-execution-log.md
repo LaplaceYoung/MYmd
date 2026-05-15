@@ -489,32 +489,36 @@
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
 
-### Slice 20
+### Slice 21
 
 - Scope:
-  - P2 writing polish regression coverage
-  - keep Focus Mode and Typewriter Mode consistent across WYSIWYG, Split source, and readonly preview surfaces
+  - P1 frontmatter properties export readability
+  - keep Obsidian/Zettlr-style YAML metadata readable during local HTML export and render API use
 - Planned touchpoints:
-  - `tests/e2e_immersive_modes.spec.ts`
+  - `src/utils/frontmatter.ts`
+  - `src/utils/renderApi.ts`
+  - `src/utils/paper.ts`
+  - `src/components/Ribbon/Ribbon.tsx`
+  - `tests/render_api.spec.ts`
   - `docs/markdown-roadmap-2026-05.md`
   - `docs/upgrade-execution-log.md`
 - Benchmark anchor:
-  - iA Writer uses Focus Mode and Typewriter Scrolling to keep long-form writing centered on the current sentence and cursor; MYmd tracks the same writing-polish lane through existing Focus/Typewriter controls and cross-surface regression coverage.
-  - Source: https://ia.net/writer/support/editor/focus-mode
+  - Obsidian stores properties in YAML frontmatter at the top of Markdown files; MYmd now turns that metadata into a readable export properties card while keeping the body focused on document content.
+  - Source: https://obsidian.md/help/properties
 - Product management baseline:
-  - Ribbon View controls toggle Focus Mode and Typewriter Mode in the shared editor store.
-  - WYSIWYG applies both immersive classes immediately.
-  - Split source and readonly preview inherit the same immersive mode state after switching views.
-  - Toggling both controls off removes the immersive classes from the source editor surface.
+  - Shared frontmatter parsing extracts simple `key: value` and inline array values from leading YAML blocks.
+  - Render API body HTML prepends a properties card and renders the remaining Markdown body.
+  - Ribbon HTML export uses the same frontmatter render path as the automation render API.
+  - Export CSS gives properties a Word-like document metadata card with light and dark-mode support.
 - Verification target:
   - `npm run typecheck`
-  - `npx playwright test tests/e2e_immersive_modes.spec.ts --reporter=line`
+  - `npx playwright test tests/render_api.spec.ts --reporter=line`
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
 - Verification completed:
   - `npm run typecheck`
-  - `npx playwright test tests/e2e_immersive_modes.spec.ts --reporter=line` with 1 test passed
+  - `npx playwright test tests/render_api.spec.ts --reporter=line` with 3 tests passed
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
