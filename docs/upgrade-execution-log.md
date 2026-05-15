@@ -709,3 +709,30 @@
   - `rg` language-data reference check across `package.json`, `package-lock.json`, and `src`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 33
+
+- Scope:
+  - PR #14 split-preview editor sync timing stabilization
+  - build-health queue evidence refresh after Wysiwyg startup smoke
+- Planned touchpoints:
+  - `src/components/Editor/WysiwygEditor.tsx`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added a guarded retry around external Markdown sync when Milkdown exposes content changes before the `editorView` context is ready during split preview startup.
+  - Cleared the retry timer during component cleanup so editor sync remains bounded to the active Wysiwyg instance.
+  - Updated PR #14 readiness evidence to the latest verification comment covering typecheck, build, repo hygiene, diff check, and the production preview smoke evidence for the previous console-noise regression.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `npm run build`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `npm run build`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`

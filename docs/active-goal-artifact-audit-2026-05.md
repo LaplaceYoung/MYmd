@@ -20,7 +20,7 @@ This audit keeps that goal measurable. It maps the active objective to concrete 
 
 ## Completion Audit Refresh
 
-Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading, retry hardening, SourceEditor language-budget optimization, and PR #12 linked the latest build-health evidence.
+Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading, retry hardening, SourceEditor language-budget optimization, split-preview editor sync stabilization, and PR #12 linked the latest build-health evidence.
 
 | Deliverable | Evidence Inspected | Current State | Gap To Close |
 |---|---|---|---|
@@ -28,7 +28,7 @@ Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading, retry h
 | Feature-gap closure path | PR #1-#14 plus roadmap acceptance rows | In progress | Review gates must clear before merge waves can land |
 | Iteration management mechanism | `docs/release-iteration-playbook.md`, `docs/iteration-merge-queue-2026-05.md`, this audit | Covered | Keep queue synchronized after every PR update |
 | Implementation evidence | PR #1-#14 branches and linked verification comments | In progress | Merge Wave 0 into `main`, then continue waves 1-4 |
-| Verification evidence | PR comments, `npm run typecheck`, `npm run build`, targeted E2E/unit gates, repo hygiene, production preview smoke | Covered for current open slices | Re-run gates after branch sync or merge |
+| Verification evidence | PR comments, `npm run typecheck`, `npm run build`, targeted E2E/unit gates, repo hygiene, production preview smoke, split-preview editor sync smoke | Covered for current open slices | Re-run gates after branch sync or merge |
 | Packaging and release evidence | GitHub Release `v1.4.3-hotfix8` with NSIS, MSI, Electron portable, release notes, SHA256 sums | Covered for latest shipped release | Package the next release after a wave reaches `main` |
 | Runtime release quality | `npm run release:smoke` evidence in release lane v1.4.3-hotfix8 | Covered for latest shipped release | Run release smoke on the next staging folder |
 | Retrospective and project memory | `docs/upgrade-execution-log.md` slices, project memory notes | Covered | Add a slice entry after every meaningful implementation or queue change |
