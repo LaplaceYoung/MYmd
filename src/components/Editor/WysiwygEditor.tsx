@@ -18,6 +18,7 @@ import { mathEditPlugin } from './plugins/mathEditPlugin'
 import { diagramViewPlugin } from './plugins/diagramPlugin'
 import { createActiveBlockPlugin } from './plugins/activeBlockPlugin'
 import { createMediaEmbedPlugin } from './plugins/mediaEmbedPlugin'
+import { createTaskListTogglePlugin } from './plugins/taskListTogglePlugin'
 import { EditorContextMenu } from './EditorContextMenu'
 import { copyImageToLocalAssets, saveBlobImageToLocalAssets } from '@/utils/fileUtils'
 import { convertFileSrc } from '@tauri-apps/api/core'
@@ -69,6 +70,10 @@ interface WysiwygEditorProps {
     onCommandRef?: React.MutableRefObject<((cmd: string, payload?: unknown) => void) | null>
     /** 只读模式（分屏预览侧使用） */
     readOnly?: boolean
+}
+
+function isMissingEditorViewContext(error: unknown) {
+    return error instanceof Error && error.message.includes('Context "editorView" not found')
 }
 
 export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }: WysiwygEditorProps) {
@@ -147,6 +152,8 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
     }, [setActiveMarks])
 
     const syncMarkdownFromEditor = useCallback((editor: Editor) => {
+        if (readOnly) return
+
         try {
             editor.action(ctx => {
                 const serializer = ctx.get(serializerCtx)
@@ -158,7 +165,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
         } catch (error) {
             console.warn('Failed to sync markdown after paste conversion:', error)
         }
-    }, [tabId, updateContent])
+    }, [readOnly, tabId, updateContent])
 
     const applyTableWidthsToDom = useCallback((markdownContent: string) => {
         const root = containerRef.current
@@ -212,6 +219,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
     }, [])
 
     const setSelectedTableWidth = useCallback((nextWidthPx: number | null) => {
+        if (readOnly) return false
         if (!editorRef.current) return false
 
         const editor = editorRef.current
@@ -231,7 +239,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
         updateContent(tabId, updatedMarkdown)
         applyTableWidthsToDom(updatedMarkdown)
         return true
-    }, [applyTableWidthsToDom, getSelectedTableContext, tabId, updateContent])
+    }, [applyTableWidthsToDom, getSelectedTableContext, readOnly, tabId, updateContent])
 
     // 创建编辑器
     useEffect(() => {
@@ -257,6 +265,7 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                     listenerManager.markdownUpdated((_ctx, markdown) => {
                         if (!isUpdatingRef.current && !destroyed) {
                             lastEditorMarkdownRef.current = markdown
+                            if (readOnly) return
                             updateContent(tabId, markdown)
                         }
                     })
@@ -289,7 +298,8 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
                             createSyntaxHintPlugin(),
                             prosemirrorSearchPlugin(),
                             createActiveBlockPlugin(),
-                            createMediaEmbedPlugin()
+                            createMediaEmbedPlugin(),
+                            createTaskListTogglePlugin(readOnly)
                         ]
                     })
                     view.updateState(newState)
@@ -475,12 +485,31 @@ export function WysiwygEditor({ tabId, content, onCommandRef, readOnly = false }
         if (!editorRef.current) return
         if (content === lastEditorMarkdownRef.current) return
 
-        isUpdatingRef.current = true
-        try {
-            editorRef.current.action(replaceAll(content))
-            lastEditorMarkdownRef.current = content
-        } finally {
-            isUpdatingRef.current = false
+        let cancelled = false
+        let retryTimer = 0
+
+        const syncExternalContent = () => {
+            if (cancelled || !editorRef.current || content === lastEditorMarkdownRef.current) return
+
+            isUpdatingRef.current = true
+            try {
+                editorRef.current.action(replaceAll(content))
+                lastEditorMarkdownRef.current = content
+            } catch (error) {
+                if (isMissingEditorViewContext(error)) {
+                    retryTimer = window.setTimeout(syncExternalContent, 50)
+                    return
+                }
+                console.warn('Failed to sync external markdown into editor:', error)
+            } finally {
+                isUpdatingRef.current = false
+            }
+        }
+
+        syncExternalContent()
+        return () => {
+            cancelled = true
+            window.clearTimeout(retryTimer)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [content])

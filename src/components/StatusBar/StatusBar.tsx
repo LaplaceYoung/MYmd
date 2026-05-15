@@ -36,6 +36,7 @@ export function StatusBar() {
     const knowledgeIndexProcessed = useEditorStore(s => s.knowledgeIndexProcessed)
     const knowledgeIndexTotal = useEditorStore(s => s.knowledgeIndexTotal)
     const knowledgeIndexError = useEditorStore(s => s.knowledgeIndexError)
+    const knowledgeIndexSkipped = useEditorStore(s => s.knowledgeIndexSkipped)
     const rebuildKnowledgeIndex = useEditorStore(s => s.rebuildKnowledgeIndex)
     const openGlobalSearch = useEditorStore(s => s.openGlobalSearch)
 
@@ -71,10 +72,13 @@ export function StatusBar() {
     const readingTime = Math.max(1, Math.ceil(charCount / 400))
 
     let indexLabel = t('status.noWorkspace')
+    const indexedCount = Math.max(0, (knowledgeIndexTotal || knowledgeIndexProcessed || 0) - knowledgeIndexSkipped)
     if (knowledgeIndexStatus === 'indexing') {
         indexLabel = t('status.indexing', { processed: knowledgeIndexProcessed, total: knowledgeIndexTotal || '?' })
     } else if (knowledgeIndexStatus === 'error') {
         indexLabel = t('status.indexFailed')
+    } else if (activeWorkspace && knowledgeIndexSkipped > 0) {
+        indexLabel = t('status.indexedWithSkips', { count: indexedCount, skipped: knowledgeIndexSkipped })
     } else if (activeWorkspace) {
         indexLabel = t('status.indexed', { count: knowledgeIndexTotal || knowledgeIndexProcessed || 0 })
     }
@@ -85,7 +89,13 @@ export function StatusBar() {
     const aiButtonClass = 'statusbar__text-btn' + (aiPanelVisible ? ' active' : '')
     const wysiwygButtonClass = 'statusbar__icon-btn' + (viewMode === 'wysiwyg' ? ' active' : '')
     const splitButtonClass = 'statusbar__icon-btn' + (viewMode === 'split' ? ' active' : '')
-    const indexButtonClass = 'statusbar__btn statusbar__btn--action' + (knowledgeIndexStatus === 'error' ? ' statusbar__btn--danger' : '')
+    const indexButtonClass = [
+        'statusbar__btn',
+        'statusbar__btn--action',
+        knowledgeIndexStatus === 'error' ? 'statusbar__btn--danger' : '',
+        knowledgeIndexStatus === 'indexing' ? 'statusbar__btn--busy' : '',
+        knowledgeIndexStatus === 'idle' && knowledgeIndexSkipped > 0 ? 'statusbar__btn--warning' : '',
+    ].filter(Boolean).join(' ')
     const statsTitle = [
         t('status.characters', { count: charCount }),
         t('status.nonWhitespace', { count: nonWhitespace }),
@@ -95,9 +105,12 @@ export function StatusBar() {
 
     const paperMeta = getPaperPresetMeta(paperPreset, customPaperSize, paperOrientation, pageMarginMm)
     const orientationLabel = getLocalizedOrientationLabel()
+    const paperStatusLabel = paperPreset === 'custom'
+        ? `${getLocalizedPaperLabel()} ${paperMeta.detail}`
+        : getLocalizedPaperLabel()
     const paperLabel = paperMeta.id === 'screen'
-        ? t('status.paperScreen', { label: getLocalizedPaperLabel(), margin: pageMarginMm })
-        : t('status.paperPreset', { label: getLocalizedPaperLabel(), orientation: orientationLabel, margin: pageMarginMm })
+        ? t('status.paperScreen', { label: paperStatusLabel, margin: pageMarginMm })
+        : t('status.paperPreset', { label: paperStatusLabel, orientation: orientationLabel, margin: pageMarginMm })
     const profileLabel = getLocalizedProfileLabel()
     const exportLabel = getLocalizedExportLabel()
 
@@ -129,9 +142,15 @@ export function StatusBar() {
                     <button
                         className={indexButtonClass}
                         onClick={() => void rebuildKnowledgeIndex()}
-                        title={knowledgeIndexError ?? t('status.rebuildIndex')}
+                        title={knowledgeIndexError ?? (knowledgeIndexSkipped > 0 ? t('status.indexSkippedTitle') : t('status.rebuildIndex'))}
+                        disabled={knowledgeIndexStatus === 'indexing'}
                     >
-                        <RefreshCw size={12} strokeWidth={1.5} style={{ marginRight: 4 }} />
+                        <RefreshCw
+                            size={12}
+                            strokeWidth={1.5}
+                            className={knowledgeIndexStatus === 'indexing' ? 'statusbar__spin' : undefined}
+                            style={{ marginRight: 4 }}
+                        />
                         {indexLabel}
                     </button>
                 )}
