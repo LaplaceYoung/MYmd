@@ -10,7 +10,11 @@ const JSON_OUTPUT = process.argv.includes("--json");
 const REQUIRED_DOCS = [
   {
     path: "docs/markdown-roadmap-2026-05.md",
-    markers: ["## Mainstream Benchmark Matrix", "P0", "P1", "P2", "P3"],
+    markers: ["## Mainstream Benchmark Matrix", "P0", "P1", "P2", "P3", "docs/benchmark-source-refresh-2026-05-15.md"],
+  },
+  {
+    path: "docs/benchmark-source-refresh-2026-05-15.md",
+    markers: ["## Source Snapshot", "## Roadmap Decision", "## Priority Adjustments", "## Sources"],
   },
   {
     path: "docs/release-iteration-playbook.md",
@@ -63,12 +67,27 @@ function fail(message) {
 }
 
 function runGhJson(args) {
-  const output = execFileSync("gh", args, {
-    cwd: ROOT,
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-  return JSON.parse(output);
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const output = execFileSync("gh", args, {
+        cwd: ROOT,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+      return JSON.parse(output);
+    } catch (error) {
+      lastError = error;
+      if (attempt < 3) {
+        sleep(400 * attempt);
+      }
+    }
+  }
+  throw lastError;
+}
+
+function sleep(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
 
 function verifyDocs() {

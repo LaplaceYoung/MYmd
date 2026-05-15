@@ -24,7 +24,7 @@ Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading, retry h
 
 | Deliverable | Evidence Inspected | Current State | Gap To Close |
 |---|---|---|---|
-| Benchmark-aligned product direction | `docs/markdown-roadmap-2026-05.md` mainstream matrix and P0-P3 backlog | Covered | Refresh when benchmark sources change roadmap priority |
+| Benchmark-aligned product direction | `docs/markdown-roadmap-2026-05.md`, `docs/benchmark-source-refresh-2026-05-15.md` mainstream matrix and P0-P3 backlog | Covered | Refresh when benchmark sources change roadmap priority |
 | Feature-gap closure path | PR #1-#14 plus roadmap acceptance rows | In progress | Review gates must clear before merge waves can land |
 | Iteration management mechanism | `docs/release-iteration-playbook.md`, `docs/iteration-merge-queue-2026-05.md`, `docs/wave0-review-handoff-2026-05.md`, `npm run iteration:audit`, this audit | Covered | Keep queue synchronized after every PR update |
 | Implementation evidence | PR #1-#14 branches and linked verification comments | In progress | Merge Wave 0 into `main`, then continue waves 1-4 |
@@ -39,7 +39,7 @@ Completion decision: the active goal remains ongoing because PR #1-#14 are open 
 
 | Requirement | Artifact | Current Evidence | Status | Next Action |
 |---|---|---|---|---|
-| Align with mainstream Markdown readers/editors | `docs/markdown-roadmap-2026-05.md` | Benchmark matrix covers Obsidian, Joplin, Typora, iA Writer, MarkText, Zettlr, Cherry Markdown, and doocs/md | Covered | Refresh when a new benchmark source changes product direction |
+| Align with mainstream Markdown readers/editors | `docs/markdown-roadmap-2026-05.md`, `docs/benchmark-source-refresh-2026-05-15.md` | Benchmark matrix covers Obsidian, Joplin, Typora, iA Writer, MarkText, Zettlr, Cherry Markdown, and doocs/md with a 2026-05-15 source refresh | Covered | Refresh when a new benchmark source changes product direction |
 | Close MYmd feature gaps | `docs/markdown-roadmap-2026-05.md` | P0-P3 backlog maps product reasons to acceptance evidence | Covered | Pull next slice from open P1/P2/P3 backlog after current PR wave clears review |
 | Build version iteration management | `docs/release-iteration-playbook.md` | Iteration loop, planning template, required gates, smoke checklist, and release asset checklist exist | Covered | Keep playbook aligned with new release automation |
 | Automate active-goal evidence checks | `scripts/iteration-goal-audit.mjs`, `package.json` | `npm run iteration:audit` checks roadmap, playbook, queue, active audit, execution log, Wave 0 handoff, PR queue state, and release assets | Covered | Run after release-management evidence changes |
@@ -58,6 +58,7 @@ Completion decision: the active goal remains ongoing because PR #1-#14 are open 
 ### Repository Docs
 
 - `docs/markdown-roadmap-2026-05.md` defines the benchmark matrix, capability backlog, success criteria, and iteration cadence.
+- `docs/benchmark-source-refresh-2026-05-15.md` records the latest benchmark source refresh and priority adjustments.
 - `docs/release-iteration-playbook.md` defines slice planning, verification gates, release smoke, checksums, release evidence, and machine paths.
 - `docs/iteration-merge-queue-2026-05.md` maps PR #1-#14 into merge waves and release triggers.
 - `docs/upgrade-execution-log.md` records completed implementation, validation, packaging, and queue-management slices.

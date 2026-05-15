@@ -818,3 +818,34 @@
   - `npm run typecheck`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 37
+
+- Scope:
+  - mainstream Markdown benchmark source refresh
+  - keep roadmap priority pressure grounded in current upstream evidence
+- Planned touchpoints:
+  - `docs/benchmark-source-refresh-2026-05-15.md`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Refreshed source-backed observations for Obsidian, Joplin, Typora, iA Writer, MarkText, Zettlr, Cherry Markdown, and doocs/md.
+  - Preserved the current MYmd positioning around local-first editing, natural knowledge affordances, release reliability, and staged advanced lanes.
+  - Added the source refresh artifact to `npm run iteration:audit`.
+  - Hardened the GitHub-backed audit command with bounded retries after a transient `gh release view` EOF surfaced during verification.
+- Verification target:
+  - `npm run iteration:audit`
+  - `npm run iteration:audit -- --offline`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run iteration:audit`
+  - `npm run iteration:audit -- --offline`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`

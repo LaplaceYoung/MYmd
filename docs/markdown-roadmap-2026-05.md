@@ -92,6 +92,8 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 
 ## Source Anchors
 
+Latest source refresh: `docs/benchmark-source-refresh-2026-05-15.md`
+
 - Obsidian core plugins: https://obsidian.md/help/plugins
 - Joplin product overview: https://joplinapp.org/help/
 - Joplin Markdown support: https://joplinapp.org/help/apps/markdown/
