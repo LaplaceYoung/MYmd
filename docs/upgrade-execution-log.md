@@ -851,3 +851,36 @@
   - `npm run typecheck`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 38
+
+- Scope:
+  - Wave 0 main-branch gate automation
+  - make the post-review validation path executable
+- Planned touchpoints:
+  - `scripts/wave-gate-check.mjs`
+  - `package.json`
+  - `docs/wave0-review-handoff-2026-05.md`
+  - `docs/release-iteration-playbook.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added `npm run wave0:gate` to run the post-merge Wave 0 validation sequence from one command.
+  - The gate runs iteration audit, TypeScript health, production build, repo hygiene, and whitespace diff checks.
+  - Added `--dry-run` and `--skip-build` options for command preview and faster local diagnosis.
+  - Unsupported wave values fail fast so later release waves can add explicit gates instead of silently reusing Wave 0 behavior.
+  - Hardened Windows command execution and spawn-error reporting after the first full gate run exposed a `spawnSync npm.cmd EINVAL` failure.
+- Verification target:
+  - `npm run wave0:gate -- --dry-run`
+  - `npm run wave0:gate`
+  - `node --check scripts/wave-gate-check.mjs`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/wave-gate-check.mjs`
+  - `npm run wave0:gate -- --dry-run`
+  - `npm run wave0:gate -- --wave 1 --dry-run` exits with the expected unsupported-wave failure.
+  - `npm run iteration:audit`
+  - `npm run wave0:gate`
+  - Gate output passed iteration audit, TypeScript health, production web build, repo hygiene, and whitespace diff check.

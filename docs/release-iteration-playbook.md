@@ -43,6 +43,7 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 | TypeScript health | `npm run typecheck` | All code slices |
 | Repository hygiene | `npm run ci:repo-hygiene` | All release-bound slices |
 | Production web build | `npm run build` | All UI/runtime slices |
+| Wave 0 gate | `npm run wave0:gate` | Wave 0 main-branch validation |
 | Targeted E2E | `npx playwright test <target specs> --reporter=line` | Changed behavior |
 | Tauri build | `npm run build:tauri` with `E:\EnvConfig\cargo\bin` on `PATH` | Installer release |
 | Electron build | `npm run build:electron` | Portable release |

@@ -52,6 +52,12 @@ This handoff gives reviewers one compact path for clearing Wave 0 and starting t
 Run these commands on `main` after Wave 0 merges:
 
 ```bash
+npm run wave0:gate
+```
+
+The expanded gate is:
+
+```bash
 npm run typecheck
 npm run build
 npm run ci:repo-hygiene
