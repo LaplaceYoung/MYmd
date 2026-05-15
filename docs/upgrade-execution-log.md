@@ -1808,3 +1808,26 @@
   - `npm run iteration:audit` with 44 checks passed.
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 65
+
+- Scope:
+  - post-Wave 3 PR #11 merge queue state refresh
+  - close the Wave 3 editor production merge queue before packaging preparation
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Marked PR #11 as merged after the deterministic local image asset lane reached main.
+  - Confirmed Wave 3 editor production work is fully merged: footnotes/export, task toggles, focus/typewriter, frontmatter/properties, writing stats, and deterministic image assets.
+  - Kept Wave 4 extension and graph PRs in the dirty review queue for the next re-sync lane.
+- Verification target:
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
