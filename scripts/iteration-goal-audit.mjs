@@ -38,7 +38,7 @@ const REQUIRED_DOCS = [
   },
   {
     path: "docs/upgrade-execution-log.md",
-    markers: ["### Slice 34", "### Slice 39", "### Slice 44", "### Slice 45", "### Slice 46", "### Slice 47", "### Slice 48", "### Slice 49", "Release lane v1.4.3-hotfix8"],
+    markers: ["### Slice 34", "### Slice 39", "### Slice 44", "### Slice 45", "### Slice 46", "### Slice 47", "### Slice 48", "### Slice 49", "### Slice 50", "Release lane v1.4.3-hotfix8"],
   },
   {
     path: "docs/wave0-review-handoff-2026-05.md",

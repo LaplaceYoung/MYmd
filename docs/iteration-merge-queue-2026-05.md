@@ -42,7 +42,7 @@ Captured on 2026-05-15 after PR #1 fresh Wave 0 readiness verification, PR #12 c
 | #2 | current head typecheck, build, repo hygiene, diff check, and index progress retry E2E | https://github.com/LaplaceYoung/MYmd/pull/2#issuecomment-4456261433 |
 | #3 | current head typecheck, build, repo hygiene, diff check, and preview isolation/runtime E2E | https://github.com/LaplaceYoung/MYmd/pull/3#issuecomment-4456303598 |
 | #4 | current head typecheck, build, repo hygiene, diff check, wikilink completion/backlink/unlinked mention E2E, and wikilink rename parser coverage | https://github.com/LaplaceYoung/MYmd/pull/4#issuecomment-4456336694 |
-| #5 | typecheck, build, repo hygiene, diff check, render API footnote tests | https://github.com/LaplaceYoung/MYmd/pull/5#issuecomment-4455073290 |
+| #5 | current head statusbar custom-paper fix, typecheck, build, repo hygiene, diff check, render API, export HTML, and export profile E2E | https://github.com/LaplaceYoung/MYmd/pull/5#issuecomment-4456385556 |
 | #6 | task toggle bug fix, typecheck, build, repo hygiene, diff check, task-list E2E | https://github.com/LaplaceYoung/MYmd/pull/6#issuecomment-4455137386 |
 | #7 | immersive E2E stabilization, typecheck, build, repo hygiene, diff check, immersive modes E2E | https://github.com/LaplaceYoung/MYmd/pull/7#issuecomment-4455167424 |
 | #8 | typecheck, build, repo hygiene, diff check, render API frontmatter tests | https://github.com/LaplaceYoung/MYmd/pull/8#issuecomment-4455181429 |

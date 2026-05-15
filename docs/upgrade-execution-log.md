@@ -1173,6 +1173,34 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
 
+### Slice 50
+
+- Scope:
+  - Wave 3 render/export fidelity evidence refresh
+  - keep PR #5 merge-queue evidence aligned with current branch verification and follow-up fix
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #5 current head with typecheck, production build, repo hygiene, diff check, and targeted Playwright coverage.
+  - Fixed custom paper status feedback so the status bar exposes resolved dimensions alongside the persisted export canvas settings.
+  - Confirmed render API footnotes, export HTML document fidelity, and export profile interactions through 13 tests.
+  - Updated the merge queue PR #5 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 3 render/export fidelity evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
 ### Slice 46
 
 - Scope:
