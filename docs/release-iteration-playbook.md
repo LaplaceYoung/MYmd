@@ -14,8 +14,11 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 4. Implement the slice with minimal dependency and layout churn.
 5. Verify with targeted tests first, then broad build checks.
 6. Record evidence in `docs/upgrade-execution-log.md`.
-7. Package and publish only after desktop smoke evidence exists.
-8. Update project memory with environment, release, or debugging lessons.
+7. Update `docs/iteration-merge-queue-2026-05.md` when the slice creates or changes a PR.
+8. Run `npm run iteration:audit` when release-management evidence changes.
+9. Package and publish only after desktop smoke evidence exists.
+10. Add a release retrospective after a release is published.
+11. Update project memory with environment, release, or debugging lessons.
 
 ## Planning Template
 
@@ -40,15 +43,21 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 | TypeScript health | `npm run typecheck` | All code slices |
 | Repository hygiene | `npm run ci:repo-hygiene` | All release-bound slices |
 | Production web build | `npm run build` | All UI/runtime slices |
+| Wave 0 gate | `npm run wave0:gate` | Wave 0 main-branch validation |
 | Targeted E2E | `npx playwright test <target specs> --reporter=line` | Changed behavior |
 | Tauri build | `npm run build:tauri` with `E:\EnvConfig\cargo\bin` on `PATH` | Installer release |
 | Electron build | `npm run build:electron` | Portable release |
 | Tauri smoke | Run `E:\EnvConfig\rust_target\release\app.exe` and capture UI evidence | Installer release |
 | Electron smoke | Run portable EXE with CDP screenshot and DOM text evidence | Portable release |
 | Release smoke automation | `npm run release:smoke` | Local release verification |
+| Release environment preflight | `npm run release:gate -- --check-env-only` | Windows packaging readiness |
+| Release packaging gate | `npm run release:gate` | Post-merge packaging validation |
+| Iteration evidence audit | `npm run iteration:audit` | Release-management and active-goal audit updates |
+| Benchmark source links | `npm run iteration:audit -- --check-sources` | Benchmark source refresh |
 | CLI indexing smoke | Included in `npm run release:smoke` | File association / CLI release verification |
 | Checksums | `Get-FileHash -Algorithm SHA256` for each release asset | GitHub release |
 | Release verification | `gh release view <tag> --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets` | GitHub release |
+| Release retrospective | `docs/release-retrospective-<tag>.md` | Published release |
 
 ## Desktop Smoke Checklist
 
@@ -56,6 +65,13 @@ The preferred local path is:
 
 ```bash
 npm run release:smoke
+```
+
+After a release wave lands on `main`, use the full packaging gate:
+
+```bash
+npm run release:gate -- --check-env-only
+npm run release:gate
 ```
 
 Use the manual steps below when debugging one runtime in isolation.
@@ -141,6 +157,8 @@ npm run release:smoke -- --tauri-exe E:\EnvConfig\rust_target\release\app.exe
 4. Keep user/unrelated untracked files untouched during release and roadmap work.
 5. Add a dated execution-log entry for every meaningful slice.
 6. Record machine-specific build paths in project memory after they affect a release.
+7. Use `docs/iteration-merge-queue-2026-05.md` as the active PR-to-release sequencing surface.
+8. Use `docs/active-goal-artifact-audit-2026-05.md` to map the long-running benchmark goal to current evidence and blockers.
 
 ## Current Machine Notes
 
