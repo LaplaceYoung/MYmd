@@ -1027,3 +1027,39 @@
   - `npm run iteration:audit`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 44
+
+- Scope:
+  - release gate environment preflight
+  - verify Windows Cargo availability before native packaging starts
+- Planned touchpoints:
+  - `scripts/release-gate-check.mjs`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/release-iteration-playbook.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added `npm run release:gate -- --check-env-only` as a fast packaging-readiness check.
+  - The release gate now checks `E:\EnvConfig\cargo\bin\cargo.exe` before Tauri packaging and prints the resolved Cargo executable path.
+  - Extended `npm run iteration:audit` so the playbook, active-goal audit, execution log, and release-gate script markers cover the environment preflight.
+- Verification target:
+  - `node --check scripts/release-gate-check.mjs`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run release:gate -- --check-env-only`
+  - `npm run release:gate -- --dry-run`
+  - `npm run release:gate -- --skip-packaging --skip-smoke`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/release-gate-check.mjs`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run release:gate -- --check-env-only` with Cargo available at `E:\EnvConfig\cargo\bin\cargo.exe`.
+  - `npm run release:gate -- --dry-run` with all 6 release gate steps listed.
+  - `npm run release:gate -- --skip-packaging --skip-smoke` with typecheck, repo hygiene, and diff check passed.
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`

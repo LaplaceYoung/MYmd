@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,6 +12,7 @@ function parseArgs(argv) {
     skipTauriBuild: false,
     skipElectronBuild: false,
     skipSmoke: false,
+    checkEnvOnly: false,
     releaseDir: "",
   };
 
@@ -28,6 +30,8 @@ function parseArgs(argv) {
       options.skipElectronBuild = true;
     } else if (arg === "--skip-smoke") {
       options.skipSmoke = true;
+    } else if (arg === "--check-env-only") {
+      options.checkEnvOnly = true;
     } else if (arg === "--release-dir") {
       if (!next) throw new Error("--release-dir requires a path");
       options.releaseDir = next;
@@ -55,6 +59,7 @@ Options:
   --skip-tauri-build        Skip npm run build:tauri.
   --skip-electron-build     Skip npm run build:electron.
   --skip-smoke              Skip npm run release:smoke.
+  --check-env-only          Validate release gate environment prerequisites and exit.
   --release-dir <path>      Forward a release staging folder to release:smoke.
 `);
 }
@@ -152,9 +157,33 @@ function runStep(step) {
   return 0;
 }
 
+function verifyEnvironment() {
+  if (!isWindows) return true;
+  if (!options.checkEnvOnly && (options.dryRun || options.skipTauriBuild)) return true;
+
+  const cargoExe = path.join(CARGO_BIN, "cargo.exe");
+  if (!existsSync(cargoExe)) {
+    console.error(`Cargo executable missing: ${cargoExe}`);
+    console.error("Set up the Windows Rust toolchain before running release packaging.");
+    return false;
+  }
+
+  console.log(`Cargo available: ${cargoExe}`);
+  return true;
+}
+
 console.log(`Running release gate${options.dryRun ? " in dry-run mode" : ""}.`);
 if (isWindows) {
   console.log(`Using Cargo bin: ${CARGO_BIN}`);
+}
+
+if (!verifyEnvironment()) {
+  process.exit(1);
+}
+
+if (options.checkEnvOnly) {
+  console.log("Release gate environment check passed.");
+  process.exit(0);
 }
 
 for (const step of commands) {

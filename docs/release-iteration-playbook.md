@@ -50,6 +50,7 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 | Tauri smoke | Run `E:\EnvConfig\rust_target\release\app.exe` and capture UI evidence | Installer release |
 | Electron smoke | Run portable EXE with CDP screenshot and DOM text evidence | Portable release |
 | Release smoke automation | `npm run release:smoke` | Local release verification |
+| Release environment preflight | `npm run release:gate -- --check-env-only` | Windows packaging readiness |
 | Release packaging gate | `npm run release:gate` | Post-merge packaging validation |
 | Iteration evidence audit | `npm run iteration:audit` | Release-management and active-goal audit updates |
 | Benchmark source links | `npm run iteration:audit -- --check-sources` | Benchmark source refresh |
@@ -69,6 +70,7 @@ npm run release:smoke
 After a release wave lands on `main`, use the full packaging gate:
 
 ```bash
+npm run release:gate -- --check-env-only
 npm run release:gate
 ```
 

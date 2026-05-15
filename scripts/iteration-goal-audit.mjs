@@ -19,7 +19,7 @@ const REQUIRED_DOCS = [
   },
   {
     path: "docs/release-iteration-playbook.md",
-    markers: ["## Iteration Loop", "## Required Gates", "npm run release:smoke", "npm run release:gate"],
+    markers: ["## Iteration Loop", "## Required Gates", "npm run release:smoke", "npm run release:gate", "--check-env-only"],
   },
   {
     path: "docs/iteration-merge-queue-2026-05.md",
@@ -33,11 +33,11 @@ const REQUIRED_DOCS = [
   },
   {
     path: "docs/active-goal-artifact-audit-2026-05.md",
-    markers: ["## Completion Audit Refresh", "## Prompt To Artifact Checklist", "v1.4.3-hotfix8"],
+    markers: ["## Completion Audit Refresh", "## Prompt To Artifact Checklist", "v1.4.3-hotfix8", "release environment preflight"],
   },
   {
     path: "docs/upgrade-execution-log.md",
-    markers: ["### Slice 34", "### Slice 39", "Release lane v1.4.3-hotfix8"],
+    markers: ["### Slice 34", "### Slice 39", "### Slice 44", "Release lane v1.4.3-hotfix8"],
   },
   {
     path: "docs/wave0-review-handoff-2026-05.md",
@@ -95,6 +95,8 @@ const REQUIRED_SCRIPT_MARKERS = [
       "Whitespace diff check",
       "--dry-run",
       "--skip-packaging",
+      "--check-env-only",
+      "Cargo available",
       "E:\\\\EnvConfig\\\\cargo\\\\bin",
     ],
   },

@@ -20,7 +20,7 @@ This audit keeps that goal measurable. It maps the active objective to concrete 
 
 ## Completion Audit Refresh
 
-Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading, retry hardening, SourceEditor language-budget optimization, split-preview editor sync stabilization, and PR #12 added Wave 0 gate automation plus self-audit coverage.
+Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading, retry hardening, SourceEditor language-budget optimization, split-preview editor sync stabilization, and PR #12 added Wave 0 gate automation, release gate automation, release environment preflight, and self-audit coverage.
 
 | Deliverable | Evidence Inspected | Current State | Gap To Close |
 |---|---|---|---|
@@ -29,7 +29,7 @@ Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading, retry h
 | Iteration management mechanism | `docs/release-iteration-playbook.md`, `docs/iteration-merge-queue-2026-05.md`, `docs/wave0-review-handoff-2026-05.md`, `npm run iteration:audit`, this audit | Covered | Keep queue synchronized after every PR update |
 | Implementation evidence | PR #1-#14 branches and linked verification comments | In progress | Merge Wave 0 into `main`, then continue waves 1-4 |
 | Verification evidence | PR comments, `npm run typecheck`, `npm run build`, targeted E2E/unit gates, repo hygiene, production preview smoke, split-preview editor sync smoke | Covered for current open slices | Re-run gates after branch sync or merge |
-| Packaging and release evidence | GitHub Release `v1.4.3-hotfix8` with NSIS, MSI, Electron portable, release notes, SHA256 sums | Covered for latest shipped release | Package the next release after a wave reaches `main` |
+| Packaging and release evidence | GitHub Release `v1.4.3-hotfix8` with NSIS, MSI, Electron portable, release notes, SHA256 sums, and release gate Cargo preflight | Covered for latest shipped release | Package the next release after a wave reaches `main` |
 | Runtime release quality | `npm run release:smoke` evidence in release lane v1.4.3-hotfix8 | Covered for latest shipped release | Run release smoke on the next staging folder |
 | Retrospective and project memory | `docs/upgrade-execution-log.md` slices, `docs/release-retrospective-v1.4.3-hotfix8.md`, project memory notes | Covered | Add a slice entry after every meaningful implementation or queue change |
 
@@ -42,14 +42,14 @@ Completion decision: the active goal remains ongoing because PR #1-#14 are open 
 | Align with mainstream Markdown readers/editors | `docs/markdown-roadmap-2026-05.md`, `docs/benchmark-source-refresh-2026-05-15.md` | Benchmark matrix covers Obsidian, Joplin, Typora, iA Writer, MarkText, Zettlr, Cherry Markdown, and doocs/md with a 2026-05-15 source refresh | Covered | Refresh when a new benchmark source changes product direction |
 | Verify benchmark source availability | `npm run iteration:audit -- --check-sources` | Source refresh URLs are fetchable through the iteration audit source-link mode | Covered | Run when source anchors change |
 | Close MYmd feature gaps | `docs/markdown-roadmap-2026-05.md` | P0-P3 backlog maps product reasons to acceptance evidence | Covered | Pull next slice from open P1/P2/P3 backlog after current PR wave clears review |
-| Build version iteration management | `docs/release-iteration-playbook.md` | Iteration loop, planning template, required gates, smoke checklist, release packaging gate, and release asset checklist exist | Covered | Keep playbook aligned with new release automation |
-| Automate active-goal evidence checks | `scripts/iteration-goal-audit.mjs`, `package.json` | `npm run iteration:audit` checks roadmap, playbook, queue, active audit, execution log, Wave 0 handoff, Wave 0 gate wiring, README release references, PR queue state, and release assets | Covered | Run after release-management evidence changes |
+| Build version iteration management | `docs/release-iteration-playbook.md` | Iteration loop, planning template, required gates, smoke checklist, release environment preflight, release packaging gate, and release asset checklist exist | Covered | Keep playbook aligned with new release automation |
+| Automate active-goal evidence checks | `scripts/iteration-goal-audit.mjs`, `package.json` | `npm run iteration:audit` checks roadmap, playbook, queue, active audit, execution log, Wave 0 handoff, Wave 0 gate wiring, release gate wiring, README release references, PR queue state, and release assets | Covered | Run after release-management evidence changes |
 | Automate Wave 0 main gate | `scripts/wave-gate-check.mjs`, `package.json`, `docs/wave0-review-handoff-2026-05.md` | `npm run wave0:gate` runs iteration audit, typecheck, production build, repo hygiene, and diff check | Covered | Run on `main` after Wave 0 lands |
 | Sequence current implementation work | `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 have lanes, states, merge waves, triggers, and verification links | Covered | Update after any PR merge, close, replace, or rebase |
 | Clear Wave 0 review path | `docs/wave0-review-handoff-2026-05.md` | PR #1, #14, and #12 have review order, reviewer checklist, main-branch gate, and packaging trigger | Covered | Use this handoff while review gates clear |
 | Attach verification evidence to slices | PR comments and `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 readiness rows link to verification comments | Covered | Re-run gates after main sync or branch rebase |
-| Keep implementation history auditable | `docs/upgrade-execution-log.md` | Slices 12-19 and 25-39 record scope, touchpoints, baseline, and verification | Covered | Add a new dated entry for every meaningful slice |
-| Package and publish release builds | GitHub release `v1.4.3-hotfix8`, `README.md`, `README_en.md`, `npm run release:gate` | Latest release has NSIS setup, MSI, Electron portable zip, release notes, SHA256 sums, README release references, and a repeatable packaging gate | Covered for latest shipped release | Package again after a merge wave reaches `main` |
+| Keep implementation history auditable | `docs/upgrade-execution-log.md` | Slices 12-19 and 25-44 record scope, touchpoints, baseline, and verification | Covered | Add a new dated entry for every meaningful slice |
+| Package and publish release builds | GitHub release `v1.4.3-hotfix8`, `README.md`, `README_en.md`, `npm run release:gate` | Latest release has NSIS setup, MSI, Electron portable zip, release notes, SHA256 sums, README release references, a repeatable packaging gate, and a Windows Cargo preflight | Covered for latest shipped release | Package again after a merge wave reaches `main` |
 | Verify release runtime quality | `npm run release:smoke` and release notes | Hotfix8 release smoke covered asset hashes, Electron rendering, Tauri rendering, and CLI-open indexing | Covered for latest shipped release | Run smoke on the next release staging folder |
 | Capture release retrospective | `docs/release-retrospective-v1.4.3-hotfix8.md` | Hotfix8 maps benchmark input, scoped requirement, implementation, verification, packaging, runtime smoke, release link, friction, and follow-ups | Covered | Add a retrospective after each published release |
 | Maintain current blocker visibility | `gh pr list` output and merge queue | PR #1-#14 currently report `BLOCKED / REVIEW_REQUIRED` | Active blocker | Review gate must clear before merge and packaging |
@@ -89,14 +89,15 @@ The active goal remains ongoing while the current benchmark-alignment PR queue i
 
 1. The relevant PR wave lands on `main`.
 2. The wave gate passes on `main`.
-3. `npm run release:gate` passes.
-4. `npm run build:tauri` passes inside the release gate.
-5. `npm run build:electron` passes inside the release gate.
-6. `npm run release:smoke` passes against the staged release folder.
-7. SHA256 sums and release notes are generated.
-8. The GitHub release is published and verified.
-9. README/README_en release references match the published release.
+3. `npm run release:gate -- --check-env-only` confirms the Windows Cargo preflight.
+4. `npm run release:gate` passes.
+5. `npm run build:tauri` passes inside the release gate.
+6. `npm run build:electron` passes inside the release gate.
+7. `npm run release:smoke` passes against the staged release folder.
+8. SHA256 sums and release notes are generated.
+9. The GitHub release is published and verified.
+10. README/README_en release references match the published release.
 
 ## Next Concrete Action
 
-Keep PR #12 as the active release-management surface. Once review gates clear, merge Wave 0 first, run `npm run wave0:gate` on `main`, then run `npm run release:gate` for the next release candidate.
+Keep PR #12 as the active release-management surface. Once review gates clear, merge Wave 0 first, run `npm run wave0:gate` on `main`, run `npm run release:gate -- --check-env-only`, then run `npm run release:gate` for the next release candidate.
