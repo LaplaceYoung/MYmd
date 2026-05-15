@@ -65,9 +65,45 @@
     font-size: 12px;
 }
 
+.knowledge-graph-panel__controls {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.knowledge-graph-panel__control {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+}
+
+.knowledge-graph-panel__control select {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
 .knowledge-graph-panel__meta {
     color: var(--text-muted);
     font-size: 11px;
+}
+
+.knowledge-graph-panel__filter-summary {
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 9%, var(--bg-surface));
+    color: var(--text-secondary);
+    font-size: 10px;
+    line-height: 1.4;
+    padding: 5px 8px;
 }
 
 .knowledge-graph-panel__actions {
@@ -142,6 +178,31 @@
     padding: 7px 8px;
     cursor: pointer;
     transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.knowledge-graph-panel__node-title,
+.knowledge-graph-panel__node-path,
+.knowledge-graph-panel__node-tags {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.knowledge-graph-panel__node-title {
+    font-weight: 600;
+}
+
+.knowledge-graph-panel__node-path {
+    margin-top: 3px;
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.knowledge-graph-panel__node-tags {
+    margin-top: 4px;
+    color: color-mix(in srgb, var(--accent) 70%, var(--text-secondary));
+    font-size: 10px;
 }
 
 .knowledge-graph-panel__node:hover {

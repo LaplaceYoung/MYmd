@@ -79,7 +79,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 |---|---|---|
 | Read-only plugin API | Extension value grows after core workflows stabilize | Manifest plus stable command, sidebar card, and search provider ids with cleanup-safe registration |
 | Local render API / CLI | Automation unlocks docs pipelines and AI workflows | CLI/render API converts Markdown to export HTML deterministically |
-| Graph view filter set | Graph should support sensemaking, not just decoration | Filter by folder/tag/link depth and open node target |
+| Graph view filter set | Graph should support sensemaking, not just decoration | Folder, tag, and link-depth filters narrow visible nodes; node cards open the target note |
 | Optional sync boundary design | Reliability story benefits from a future sync plan | ADR defines data ownership, conflict policy, and provider boundary |
 | Research writing lane | Zettlr-style users need citation/project workflows | Zotero/citation/export ADR and benchmark document set |
 

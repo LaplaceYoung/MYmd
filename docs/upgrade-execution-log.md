@@ -489,6 +489,42 @@
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
 
+### Slice 19
+
+- Scope:
+  - P3 graph view filter set
+  - make the knowledge graph useful for sensemaking through folder, tag, and link-depth filtering
+- Planned touchpoints:
+  - `src/components/Sidebar/KnowledgeGraphPanel.tsx`
+  - `src/components/Sidebar/KnowledgeGraphPanel.css`
+  - `src/knowledge/types.ts`
+  - `src-tauri/src/lib.rs`
+  - `tests/e2e_graph_panel.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Obsidian graph workflows make dense note networks usable by narrowing the visible graph slice.
+  - Source: https://help.obsidian.md/plugins/graph
+- Product management baseline:
+  - The graph panel now loads a broad local graph slice once and filters it client-side by search text, folder, tag, and link depth.
+  - Graph nodes now carry indexed tags from the native knowledge database.
+  - Node cards show folder and tag context while preserving the existing click-to-open target behavior.
+  - AI graph prompts now include the active graph filter summary and filtered node/edge counts.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_graph_panel.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `cargo check --manifest-path src-tauri/Cargo.toml`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_graph_panel.spec.ts --reporter=line` with 4 tests passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `cargo check --manifest-path src-tauri/Cargo.toml`
+
 ### Slice 22
 
 - Scope:
@@ -1920,6 +1956,42 @@
 - Verification completed:
   - `npm run typecheck`
   - `npx playwright test tests/plugin_api.spec.ts --reporter=line` with 3 tests passed.
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Known risk:
+  - Production build still reports existing over-500 kB chunks for heavy editor and diagram packages.
+
+### Slice 67
+
+- Scope:
+  - Wave 4 graph filter main-sync
+  - bring PR #13 onto the `main` branch after PR #9 extension surface landed
+- Planned touchpoints:
+  - `src-tauri/src/lib.rs`
+  - `src/components/Sidebar/KnowledgeGraphPanel.tsx`
+  - `src/components/Sidebar/KnowledgeGraphPanel.css`
+  - `src/knowledge/types.ts`
+  - `tests/e2e_graph_panel.spec.ts`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+  - `scripts/iteration-goal-audit.mjs`
+- Product management baseline:
+  - PR #13 now carries Wave 3 release evidence, PR #9 readonly plugin API contracts, and the hotfix9 release audit.
+  - The merge queue marks PR #9 as merged and PR #13 as review-gated after main-sync.
+  - The graph panel filter slice remains focused on folder, tag, search, and link-depth narrowing for local knowledge graph sensemaking.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_graph_panel.spec.ts --reporter=line`
+  - `cargo check --manifest-path src-tauri/Cargo.toml`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_graph_panel.spec.ts --reporter=line` with 4 tests passed.
+  - `cargo check --manifest-path src-tauri/Cargo.toml`
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - `git diff --check`

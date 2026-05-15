@@ -70,6 +70,7 @@ export interface KnowledgeGraphNode {
   id: string;
   title: string;
   file_path: string;
+  tags?: string[];
 }
 
 export interface KnowledgeGraphEdge {

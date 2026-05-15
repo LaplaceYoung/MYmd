@@ -93,6 +93,7 @@ struct KnowledgeGraphNode {
     id: String,
     title: String,
     file_path: String,
+    tags: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -792,10 +793,26 @@ fn knowledge_graph(filter_text: String, limit: Option<i64>) -> Result<KnowledgeG
             let mut stmt = conn
                 .prepare(
                     "
-                    SELECT file_key, title, file_path
-                    FROM documents
-                    WHERE (?1 = '' OR title LIKE ?2 OR file_path LIKE ?2)
-                    ORDER BY updated_at DESC
+                    SELECT
+                        d.file_key,
+                        d.title,
+                        d.file_path,
+                        COALESCE(GROUP_CONCAT(t.name, ','), '') AS tags
+                    FROM documents d
+                    LEFT JOIN document_tags dt ON dt.document_id = d.id
+                    LEFT JOIN tags t ON t.id = dt.tag_id
+                    WHERE (?1 = ''
+                           OR d.title LIKE ?2
+                           OR d.file_path LIKE ?2
+                           OR EXISTS (
+                               SELECT 1
+                               FROM document_tags dt_filter
+                               JOIN tags t_filter ON t_filter.id = dt_filter.tag_id
+                               WHERE dt_filter.document_id = d.id
+                                 AND t_filter.name LIKE ?2
+                           ))
+                    GROUP BY d.id
+                    ORDER BY d.updated_at DESC
                     LIMIT ?3
                     ",
                 )
@@ -807,6 +824,18 @@ fn knowledge_graph(filter_text: String, limit: Option<i64>) -> Result<KnowledgeG
                         id: row.get(0)?,
                         title: row.get(1)?,
                         file_path: row.get(2)?,
+                        tags: row
+                            .get::<_, String>(3)?
+                            .split(',')
+                            .filter_map(|tag| {
+                                let trimmed = tag.trim();
+                                if trimmed.is_empty() {
+                                    None
+                                } else {
+                                    Some(trimmed.to_string())
+                                }
+                            })
+                            .collect(),
                     })
                 })
                 .map_err(|err| format!("Run graph node query failed: {}", err))?;
