@@ -1228,6 +1228,33 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
 
+### Slice 52
+
+- Scope:
+  - Wave 3 writing polish evidence refresh
+  - keep PR #7 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #7 current head with typecheck, production build, repo hygiene, diff check, immersive modes E2E, and layout profile status-bar regression coverage.
+  - Confirmed focus and typewriter behavior stays aligned across WYSIWYG, split source, and split preview editing surfaces.
+  - Updated the merge queue PR #7 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 3 writing polish evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
 ### Slice 46
 
 - Scope:

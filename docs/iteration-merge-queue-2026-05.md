@@ -34,7 +34,7 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 
 ## Readiness Snapshot
 
-Captured on 2026-05-15 after PR #1 fresh Wave 0 readiness verification, PR #12 current-branch Wave 0 gate verification, PR #13 graph-filter verification, and PR #14 build-health verification that cleared circular chunk warnings.
+Captured on 2026-05-15 after PR #1 fresh Wave 0 readiness verification, PR #7 immersive-writing verification, PR #12 current-branch Wave 0 gate verification, PR #13 graph-filter verification, and PR #14 build-health verification that cleared circular chunk warnings.
 
 | PR | Latest Evidence | Evidence Surface |
 |---:|---|---|
@@ -44,7 +44,7 @@ Captured on 2026-05-15 after PR #1 fresh Wave 0 readiness verification, PR #12 c
 | #4 | current head typecheck, build, repo hygiene, diff check, wikilink completion/backlink/unlinked mention E2E, and wikilink rename parser coverage | https://github.com/LaplaceYoung/MYmd/pull/4#issuecomment-4456336694 |
 | #5 | current head statusbar custom-paper fix, typecheck, build, repo hygiene, diff check, render API, export HTML, and export profile E2E | https://github.com/LaplaceYoung/MYmd/pull/5#issuecomment-4456385556 |
 | #6 | current head typecheck, build, repo hygiene, diff check, and task-list direct-toggle E2E | https://github.com/LaplaceYoung/MYmd/pull/6#issuecomment-4456428484 |
-| #7 | immersive E2E stabilization, typecheck, build, repo hygiene, diff check, immersive modes E2E | https://github.com/LaplaceYoung/MYmd/pull/7#issuecomment-4455167424 |
+| #7 | current head typecheck, build, repo hygiene, diff check, immersive modes E2E, and layout profile status-bar regression | https://github.com/LaplaceYoung/MYmd/pull/7#issuecomment-4456478062 |
 | #8 | typecheck, build, repo hygiene, diff check, render API frontmatter tests | https://github.com/LaplaceYoung/MYmd/pull/8#issuecomment-4455181429 |
 | #9 | typecheck, build, repo hygiene, diff check, plugin API tests | https://github.com/LaplaceYoung/MYmd/pull/9#issuecomment-4455215928 |
 | #10 | typecheck, build, repo hygiene, diff check, writing stats tests, benchmark link checks | https://github.com/LaplaceYoung/MYmd/pull/10#issuecomment-4455226982 |
