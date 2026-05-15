@@ -489,35 +489,32 @@
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
 
-### Slice 19
+### Slice 20
 
 - Scope:
-  - P2 task list direct toggle parity
-  - make GFM checklist items editable from the visual Markdown surface
+  - P2 writing polish regression coverage
+  - keep Focus Mode and Typewriter Mode consistent across WYSIWYG, Split source, and readonly preview surfaces
 - Planned touchpoints:
-  - `src/components/Editor/plugins/taskListTogglePlugin.ts`
-  - `src/components/Editor/WysiwygEditor.tsx`
-  - `src/styles/editor.css`
-  - `tests/e2e_task_list_toggle.spec.ts`
+  - `tests/e2e_immersive_modes.spec.ts`
   - `docs/markdown-roadmap-2026-05.md`
   - `docs/upgrade-execution-log.md`
 - Benchmark anchor:
-  - Typora and MarkText both make task lists feel like visual Markdown controls; MYmd now brings the same low-friction checklist loop into WYSIWYG while preserving Markdown as the source of truth.
-  - Sources: https://support.typora.io/Markdown-Reference/ and https://github.com/marktext/marktext
+  - iA Writer uses Focus Mode and Typewriter Scrolling to keep long-form writing centered on the current sentence and cursor; MYmd tracks the same writing-polish lane through existing Focus/Typewriter controls and cross-surface regression coverage.
+  - Source: https://ia.net/writer/support/editor/focus-mode
 - Product management baseline:
-  - WYSIWYG now renders parsed GFM task list items as visible checkboxes.
-  - Clicking a checkbox updates the underlying task item state and writes the checked/unchecked marker back into Markdown.
-  - Split mode source reflects the same checklist state after visual toggles.
-  - Split preview keeps the checkbox affordance disabled through the existing readonly preview boundary.
+  - Ribbon View controls toggle Focus Mode and Typewriter Mode in the shared editor store.
+  - WYSIWYG applies both immersive classes immediately.
+  - Split source and readonly preview inherit the same immersive mode state after switching views.
+  - Toggling both controls off removes the immersive classes from the source editor surface.
 - Verification target:
   - `npm run typecheck`
-  - `npx playwright test tests/e2e_task_list_toggle.spec.ts --reporter=line`
+  - `npx playwright test tests/e2e_immersive_modes.spec.ts --reporter=line`
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
 - Verification completed:
   - `npm run typecheck`
-  - `npx playwright test tests/e2e_task_list_toggle.spec.ts --reporter=line` with 1 test passed
+  - `npx playwright test tests/e2e_immersive_modes.spec.ts --reporter=line` with 1 test passed
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
