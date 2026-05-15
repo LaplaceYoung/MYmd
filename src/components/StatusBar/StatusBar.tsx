@@ -1,9 +1,11 @@
-﻿import { BookOpen, AlignLeft, ZoomIn, ZoomOut, FileText, List, Link2, Network, Search, RefreshCw, Bot, FileSpreadsheet } from 'lucide-react'
+import { useMemo } from 'react'
+import { BookOpen, AlignLeft, ZoomIn, ZoomOut, FileText, List, Link2, Network, Search, RefreshCw, Bot, FileSpreadsheet } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
 import { useI18n } from '@/i18n'
 import {
     getPaperPresetMeta,
 } from '@/utils/paper'
+import { calculateWritingStats } from '@/utils/writingStats'
 import './StatusBar.css'
 
 export function StatusBar() {
@@ -39,6 +41,7 @@ export function StatusBar() {
     const knowledgeIndexSkipped = useEditorStore(s => s.knowledgeIndexSkipped)
     const rebuildKnowledgeIndex = useEditorStore(s => s.rebuildKnowledgeIndex)
     const openGlobalSearch = useEditorStore(s => s.openGlobalSearch)
+    const writingStats = useMemo(() => calculateWritingStats(activeTab?.content ?? ''), [activeTab?.content])
 
     if (!activeTab) return <div className="statusbar statusbar--fluent" />
 
@@ -66,10 +69,10 @@ export function StatusBar() {
         return t('settings.exportPrint')
     }
 
-    const charCount = activeTab.content.length
-    const nonWhitespace = activeTab.content.replace(/\s/g, '').length
-    const wordCount = activeTab.content.trim().split(/\s+/).filter(Boolean).length
-    const readingTime = Math.max(1, Math.ceil(charCount / 400))
+    const charCount = writingStats.visibleCharacterCount
+    const nonWhitespace = writingStats.nonWhitespaceCharacterCount
+    const wordCount = writingStats.wordCount
+    const readingTime = writingStats.readingTimeMinutes
 
     let indexLabel = t('status.noWorkspace')
     const indexedCount = Math.max(0, (knowledgeIndexTotal || knowledgeIndexProcessed || 0) - knowledgeIndexSkipped)

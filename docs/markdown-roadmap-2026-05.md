@@ -71,7 +71,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 | Footnotes end-to-end | Long-form notes need scholarly and technical references | Milkdown GFM editor support stays available, shared HTML export renders references/endnotes, and raw Markdown remains searchable |
 | Image/resource workflow | Local-first files need deterministic asset storage | Paste/drop image creates stable relative path and survives rename/move |
 | Export matrix | Users expect HTML, PDF, image, and Docx paths | Benchmark documents export with headings, tables, KaTeX, Mermaid, images |
-| Writing polish | Long-form writers need focus and quality signals | Word count, reading time, focus/typewriter WYSIWYG+Split regression, optional style hints |
+| Writing polish | Long-form writers need focus and quality signals | Markdown-aware word count, CJK-aware reading time, focus/typewriter WYSIWYG+Split regression, optional style hints |
 
 ### P3: Ecosystem And Automation
 
@@ -100,8 +100,10 @@ Latest source refresh: `docs/benchmark-source-refresh-2026-05-15.md`
 - Joplin product overview: https://joplinapp.org/help/
 - Joplin Markdown support: https://joplinapp.org/help/apps/markdown/
 - Typora Markdown reference: https://support.typora.io/Markdown-Reference/
+- Typora word count: https://support.typora.io/Word-Count/
 - Obsidian basic formatting syntax: https://help.obsidian.md/syntax
 - iA Writer Focus Mode: https://ia.net/writer/support/editor/focus-mode
+- iA Writer Stats: https://ia.net/writer/support/editor/stats
 - iA Writer Style Check: https://ia.net/writer/support/editor/style-check
 - MarkText README: https://github.com/marktext/marktext
 - Zettlr footnotes: https://docs.zettlr.com/en/editor/footnotes/
