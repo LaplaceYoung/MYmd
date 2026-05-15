@@ -1831,3 +1831,34 @@
   - `npm run iteration:audit` with 44 checks passed.
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+
+### Release lane v1.4.3-hotfix9
+
+- Scope:
+  - package the merged Wave 3 editor production queue into a Windows release
+  - keep the local-first Markdown workflow release loop complete after PR #11 and PR #26 reached main
+- Release staging:
+  - `release/v1.4.3-hotfix9`
+  - `MYmd_1.4.3_x64-setup.exe`
+  - `MYmd_1.4.3_x64_en-US.msi`
+  - `MYmd-Electron-1.4.3-x64-portable.zip`
+  - `SHA256SUMS.txt`
+  - `RELEASE_NOTES.md`
+- Verification completed:
+  - `npm run build:tauri`
+  - `npm run build:electron`
+  - `node --check scripts/release-smoke-check.mjs`
+  - `npm run release:smoke -- --release-dir release/v1.4.3-hotfix9 --cdp-port 9554 --cli-cdp-port 9555`
+  - `npm run release:gate -- --skip-packaging --skip-smoke --release-dir release/v1.4.3-hotfix9`
+  - GitHub release verification for `v1.4.3-hotfix9`
+- Release smoke evidence:
+  - Electron title `MYmd - Markdown Editor`, root HTML length `25934`, blocking events `0`.
+  - Tauri title `MYmd`, screenshot contrast `255`, screenshot bytes `28005`.
+  - CLI indexing reported `documentHits: 1`, `headingHits: 5`, `tagHits: 4`, `blockingEventCount: 0`.
+- SHA256:
+  - `MYmd_1.4.3_x64-setup.exe`: `9478CEFF0F6BF5B6ACA6AC837934FE1BFFEF26D0A7107BD4D204188BF8C8CF48`
+  - `MYmd_1.4.3_x64_en-US.msi`: `85A09D686A76CE8A6BEA8A22420A092A58C314E92AADFE8AEA54FB86B2EC8064`
+  - `MYmd-Electron-1.4.3-x64-portable.zip`: `D5624E3C548D8B81AD87E4AAFC2A0A2562B6931DC5B98768484ECF3E168C73DA`
+- Published release:
+  - https://github.com/LaplaceYoung/MYmd/releases/tag/v1.4.3-hotfix9
