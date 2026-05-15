@@ -1392,6 +1392,32 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
 
+### Slice 57
+
+- Scope:
+  - post-Wave 0 merge queue state refresh
+  - make iteration audit understand merged PRs as first-class queue states
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Marked PR #1, #12, and #14 as merged after the Wave 0 main integration.
+  - Marked the remaining open PRs as dirty after Wave 0 main changes so the next merge work starts with explicit branch re-sync.
+  - Updated `npm run iteration:audit` to inspect each tracked PR directly and accept merged lifecycle states alongside open PR states.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
 ### Slice 46
 
 - Scope:

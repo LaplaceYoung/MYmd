@@ -38,7 +38,7 @@ const REQUIRED_DOCS = [
   },
   {
     path: "docs/upgrade-execution-log.md",
-    markers: ["### Slice 34", "### Slice 39", "### Slice 44", "### Slice 45", "### Slice 46", "### Slice 47", "### Slice 48", "### Slice 49", "### Slice 50", "### Slice 51", "### Slice 52", "### Slice 53", "### Slice 54", "### Slice 55", "### Slice 56", "Release lane v1.4.3-hotfix8"],
+    markers: ["### Slice 34", "### Slice 39", "### Slice 44", "### Slice 45", "### Slice 46", "### Slice 47", "### Slice 48", "### Slice 49", "### Slice 50", "### Slice 51", "### Slice 52", "### Slice 53", "### Slice 54", "### Slice 55", "### Slice 56", "### Slice 57", "Release lane v1.4.3-hotfix8"],
   },
   {
     path: "docs/wave0-review-handoff-2026-05.md",
@@ -50,7 +50,7 @@ const REQUIRED_DOCS = [
   },
 ];
 
-const REQUIRED_OPEN_PR_NUMBERS = Array.from({ length: 14 }, (_, index) => index + 1);
+const REQUIRED_PR_NUMBERS = Array.from({ length: 14 }, (_, index) => index + 1);
 const REQUIRED_RELEASE_ASSETS = [
   "MYmd_1.4.3_x64-setup.exe",
   "MYmd_1.4.3_x64_en-US.msi",
@@ -310,36 +310,31 @@ function verifyGitHubState() {
   }
 
   const queue = readRepoFile("docs/iteration-merge-queue-2026-05.md");
-  const prs = runGhJson([
-    "pr",
-    "list",
-    "--state",
-    "open",
-    "--json",
-    "number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url",
-    "--limit",
-    "25",
-  ]);
-
-  const prByNumber = new Map(prs.map((pr) => [pr.number, pr]));
-
-  for (const number of REQUIRED_OPEN_PR_NUMBERS) {
-    const pr = prByNumber.get(number);
+  for (const number of REQUIRED_PR_NUMBERS) {
+    const pr = runGhJson([
+      "pr",
+      "view",
+      String(number),
+      "--json",
+      "number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url,state,mergedAt",
+    ]);
     const exists = Boolean(pr);
-    addCheck(`open PR present: #${number}`, exists, exists ? pr.url : "missing from gh pr list");
+    addCheck(`PR present: #${number}`, exists, exists ? pr.url : "missing from gh pr view");
     if (!exists) {
-      fail(`PR #${number} is missing from the open PR queue`);
+      fail(`PR #${number} is missing from GitHub`);
       continue;
     }
 
-    const expectedState = `${pr.mergeStateStatus} / ${pr.reviewDecision}`;
+    const expectedState = pr.state === "MERGED"
+      ? `MERGED / ${pr.reviewDecision}`
+      : `${pr.mergeStateStatus} / ${pr.reviewDecision}`;
     const queueRow = queue.split(/\r?\n/).find((line) => line.startsWith(`| #${number} |`));
     const queueMatchesState = Boolean(queueRow?.includes(`| ${expectedState} |`));
     addCheck(
       `queue state matches GitHub: #${number}`,
       queueMatchesState,
       expectedState,
-      { branch: pr.headRefName, updatedAt: pr.updatedAt, queueRow },
+      { branch: pr.headRefName, state: pr.state, mergedAt: pr.mergedAt, updatedAt: pr.updatedAt, queueRow },
     );
     if (!queueMatchesState) {
       fail(`PR #${number} queue state should reflect ${expectedState}`);
