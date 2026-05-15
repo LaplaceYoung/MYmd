@@ -492,6 +492,42 @@
 ### Slice 19
 
 - Scope:
+  - P1 index progress and retry
+  - make workspace search/indexing status visible, trustworthy, and recoverable
+- Planned touchpoints:
+  - `src/knowledge/service.ts`
+  - `src/stores/editorStore.ts`
+  - `src/components/StatusBar/StatusBar.tsx`
+  - `src/components/Sidebar/FileExplorer.tsx`
+  - `src/utils/editorRuntime.ts`
+  - `tests/e2e_index_progress_retry.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Joplin exposes progress counts and retry flows around sync/index reliability; MYmd applies the same trust pattern to local workspace indexing.
+  - Obsidian-style status affordances informed the compact status-bar entry and details path.
+  - Sources checked by research agent: Joplin search/help/changelog and Obsidian search/sync/file-recovery docs.
+- Product management baseline:
+  - Workspace indexing now records skipped file count and per-file diagnostics while keeping the successful index usable.
+  - The status bar shows indexing progress, full indexed state, and partial-index retry state.
+  - The file explorer shows an indexing status card, skipped-file details, and a retry action that clears warnings after successful rebuild.
+  - Runtime state snapshots expose processed, total, and skipped counts for smoke/debug checks.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_index_progress_retry.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_index_progress_retry.spec.ts --reporter=line` with 1 test passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 19
+
+- Scope:
   - P0 build-health cleanup
   - reduce noisy Vite manual chunk warnings while preserving lazy editor/sidebar entrypoints
 - Planned touchpoints:
