@@ -77,7 +77,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 
 | Task | Product Reason | Acceptance Evidence |
 |---|---|---|
-| Read-only plugin API | Extension value grows after core workflows stabilize | Manifest, command registration, sidebar card, search provider API |
+| Read-only plugin API | Extension value grows after core workflows stabilize | Manifest plus stable command, sidebar card, and search provider ids with cleanup-safe registration |
 | Local render API / CLI | Automation unlocks docs pipelines and AI workflows | CLI/render API converts Markdown to export HTML deterministically |
 | Graph view filter set | Graph should support sensemaking, not just decoration | Filter by folder/tag/link depth and open node target |
 | Optional sync boundary design | Reliability story benefits from a future sync plan | ADR defines data ownership, conflict policy, and provider boundary |
@@ -97,7 +97,9 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 Latest source refresh: `docs/benchmark-source-refresh-2026-05-15.md`
 
 - Obsidian core plugins: https://obsidian.md/help/plugins
+- Obsidian community plugins: https://obsidian.md/plugins
 - Joplin product overview: https://joplinapp.org/help/
+- Joplin plugin API: https://joplinapp.org/api/references/plugin_api/
 - Joplin Markdown support: https://joplinapp.org/help/apps/markdown/
 - Typora Markdown reference: https://support.typora.io/Markdown-Reference/
 - Typora word count: https://support.typora.io/Word-Count/
