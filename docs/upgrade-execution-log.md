@@ -489,42 +489,39 @@
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
 
-### Slice 22
+### Slice 19
 
 - Scope:
-  - P2 footnote export rendering closure
-  - align long-form Markdown export with mainstream editor footnote syntax
+  - P2 task list direct toggle parity
+  - make GFM checklist items editable from the visual Markdown surface
 - Planned touchpoints:
-  - `src/utils/footnotes.ts`
-  - `src/utils/renderApi.ts`
-  - `src/components/Ribbon/Ribbon.tsx`
-  - `src/utils/paper.ts`
-  - `tests/render_api.spec.ts`
+  - `src/components/Editor/plugins/taskListTogglePlugin.ts`
+  - `src/components/Editor/WysiwygEditor.tsx`
+  - `src/styles/editor.css`
+  - `tests/e2e_task_list_toggle.spec.ts`
   - `docs/markdown-roadmap-2026-05.md`
   - `docs/upgrade-execution-log.md`
 - Benchmark anchor:
-  - Typora, Obsidian, and Zettlr all document `[^label]` style footnotes for long-form Markdown writing.
-  - Sources:
-    - https://support.typora.io/Markdown-Reference/
-    - https://help.obsidian.md/syntax
-    - https://docs.zettlr.com/en/editor/footnotes/
+  - Typora and MarkText both make task lists feel like visual Markdown controls; MYmd now brings the same low-friction checklist loop into WYSIWYG while preserving Markdown as the source of truth.
+  - Sources: https://support.typora.io/Markdown-Reference/ and https://github.com/marktext/marktext
 - Product management baseline:
-  - Milkdown GFM already provides editor-side footnote schema support.
-  - The shared export lane now converts raw Markdown footnote references into accessible HTML noterefs and an endnotes section.
-  - Ribbon HTML export uses the same footnote preprocessor as the automation-facing render API.
-  - Export CSS adds visible footnote reference, endnote, target-highlight, and backlink styling.
+  - WYSIWYG now renders parsed GFM task list items as visible checkboxes.
+  - Clicking a checkbox updates the underlying task item state and writes the checked/unchecked marker back into Markdown.
+  - Split mode source reflects the same checklist state after visual toggles.
+  - Split preview keeps the checkbox affordance disabled through the existing readonly preview boundary.
 - Verification target:
   - `npm run typecheck`
-  - `npx playwright test tests/render_api.spec.ts --reporter=line`
+  - `npx playwright test tests/e2e_task_list_toggle.spec.ts --reporter=line`
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
 - Verification completed:
-  - `npx playwright test tests/render_api.spec.ts --reporter=line` with 3 tests passed
   - `npm run typecheck`
+  - `npx playwright test tests/e2e_task_list_toggle.spec.ts --reporter=line` with 1 test passed
   - `npm run build`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+  - Build keeps the existing vendor chunk size and circular chunk warnings for the current editor/diagram dependency stack.
 
 ### Slice 21
 
