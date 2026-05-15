@@ -256,7 +256,30 @@ function cdpClient(webSocketUrl) {
     opened,
     events,
     send,
-    close: () => ws.close(),
+    close: () =>
+      new Promise((resolve) => {
+        if (ws.readyState === WebSocket.CLOSED) {
+          resolve();
+          return;
+        }
+
+        const timer = setTimeout(resolve, 1000);
+        ws.addEventListener(
+          "close",
+          () => {
+            clearTimeout(timer);
+            resolve();
+          },
+          { once: true },
+        );
+
+        try {
+          ws.close();
+        } catch {
+          clearTimeout(timer);
+          resolve();
+        }
+      }),
   };
 }
 
@@ -346,7 +369,7 @@ async function smokeElectron(options) {
       blockingEventCount: blockingEvents.length,
     };
     writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`);
-    client.close();
+    await client.close();
     return summary;
   } finally {
     await killProcessTree(child.pid);
@@ -369,6 +392,38 @@ async function killProcessTree(pid) {
   } catch {
     // already exited
   }
+}
+
+async function killProcessesByPath(processPaths) {
+  const targets = processPaths.filter(Boolean).map((targetPath) => path.resolve(targetPath).toLowerCase());
+  if (process.platform !== "win32" || targets.length === 0) return;
+
+  const targetList = targets.map((targetPath) => `'${targetPath.replace(/'/g, "''")}'`).join(",");
+  const command = `
+$targets = @(${targetList})
+Get-Process -ErrorAction SilentlyContinue |
+  Where-Object { $_.Path -and ($targets -contains $_.Path.ToLowerInvariant()) } |
+  Stop-Process -Force -ErrorAction SilentlyContinue
+`;
+
+  await new Promise((resolve) => {
+    const killer = spawn("powershell", ["-NoProfile", "-Command", command], {
+      windowsHide: true,
+      stdio: "ignore",
+    });
+    const timeout = setTimeout(() => {
+      killer.kill();
+      resolve();
+    }, 5000);
+    killer.on("close", () => {
+      clearTimeout(timeout);
+      resolve();
+    });
+    killer.on("error", () => {
+      clearTimeout(timeout);
+      resolve();
+    });
+  });
 }
 
 function writeTauriSmokeScript(scriptPath, options) {
@@ -675,7 +730,7 @@ async function smokeCliIndexing(options) {
       blockingEventCount: blockingEvents.length,
     };
     writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`);
-    client.close();
+    await client.close();
     return summary;
   } finally {
     await killProcessTree(child.pid);
@@ -708,10 +763,13 @@ async function main() {
     results.checks.cliIndexing = await smokeCliIndexing(options);
   }
 
+  await killProcessesByPath([options.electronExe, options.tauriExe]);
+
   const summaryPath = path.join(options.outputDir, "release-smoke-summary.json");
   writeFileSync(summaryPath, `${JSON.stringify(results, null, 2)}\n`);
   console.log(JSON.stringify(results, null, 2));
   console.log(`Release smoke check passed. Summary: ${summaryPath}`);
+  process.exit(0);
 }
 
 main().catch((error) => {
