@@ -48,7 +48,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 | Add release smoke automation to project docs | Packaging quality has direct user impact | `npm run release:smoke` covers Tauri installer, MSI, Electron portable, checksum, screenshot/DOM smoke |
 | Keep search entry semantics unified | Titlebar search, command search, and global search should feel predictable | E2E covers titlebar search, modal search, keyboard result open |
 | Keep CLI/file association indexing path covered | Double-click/open-with should feed the knowledge loop | `npm run release:smoke` verifies CLI open plus document, heading, and tag search recall |
-| Track known build warnings | Large editor chunks need visible ownership | Release notes mention current chunk warnings and owner lane |
+| Track build warning ownership | Circular manual chunk warnings and SourceEditor language-data overreach are closed; remaining editor/diagram chunks need visible ownership | Release notes mention remaining WYSIWYG/source editor and Mermaid definition chunk warnings with owner lane |
 
 ### P1: Natural Knowledge Workflow
 
@@ -57,9 +57,9 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 | Wikilink file/heading completion | Users should discover linking by typing naturally | Source/Split typing `[[` shows ranked file suggestions, `[[Alpha` shows heading targets, and selection inserts valid Markdown |
 | Tag completion in knowledge entry points | Tags should feel searchable and reusable from everyday writing | Source/Split typing `#pro` shows indexed tag suggestions, supports nested tags, and inserts a valid tag |
 | Backlink context snippets | Backlinks should answer why a document is connected | Panel groups linked/unlinked mentions, shows snippet, heading label, and jump target |
-| Unlinked mentions | Knowledge network should grow from existing writing | Mention query finds candidate text and converts it into a link |
-| Index progress and retry | Workspace indexing should feel reliable and explainable | UI shows idle/indexing/error/progress and retry path |
-| Preview/edit isolation | Reading mode should stay stable during navigation | Regression prevents pure preview from entering edit state unexpectedly |
+| Unlinked mentions | Knowledge network should grow from existing writing | Mention query finds candidate text, converts it into a link, reindexes the source note, and refreshes the backlink panel |
+| Index progress and retry | Workspace indexing should feel reliable and explainable | UI shows idle/indexing/error/progress, skipped-file details, and retry recovery |
+| Preview/edit isolation | Reading mode should stay stable during navigation | Regression prevents split preview from writing content, dirtying clean tabs, or registering editing commands |
 
 ### P2: Editor Production Power
 
@@ -91,6 +91,8 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 | Release candidate | Installer/portable distribution | Tauri smoke, Electron smoke, checksums, GitHub release verification |
 
 ## Source Anchors
+
+Latest source refresh: `docs/benchmark-source-refresh-2026-05-15.md`
 
 - Obsidian core plugins: https://obsidian.md/help/plugins
 - Joplin product overview: https://joplinapp.org/help/
