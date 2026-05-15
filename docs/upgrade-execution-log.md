@@ -489,6 +489,39 @@
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
 
+### Slice 24
+
+- Scope:
+  - P2 deterministic image asset naming
+  - make paste/drop image resource paths stable, safe, and reusable across editor surfaces
+- Planned touchpoints:
+  - `src/utils/localAssets.ts`
+  - `src/utils/fileUtils.ts`
+  - `tests/local_assets.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - MarkText treats direct clipboard image paste as a core editor capability; MYmd keeps that daily workflow local-first by making persisted asset names deterministic and relative.
+  - Source: https://github.com/marktext/marktext
+- Product management baseline:
+  - Image asset names now combine a sanitized base name, safe image extension, and stable content hash.
+  - Identical pasted/dropped image bytes produce the same asset file name, while changed bytes produce a different name.
+  - Unsafe source extensions are replaced with image MIME-derived extensions.
+  - Source and WYSIWYG image paths keep using the same `assets/{fileName}` relative path contract through `fileUtils`.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/local_assets.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/local_assets.spec.ts --reporter=line` with 4 tests passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Known risk:
+  - Production build still reports existing circular chunk and over-500 kB chunk warnings for the heavy editor and diagram vendor stack.
 ### Slice 23
 
 - Scope:
