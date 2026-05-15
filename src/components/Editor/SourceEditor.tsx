@@ -2,7 +2,6 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror'
 import { SearchCursor, SearchQuery, getSearchQuery, setSearchQuery, findNext, findPrevious, replaceNext, replaceAll, search } from '@codemirror/search'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
-import { languages } from '@codemirror/language-data'
 import { acceptCompletion, autocompletion, startCompletion, type Completion, type CompletionContext } from '@codemirror/autocomplete'
 import { Decoration, EditorView, keymap, type DecorationSet } from '@codemirror/view'
 import { Prec, RangeSetBuilder, StateField, type EditorState } from '@codemirror/state'
@@ -13,6 +12,7 @@ import { extractImageFileFromDataTransfer, readImageFromClipboardApi } from '@/u
 import { buildMediaEmbedSnippet } from '@/utils/mediaEmbeds'
 import { getHtmlPasteMarkdown } from '@/utils/htmlPaste'
 import { convertFileSrc } from '@tauri-apps/api/core'
+import { commonMarkdownCodeLanguages } from './commonMarkdownCodeLanguages'
 
 interface SourceEditorProps {
     tabId: string
@@ -516,7 +516,7 @@ export function SourceEditor({ tabId, content }: SourceEditorProps) {
                         top: false,
                     }),
                     sourceSearchHighlightField,
-                    markdown({ base: markdownLanguage, codeLanguages: languages }),
+                    markdown({ base: markdownLanguage, codeLanguages: commonMarkdownCodeLanguages }),
                     wikilinkCompletionTrigger,
                     tagCompletionTrigger,
                     wikilinkCompletionKeymap,

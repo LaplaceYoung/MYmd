@@ -369,6 +369,20 @@ export function buildExportHtmlStyle(
                 color: #8b949e;
                 border-color: rgba(139, 148, 158, 0.32);
             }
+            .frontmatter-properties {
+                border-color: rgba(96, 165, 250, 0.28);
+                background: rgba(15, 23, 42, 0.72);
+                color: #c9d1d9;
+            }
+            .frontmatter-properties__title {
+                color: #93c5fd;
+            }
+            .frontmatter-properties dt {
+                color: #94a3b8;
+            }
+            .frontmatter-properties dd {
+                color: #e2e8f0;
+            }
         }`
         : ''
 
@@ -417,6 +431,39 @@ export function buildExportHtmlStyle(
         .export-meta__detail {
             text-align: right;
         }
+        .frontmatter-properties {
+            margin: 0 0 24px;
+            padding: 16px 18px;
+            border: 1px solid rgba(37, 99, 235, 0.16);
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(248, 250, 252, 0.92));
+            color: #334155;
+        }
+        .frontmatter-properties__title {
+            margin-bottom: 10px;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .frontmatter-properties dl {
+            display: grid;
+            grid-template-columns: minmax(96px, 0.34fr) 1fr;
+            gap: 8px 16px;
+            margin: 0;
+        }
+        .frontmatter-properties__row {
+            display: contents;
+        }
+        .frontmatter-properties dt {
+            color: #475569;
+            font-weight: 650;
+        }
+        .frontmatter-properties dd {
+            margin: 0;
+            color: #0f172a;
+        }
         #content {
             min-height: ${bodyMinHeight};
         }
@@ -440,6 +487,36 @@ export function buildExportHtmlStyle(
             border-left: 4px solid rgba(37, 99, 235, 0.4);
             background: rgba(37, 99, 235, 0.06);
             color: #334155;
+        }
+        .footnote-ref {
+            font-size: 0.78em;
+            vertical-align: super;
+            line-height: 0;
+        }
+        .footnote-ref a {
+            padding: 0 0.15em;
+        }
+        .footnotes {
+            margin-top: 2.4em;
+            color: #475569;
+            font-size: 0.9em;
+        }
+        .footnotes hr {
+            width: 34%;
+            margin: 0 0 1em;
+            border: 0;
+            border-top: 1px solid rgba(15, 23, 42, 0.18);
+        }
+        .footnotes ol {
+            padding-left: 1.4em;
+        }
+        .footnotes__item:target {
+            background: rgba(37, 99, 235, 0.08);
+            border-radius: 8px;
+        }
+        .footnote-backref {
+            margin-left: 0.35em;
+            font-size: 0.84em;
         }
         table {
             width: max-content;

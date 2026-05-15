@@ -58,6 +58,8 @@ export function FileExplorer() {
     const knowledgeIndexProcessed = useEditorStore((s) => s.knowledgeIndexProcessed)
     const knowledgeIndexTotal = useEditorStore((s) => s.knowledgeIndexTotal)
     const knowledgeIndexError = useEditorStore((s) => s.knowledgeIndexError)
+    const knowledgeIndexSkipped = useEditorStore((s) => s.knowledgeIndexSkipped)
+    const knowledgeIndexFailedFiles = useEditorStore((s) => s.knowledgeIndexFailedFiles)
     const rebuildKnowledgeIndex = useEditorStore((s) => s.rebuildKnowledgeIndex)
 
     const [fileTree, setFileTree] = useState<FileNode[]>([])
@@ -409,6 +411,9 @@ export function FileExplorer() {
 
     if (!fileExplorerVisible) return null
 
+    const indexedCount = Math.max(0, (knowledgeIndexTotal || knowledgeIndexProcessed || 0) - knowledgeIndexSkipped)
+    const hasIndexWarnings = knowledgeIndexStatus === 'idle' && knowledgeIndexSkipped > 0
+
     const actionTitle = actionMode === 'create-file'
         ? '新建文档'
         : actionMode === 'create-folder'
@@ -490,22 +495,61 @@ export function FileExplorer() {
                             )}
 
                             {knowledgeIndexStatus === 'indexing' && (
-                                <div className="file-explorer__error" role="status" aria-live="polite">
+                                <div className="file-explorer__index-status file-explorer__index-status--indexing" role="status" aria-live="polite">
                                     <RefreshCw size={14} className="spinning" />
-                                    <span>
-                                        正在建立索引 {knowledgeIndexProcessed}/{knowledgeIndexTotal || '?'}
-                                    </span>
+                                    <div className="file-explorer__index-copy">
+                                        <span>正在建立索引 {knowledgeIndexProcessed}/{knowledgeIndexTotal || '?'}</span>
+                                        <small>搜索结果会随索引进度更新。</small>
+                                    </div>
                                 </div>
                             )}
 
                             {knowledgeIndexStatus === 'error' && knowledgeIndexError && (
-                                <div className="file-explorer__error" role="status" aria-live="polite">
+                                <div className="file-explorer__index-status file-explorer__index-status--error" role="status" aria-live="polite">
                                     <AlertCircle size={14} />
-                                    <span>{knowledgeIndexError}</span>
+                                    <div className="file-explorer__index-copy">
+                                        <span>{knowledgeIndexError}</span>
+                                        <small>搜索会使用上一次可用索引。</small>
+                                        {knowledgeIndexFailedFiles.length > 0 && (
+                                            <details className="file-explorer__index-details">
+                                                <summary>查看 {knowledgeIndexFailedFiles.length} 个文件</summary>
+                                                {knowledgeIndexFailedFiles.slice(0, 5).map((item) => (
+                                                    <div key={item.filePath} className="file-explorer__index-file" title={`${item.filePath}\n${item.message}`}>
+                                                        {basenameFromPath(item.filePath)}
+                                                    </div>
+                                                ))}
+                                            </details>
+                                        )}
+                                    </div>
                                     <button
                                         className="btn-secondary btn-small"
                                         onClick={() => void rebuildKnowledgeIndex()}
-                                        style={{ marginLeft: 'auto' }}
+                                    >
+                                        重试索引
+                                    </button>
+                                </div>
+                            )}
+
+                            {hasIndexWarnings && (
+                                <div className="file-explorer__index-status file-explorer__index-status--warning" role="status" aria-live="polite">
+                                    <AlertCircle size={14} />
+                                    <div className="file-explorer__index-copy">
+                                        <span>已索引 {indexedCount} 个文件，{knowledgeIndexSkipped} 个需重试</span>
+                                        <small>搜索可继续使用已索引内容。</small>
+                                        {knowledgeIndexFailedFiles.length > 0 && (
+                                            <details className="file-explorer__index-details">
+                                                <summary>查看跳过文件</summary>
+                                                {knowledgeIndexFailedFiles.slice(0, 5).map((item) => (
+                                                    <div key={item.filePath} className="file-explorer__index-file" title={`${item.filePath}\n${item.message}`}>
+                                                        {basenameFromPath(item.filePath)}
+                                                    </div>
+                                                ))}
+                                            </details>
+                                        )}
+                                    </div>
+                                    <button
+                                        className="btn-secondary btn-small"
+                                        onClick={() => void rebuildKnowledgeIndex()}
                                     >
                                         重试索引
                                     </button>
