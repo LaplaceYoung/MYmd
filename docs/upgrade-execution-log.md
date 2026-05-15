@@ -1282,6 +1282,33 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
 
+### Slice 54
+
+- Scope:
+  - Wave 3 writing stats evidence refresh
+  - keep PR #10 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #10 current head with typecheck, Markdown-aware writing stats tests, benchmark source link checks, production build, repo hygiene, and diff check.
+  - Confirmed writing stats count visible Markdown text across syntax stripping, frontmatter/comment/table handling, mixed CJK and Latin prose, and empty documents.
+  - Updated the merge queue PR #10 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 3 writing stats evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
 ### Slice 46
 
 - Scope:
