@@ -15,8 +15,9 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 5. Verify with targeted tests first, then broad build checks.
 6. Record evidence in `docs/upgrade-execution-log.md`.
 7. Update `docs/iteration-merge-queue-2026-05.md` when the slice creates or changes a PR.
-8. Package and publish only after desktop smoke evidence exists.
-9. Update project memory with environment, release, or debugging lessons.
+8. Run `npm run iteration:audit` when release-management evidence changes.
+9. Package and publish only after desktop smoke evidence exists.
+10. Update project memory with environment, release, or debugging lessons.
 
 ## Planning Template
 
@@ -47,6 +48,7 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 | Tauri smoke | Run `E:\EnvConfig\rust_target\release\app.exe` and capture UI evidence | Installer release |
 | Electron smoke | Run portable EXE with CDP screenshot and DOM text evidence | Portable release |
 | Release smoke automation | `npm run release:smoke` | Local release verification |
+| Iteration evidence audit | `npm run iteration:audit` | Release-management and active-goal audit updates |
 | CLI indexing smoke | Included in `npm run release:smoke` | File association / CLI release verification |
 | Checksums | `Get-FileHash -Algorithm SHA256` for each release asset | GitHub release |
 | Release verification | `gh release view <tag> --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets` | GitHub release |

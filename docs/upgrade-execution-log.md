@@ -760,3 +760,32 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
   - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+
+### Slice 35
+
+- Scope:
+  - active-goal evidence audit automation
+  - make release-management checks repeatable from `npm`
+- Planned touchpoints:
+  - `scripts/iteration-goal-audit.mjs`
+  - `package.json`
+  - `docs/release-iteration-playbook.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added `npm run iteration:audit` to verify the roadmap, release playbook, merge queue, active-goal audit, execution log, Wave 0 handoff, open PR queue state, and latest release assets.
+  - Added an `--offline` option for docs-only checks and `--json` output for machine-readable audit reports.
+- Verification target:
+  - `npm run iteration:audit`
+  - `npm run iteration:audit -- --offline`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run iteration:audit`
+  - `npm run iteration:audit -- --offline`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`

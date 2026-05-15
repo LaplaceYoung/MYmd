@@ -26,7 +26,7 @@ Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading, retry h
 |---|---|---|---|
 | Benchmark-aligned product direction | `docs/markdown-roadmap-2026-05.md` mainstream matrix and P0-P3 backlog | Covered | Refresh when benchmark sources change roadmap priority |
 | Feature-gap closure path | PR #1-#14 plus roadmap acceptance rows | In progress | Review gates must clear before merge waves can land |
-| Iteration management mechanism | `docs/release-iteration-playbook.md`, `docs/iteration-merge-queue-2026-05.md`, `docs/wave0-review-handoff-2026-05.md`, this audit | Covered | Keep queue synchronized after every PR update |
+| Iteration management mechanism | `docs/release-iteration-playbook.md`, `docs/iteration-merge-queue-2026-05.md`, `docs/wave0-review-handoff-2026-05.md`, `npm run iteration:audit`, this audit | Covered | Keep queue synchronized after every PR update |
 | Implementation evidence | PR #1-#14 branches and linked verification comments | In progress | Merge Wave 0 into `main`, then continue waves 1-4 |
 | Verification evidence | PR comments, `npm run typecheck`, `npm run build`, targeted E2E/unit gates, repo hygiene, production preview smoke, split-preview editor sync smoke | Covered for current open slices | Re-run gates after branch sync or merge |
 | Packaging and release evidence | GitHub Release `v1.4.3-hotfix8` with NSIS, MSI, Electron portable, release notes, SHA256 sums | Covered for latest shipped release | Package the next release after a wave reaches `main` |
@@ -42,6 +42,7 @@ Completion decision: the active goal remains ongoing because PR #1-#14 are open 
 | Align with mainstream Markdown readers/editors | `docs/markdown-roadmap-2026-05.md` | Benchmark matrix covers Obsidian, Joplin, Typora, iA Writer, MarkText, Zettlr, Cherry Markdown, and doocs/md | Covered | Refresh when a new benchmark source changes product direction |
 | Close MYmd feature gaps | `docs/markdown-roadmap-2026-05.md` | P0-P3 backlog maps product reasons to acceptance evidence | Covered | Pull next slice from open P1/P2/P3 backlog after current PR wave clears review |
 | Build version iteration management | `docs/release-iteration-playbook.md` | Iteration loop, planning template, required gates, smoke checklist, and release asset checklist exist | Covered | Keep playbook aligned with new release automation |
+| Automate active-goal evidence checks | `scripts/iteration-goal-audit.mjs`, `package.json` | `npm run iteration:audit` checks roadmap, playbook, queue, active audit, execution log, Wave 0 handoff, PR queue state, and release assets | Covered | Run after release-management evidence changes |
 | Sequence current implementation work | `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 have lanes, states, merge waves, triggers, and verification links | Covered | Update after any PR merge, close, replace, or rebase |
 | Clear Wave 0 review path | `docs/wave0-review-handoff-2026-05.md` | PR #1, #14, and #12 have review order, reviewer checklist, main-branch gate, and packaging trigger | Covered | Use this handoff while review gates clear |
 | Attach verification evidence to slices | PR comments and `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 readiness rows link to verification comments | Covered | Re-run gates after main sync or branch rebase |
@@ -72,6 +73,7 @@ Completion decision: the active goal remains ongoing because PR #1-#14 are open 
 ```bash
 gh release view --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets
 gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25
+npm run iteration:audit
 rg -n "v1.4.3-hotfix8|PR #14|vite-chunk|Mermaid|chunk|release:smoke|build:tauri|build:electron" README.md README_en.md docs/markdown-roadmap-2026-05.md docs/release-iteration-playbook.md docs/iteration-merge-queue-2026-05.md docs/upgrade-execution-log.md docs/active-goal-artifact-audit-2026-05.md
 ```
 

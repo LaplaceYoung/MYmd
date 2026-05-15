@@ -9,6 +9,7 @@
     "build": "vite build",
     "build:electron": "npm run build && electron-builder --config electron-builder.json",
     "release:smoke": "node scripts/release-smoke-check.mjs",
+    "iteration:audit": "node scripts/iteration-goal-audit.mjs",
     "ci:repo-hygiene": "node scripts/repo-hygiene-check.mjs",
     "ci:check": "npm run ci:repo-hygiene && npm run build",
     "preview": "vite preview",
