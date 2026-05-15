@@ -837,6 +837,7 @@
   - Hardened the GitHub-backed audit command with bounded retries after a transient `gh release view` EOF surfaced during verification.
 - Verification target:
   - `npm run iteration:audit`
+  - `npm run iteration:audit -- --check-sources`
   - `npm run iteration:audit -- --offline`
   - `node --check scripts/iteration-goal-audit.mjs`
   - `npm run typecheck`
@@ -844,6 +845,7 @@
   - `git diff --check`
 - Verification completed:
   - `npm run iteration:audit`
+  - `npm run iteration:audit -- --check-sources`
   - `npm run iteration:audit -- --offline`
   - `node --check scripts/iteration-goal-audit.mjs`
   - `npm run typecheck`

@@ -40,6 +40,7 @@ Completion decision: the active goal remains ongoing because PR #1-#14 are open 
 | Requirement | Artifact | Current Evidence | Status | Next Action |
 |---|---|---|---|---|
 | Align with mainstream Markdown readers/editors | `docs/markdown-roadmap-2026-05.md`, `docs/benchmark-source-refresh-2026-05-15.md` | Benchmark matrix covers Obsidian, Joplin, Typora, iA Writer, MarkText, Zettlr, Cherry Markdown, and doocs/md with a 2026-05-15 source refresh | Covered | Refresh when a new benchmark source changes product direction |
+| Verify benchmark source availability | `npm run iteration:audit -- --check-sources` | Source refresh URLs are fetchable through the iteration audit source-link mode | Covered | Run when source anchors change |
 | Close MYmd feature gaps | `docs/markdown-roadmap-2026-05.md` | P0-P3 backlog maps product reasons to acceptance evidence | Covered | Pull next slice from open P1/P2/P3 backlog after current PR wave clears review |
 | Build version iteration management | `docs/release-iteration-playbook.md` | Iteration loop, planning template, required gates, smoke checklist, and release asset checklist exist | Covered | Keep playbook aligned with new release automation |
 | Automate active-goal evidence checks | `scripts/iteration-goal-audit.mjs`, `package.json` | `npm run iteration:audit` checks roadmap, playbook, queue, active audit, execution log, Wave 0 handoff, PR queue state, and release assets | Covered | Run after release-management evidence changes |
@@ -77,6 +78,7 @@ Completion decision: the active goal remains ongoing because PR #1-#14 are open 
 gh release view --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets
 gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25
 npm run iteration:audit
+npm run iteration:audit -- --check-sources
 rg -n "v1.4.3-hotfix8|PR #14|vite-chunk|Mermaid|chunk|release:smoke|build:tauri|build:electron" README.md README_en.md docs/markdown-roadmap-2026-05.md docs/release-iteration-playbook.md docs/iteration-merge-queue-2026-05.md docs/upgrade-execution-log.md docs/active-goal-artifact-audit-2026-05.md
 ```
 

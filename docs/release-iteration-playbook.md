@@ -50,6 +50,7 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 | Electron smoke | Run portable EXE with CDP screenshot and DOM text evidence | Portable release |
 | Release smoke automation | `npm run release:smoke` | Local release verification |
 | Iteration evidence audit | `npm run iteration:audit` | Release-management and active-goal audit updates |
+| Benchmark source links | `npm run iteration:audit -- --check-sources` | Benchmark source refresh |
 | CLI indexing smoke | Included in `npm run release:smoke` | File association / CLI release verification |
 | Checksums | `Get-FileHash -Algorithm SHA256` for each release asset | GitHub release |
 | Release verification | `gh release view <tag> --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets` | GitHub release |

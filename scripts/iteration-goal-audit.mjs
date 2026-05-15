@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OFFLINE = process.argv.includes("--offline");
 const JSON_OUTPUT = process.argv.includes("--json");
+const CHECK_SOURCES = process.argv.includes("--check-sources");
 
 const REQUIRED_DOCS = [
   {
@@ -68,7 +69,7 @@ function fail(message) {
 
 function runGhJson(args) {
   let lastError;
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
+  for (let attempt = 1; attempt <= 6; attempt += 1) {
     try {
       const output = execFileSync("gh", args, {
         cwd: ROOT,
@@ -78,12 +79,82 @@ function runGhJson(args) {
       return JSON.parse(output);
     } catch (error) {
       lastError = error;
-      if (attempt < 3) {
-        sleep(400 * attempt);
+      if (attempt < 6) {
+        sleep(Math.min(1000 * attempt, 5000));
       }
     }
   }
   throw lastError;
+}
+
+function extractBenchmarkSourceUrls() {
+  const content = readRepoFile("docs/benchmark-source-refresh-2026-05-15.md");
+  const sourceStart = content.indexOf("## Sources");
+  const sourceBlock = sourceStart >= 0 ? content.slice(sourceStart) : content;
+  const urls = new Set();
+  for (const line of sourceBlock.split(/\r?\n/)) {
+    const matches = line.match(/https?:\/\/[^\s)]+/g) ?? [];
+    for (const match of matches) {
+      urls.add(match.replace(/[.,;]+$/, ""));
+    }
+  }
+  return [...urls];
+}
+
+async function fetchWithRetry(url) {
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      const response = await fetch(url, {
+        redirect: "follow",
+        signal: controller.signal,
+        headers: {
+          "User-Agent": "MYmd-iteration-audit",
+        },
+      });
+      response.body?.cancel();
+      return { status: response.status, finalUrl: response.url };
+    } catch (error) {
+      lastError = error;
+      if (attempt < 3) {
+        await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+      }
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+  throw lastError;
+}
+
+async function verifyBenchmarkSourceLinks() {
+  if (!CHECK_SOURCES) return;
+  if (OFFLINE) {
+    addCheck("benchmark source links", true, "skipped with --offline");
+    return;
+  }
+
+  const urls = extractBenchmarkSourceUrls();
+  addCheck("benchmark source URL inventory", urls.length > 0, `${urls.length} URLs`);
+  if (urls.length === 0) {
+    fail("benchmark source refresh should include source URLs");
+    return;
+  }
+
+  for (const url of urls) {
+    try {
+      const result = await fetchWithRetry(url);
+      const passed = result.status >= 200 && result.status < 400;
+      addCheck(`benchmark source link: ${url}`, passed, `${result.status} ${result.finalUrl}`);
+      if (!passed) {
+        fail(`${url} returned HTTP ${result.status}`);
+      }
+    } catch (error) {
+      addCheck(`benchmark source link: ${url}`, false, error instanceof Error ? error.message : String(error));
+      fail(`${url} could not be fetched`);
+    }
+  }
 }
 
 function sleep(ms) {
@@ -200,6 +271,7 @@ function printResult() {
     passed,
     checkedAt: new Date().toISOString(),
     offline: OFFLINE,
+    checkSources: CHECK_SOURCES,
     checkCount: checks.length,
     blockers,
     checks,
@@ -227,14 +299,15 @@ function printResult() {
   return false;
 }
 
-function main() {
+async function main() {
   verifyDocs();
   verifyPackageScript();
   verifyGitHubState();
+  await verifyBenchmarkSourceLinks();
 
   if (!printResult()) {
     process.exit(1);
   }
 }
 
-main();
+await main();
