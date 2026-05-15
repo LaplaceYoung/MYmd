@@ -1647,3 +1647,26 @@
   - `npm run iteration:audit` with 44 checks passed.
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 61
+
+- Scope:
+  - post-Wave 3 PR #6 merge queue state refresh
+  - keep merged task-list direct toggle state auditable before the next Wave 3 PR
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Marked PR #6 as merged after the daily editing checklist toggle lane reached main.
+  - Kept the remaining Wave 3 editor production PRs in the dirty review queue for targeted re-sync.
+  - Preserved the staged release rule that installer packaging starts after merged main evidence is current.
+- Verification target:
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`

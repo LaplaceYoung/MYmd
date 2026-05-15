@@ -22,7 +22,7 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 | #3 | `young/preview-edit-isolation` | P1 reading/editing safety | MERGED / REVIEW_REQUIRED | 1 | Wave 1 merged to main |
 | #4 | `young/unlinked-mentions-closure` | P1 knowledge network | MERGED / REVIEW_REQUIRED | 2 | Wave 2 merged to main |
 | #5 | `young/footnotes-render-export-coverage` | P2 render/export fidelity | MERGED / REVIEW_REQUIRED | 3 | Wave 3 PR #5 merged to main |
-| #6 | `young/task-list-direct-toggle` | P2 daily editing | DIRTY / REVIEW_REQUIRED | 3 | Re-sync after Wave 0 main changes before merge |
+| #6 | `young/task-list-direct-toggle` | P2 daily editing | MERGED / REVIEW_REQUIRED | 3 | Wave 3 PR #6 merged to main |
 | #7 | `young/focus-typewriter-regression` | P2 writing polish | DIRTY / REVIEW_REQUIRED | 3 | Re-sync after Wave 0 main changes before merge |
 | #8 | `young/frontmatter-export-properties` | P2 export/properties | DIRTY / REVIEW_REQUIRED | 3 | Re-sync after Wave 0 main changes before merge |
 | #9 | `young/readonly-plugin-api-contract` | P3 extension surface | DIRTY / REVIEW_REQUIRED | 4 | Re-sync after Wave 0 main changes before merge |
