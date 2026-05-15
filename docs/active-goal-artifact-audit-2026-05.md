@@ -20,40 +20,38 @@ This audit keeps that goal measurable. It maps the active objective to concrete 
 
 ## Completion Audit Refresh
 
-Captured on 2026-05-15 after PR #1, PR #12, and PR #14 gained fresh Wave 0 evidence for stability verification, current-branch gate status, release preflight, and build-health warning ownership.
+Captured on 2026-05-15 after Wave 3 editor production work reached main and `v1.4.3-hotfix9` was published with NSIS, MSI, Electron portable, SHA256, release notes, release smoke, and GitHub release verification.
 
 | Deliverable | Evidence Inspected | Current State | Gap To Close |
 |---|---|---|---|
-| Benchmark-aligned product direction | `docs/markdown-roadmap-2026-05.md`, `docs/benchmark-source-refresh-2026-05-15.md` mainstream matrix and P0-P3 backlog | Covered | Refresh when benchmark sources change roadmap priority |
-| Feature-gap closure path | PR #1-#14 plus roadmap acceptance rows | In progress | Review gates must clear before merge waves can land |
-| Iteration management mechanism | `docs/release-iteration-playbook.md`, `docs/iteration-merge-queue-2026-05.md`, `docs/wave0-review-handoff-2026-05.md`, `npm run iteration:audit`, this audit | Covered | Keep queue synchronized after every PR update |
-| Implementation evidence | PR #1-#14 branches and linked verification comments | In progress | Merge Wave 0 into `main`, then continue waves 1-4 |
-| Verification evidence | PR comments, `npm run typecheck`, `npm run build`, targeted E2E/unit gates, repo hygiene, production preview smoke, split-preview editor sync smoke | Covered for current open slices | Re-run gates after branch sync or merge |
-| Packaging and release evidence | GitHub Release `v1.4.3-hotfix8` with NSIS, MSI, Electron portable, release notes, SHA256 sums, and release gate Cargo preflight | Covered for latest shipped release | Package the next release after a wave reaches `main` |
-| Runtime release quality | `npm run release:smoke` evidence in release lane v1.4.3-hotfix8 | Covered for latest shipped release | Run release smoke on the next staging folder |
-| Retrospective and project memory | `docs/upgrade-execution-log.md` slices, `docs/release-retrospective-v1.4.3-hotfix8.md`, project memory notes | Covered | Add a slice entry after every meaningful implementation or queue change |
+| Benchmark-aligned product direction | `docs/markdown-roadmap-2026-05.md`, `docs/benchmark-source-refresh-2026-05-15.md` | Covered | Refresh when benchmark sources change roadmap priority |
+| Feature-gap closure path | PR #1-#14 plus roadmap acceptance rows | Wave 0-3 merged; Wave 4 remains | Re-sync and merge PR #9 and PR #13 |
+| Iteration management mechanism | `docs/release-iteration-playbook.md`, `docs/iteration-merge-queue-2026-05.md`, `npm run iteration:audit` | Covered | Keep queue synchronized after every PR update |
+| Implementation evidence | Main branch plus merged PRs #1-#8, #10-#12, #14, #24-#26 | Covered for Wave 0-3 | Continue Wave 4 extension and graph lanes |
+| Verification evidence | Typecheck, build, targeted Playwright tests, repo hygiene, release gate, release smoke | Covered for shipped Wave 3 | Re-run gates after Wave 4 branch sync |
+| Packaging and release evidence | GitHub Release `v1.4.3-hotfix9` with NSIS, MSI, Electron portable, release notes, and SHA256 sums | Covered for latest shipped release | Package again after Wave 4 lands |
+| Runtime release quality | `npm run release:smoke -- --release-dir release/v1.4.3-hotfix9 --cdp-port 9554 --cli-cdp-port 9555` | Covered for latest shipped release | Keep release environment preflight current |
+| Retrospective and project memory | `docs/upgrade-execution-log.md`, `docs/release-retrospective-v1.4.3-hotfix9.md` | Covered | Add a slice entry after every meaningful implementation or queue change |
 
-Completion decision: the active goal remains ongoing because PR #1-#14 are open and the next release packaging lane starts after a merge wave reaches `main`.
+Completion decision: the active goal remains ongoing because Wave 4 extension and graph-sensemaking work remains in PR #9 and PR #13.
 
 ## Prompt To Artifact Checklist
 
 | Requirement | Artifact | Current Evidence | Status | Next Action |
 |---|---|---|---|---|
-| Align with mainstream Markdown readers/editors | `docs/markdown-roadmap-2026-05.md`, `docs/benchmark-source-refresh-2026-05-15.md` | Benchmark matrix covers Obsidian, Joplin, Typora, iA Writer, MarkText, Zettlr, Cherry Markdown, and doocs/md with a 2026-05-15 source refresh | Covered | Refresh when a new benchmark source changes product direction |
-| Verify benchmark source availability | `npm run iteration:audit -- --check-sources` | Source refresh URLs are fetchable through the iteration audit source-link mode | Covered | Run when source anchors change |
-| Close MYmd feature gaps | `docs/markdown-roadmap-2026-05.md` | P0-P3 backlog maps product reasons to acceptance evidence | Covered | Pull next slice from open P1/P2/P3 backlog after current PR wave clears review |
-| Build version iteration management | `docs/release-iteration-playbook.md` | Iteration loop, planning template, required gates, smoke checklist, release environment preflight, release packaging gate, and release asset checklist exist | Covered | Keep playbook aligned with new release automation |
-| Automate active-goal evidence checks | `scripts/iteration-goal-audit.mjs`, `package.json` | `npm run iteration:audit` checks roadmap, playbook, queue, active audit, execution log, Wave 0 handoff, Wave 0 gate wiring, release gate wiring, README release references, PR queue state, and release assets | Covered | Run after release-management evidence changes |
-| Automate Wave 0 main gate | `scripts/wave-gate-check.mjs`, `package.json`, `docs/wave0-review-handoff-2026-05.md` | `npm run wave0:gate` runs iteration audit, typecheck, production build, repo hygiene, and diff check | Covered | Run on `main` after Wave 0 lands |
-| Sequence current implementation work | `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 have lanes, states, merge waves, triggers, and verification links | Covered | Update after any PR merge, close, replace, or rebase |
-| Clear Wave 0 review path | `docs/wave0-review-handoff-2026-05.md` | PR #1, #14, and #12 have review order, reviewer checklist, main-branch gate, release environment preflight, and packaging trigger | Covered | Use this handoff while review gates clear |
-| Attach verification evidence to slices | PR comments and `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 readiness rows link to verification comments | Covered | Re-run gates after main sync or branch rebase |
-| Keep implementation history auditable | `docs/upgrade-execution-log.md` | Slices 12-19 and 25-44 record scope, touchpoints, baseline, and verification | Covered | Add a new dated entry for every meaningful slice |
-| Package and publish release builds | GitHub release `v1.4.3-hotfix8`, `README.md`, `README_en.md`, `npm run release:gate` | Latest release has NSIS setup, MSI, Electron portable zip, release notes, SHA256 sums, README release references, a repeatable packaging gate, and a Windows Cargo preflight | Covered for latest shipped release | Package again after a merge wave reaches `main` |
-| Verify release runtime quality | `npm run release:smoke` and release notes | Hotfix8 release smoke covered asset hashes, Electron rendering, Tauri rendering, and CLI-open indexing | Covered for latest shipped release | Run smoke on the next release staging folder |
-| Capture release retrospective | `docs/release-retrospective-v1.4.3-hotfix8.md` | Hotfix8 maps benchmark input, scoped requirement, implementation, verification, packaging, runtime smoke, release link, friction, and follow-ups | Covered | Add a retrospective after each published release |
-| Maintain current blocker visibility | `gh pr list` output and merge queue | PR #1-#14 currently report `BLOCKED / REVIEW_REQUIRED` | Active blocker | Review gate must clear before merge and packaging |
-| Track known performance warnings | `docs/markdown-roadmap-2026-05.md`, release notes, build output | Circular manual chunk warnings and SourceEditor language-data overreach are closed; large editor/diagram chunks remain tracked as current build warnings | Open risk | Assign a future editor/diagram chunk slice after current release waves |
+| Align with mainstream Markdown readers/editors | `docs/markdown-roadmap-2026-05.md`, `docs/benchmark-source-refresh-2026-05-15.md` | Benchmark matrix covers Obsidian, Joplin, Typora, iA Writer, MarkText, Zettlr, Cherry Markdown, and doocs/md | Covered | Refresh when a source changes product direction |
+| Verify benchmark source availability | `npm run iteration:audit -- --check-sources` | Source refresh URLs remain auditable | Covered | Run when source anchors change |
+| Close MYmd feature gaps | `docs/markdown-roadmap-2026-05.md` | Wave 3 editor production work shipped in `v1.4.3-hotfix9` | In progress | Continue Wave 4 PR #9 and PR #13 |
+| Build version iteration management | `docs/release-iteration-playbook.md` | Iteration loop, planning template, required gates, smoke checklist, release environment preflight, and release asset checklist exist | Covered | Keep playbook aligned with release automation |
+| Automate active-goal evidence checks | `scripts/iteration-goal-audit.mjs`, `package.json` | `npm run iteration:audit` checks docs, README markers, PR queue state, and latest release assets | Covered | Run after release-management evidence changes |
+| Sequence current implementation work | `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 have lanes, states, waves, triggers, and evidence links | Covered | Update after PR #9 or #13 changes |
+| Attach verification evidence to slices | PR comments and `docs/iteration-merge-queue-2026-05.md` | Wave 3 verification comments and release smoke evidence are recorded | Covered | Re-run gates after branch sync |
+| Keep implementation history auditable | `docs/upgrade-execution-log.md` | Slices 12-65 plus `v1.4.3-hotfix9` release lane record scope, validation, packaging, and release evidence | Covered | Add a dated entry for every meaningful slice |
+| Package and publish release builds | GitHub Release `v1.4.3-hotfix9`, `README.md`, `README_en.md`, `npm run release:gate` | Latest release has installers, portable zip, release notes, SHA256 sums, README release references, and release smoke evidence | Covered | Package again after Wave 4 |
+| Verify release runtime quality | `npm run release:smoke` and release notes | `v1.4.3-hotfix9` smoke covered asset hashes, Electron rendering, Tauri rendering, and CLI-open indexing | Covered | Keep release smoke cleanly exiting on Windows |
+| Capture release retrospective | `docs/release-retrospective-v1.4.3-hotfix9.md` | Retrospective maps benchmark input, scoped requirement, implementation, verification, packaging, runtime smoke, release link, friction, and follow-ups | Covered | Add a retrospective after each published release |
+| Maintain current blocker visibility | `gh pr list` output and merge queue | Open PRs are #9 and #13 with review gates | Active blocker | Re-sync Wave 4 branches before merge |
+| Track known performance warnings | `docs/markdown-roadmap-2026-05.md`, release notes, build output | Large editor/diagram chunks remain tracked as current build warnings | Open risk | Assign a future editor/diagram chunk slice |
 
 ## Current Evidence Snapshot
 
@@ -64,40 +62,39 @@ Completion decision: the active goal remains ongoing because PR #1-#14 are open 
 - `docs/release-iteration-playbook.md` defines slice planning, verification gates, release smoke, checksums, release evidence, and machine paths.
 - `docs/iteration-merge-queue-2026-05.md` maps PR #1-#14 into merge waves and release triggers.
 - `docs/upgrade-execution-log.md` records completed implementation, validation, packaging, and queue-management slices.
-- `docs/release-retrospective-v1.4.3-hotfix8.md` records the latest published release retrospective and follow-ups.
+- `docs/release-retrospective-v1.4.3-hotfix9.md` records the latest published release retrospective and follow-ups.
 
 ### GitHub State
 
-- Latest release: `v1.4.3-hotfix8`
-- Release URL: https://github.com/LaplaceYoung/MYmd/releases/tag/v1.4.3-hotfix8
-- Open PR queue: PR #1-#14
-- Current PR state: all open PRs are `BLOCKED / REVIEW_REQUIRED`
+- Latest release: `v1.4.3-hotfix9`
+- Release URL: https://github.com/LaplaceYoung/MYmd/releases/tag/v1.4.3-hotfix9
+- Open PR queue: PR #9 and PR #13
+- Current PR state: review-required Wave 4 branches
 
 ### Verification Commands Used For This Audit
 
 ```bash
-gh release view --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets
+gh release view v1.4.3-hotfix9 --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets
 gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25
+npm run release:gate -- --skip-packaging --skip-smoke --release-dir release/v1.4.3-hotfix9
 npm run iteration:audit
-npm run iteration:audit -- --check-sources
-rg -n "v1.4.3-hotfix8|PR #14|vite-chunk|Mermaid|chunk|release:smoke|build:tauri|build:electron" README.md README_en.md docs/markdown-roadmap-2026-05.md docs/release-iteration-playbook.md docs/iteration-merge-queue-2026-05.md docs/upgrade-execution-log.md docs/active-goal-artifact-audit-2026-05.md
+rg -n "v1.4.3-hotfix9|release:smoke|build:tauri|build:electron" README.md README_en.md docs/markdown-roadmap-2026-05.md docs/release-iteration-playbook.md docs/iteration-merge-queue-2026-05.md docs/upgrade-execution-log.md docs/active-goal-artifact-audit-2026-05.md
 ```
 
 ## Release Completion Gate
 
-The active goal remains ongoing while the current benchmark-alignment PR queue is open. A release wave is ready for packaging only after:
+A release wave is ready for packaging after:
 
 1. The relevant PR wave lands on `main`.
 2. The wave gate passes on `main`.
-3. `npm run release:gate -- --check-env-only` confirms the Windows Cargo preflight.
-4. `npm run release:gate` passes.
-5. `npm run build:tauri` passes inside the release gate.
-6. `npm run build:electron` passes inside the release gate.
-7. `npm run release:smoke` passes against the staged release folder.
-8. SHA256 sums and release notes are generated.
-9. The GitHub release is published and verified.
-10. README/README_en release references match the published release.
+3. `npm run release:gate -- --check-env-only` confirms the Windows Cargo release environment preflight.
+4. `npm run build:tauri` passes.
+5. `npm run build:electron` passes.
+6. `npm run release:smoke` passes against the staged release folder.
+7. SHA256 sums and release notes are generated.
+8. The GitHub release is published and verified.
+9. README/README_en release references match the published release.
 
 ## Next Concrete Action
 
-Keep PR #12 as the active release-management surface. Once review gates clear, merge Wave 0 first, run `npm run wave0:gate` on `main`, run `npm run release:gate -- --check-env-only`, then run `npm run release:gate` for the next release candidate.
+Re-sync PR #9 first, then PR #13. Wave 4 should land after the shipped Wave 3 release evidence stays stable on main.
