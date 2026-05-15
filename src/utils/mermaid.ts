@@ -1,27 +1,33 @@
-type MermaidApi = typeof import('mermaid').default
-
-let mermaidApi: MermaidApi | null = null
-let mermaidLoadPromise: Promise<MermaidApi> | null = null
 let isMermaidInitialized = false
 let mermaidRenderCounter = 0
+let mermaidLoader: Promise<typeof import('mermaid')['default']> | null = null
+let mermaidInstance: typeof import('mermaid')['default'] | null = null
+
+async function loadMermaid() {
+    if (mermaidInstance) return mermaidInstance
+
+    mermaidLoader ??= import('mermaid')
+        .then(module => module.default)
+        .catch(error => {
+            mermaidLoader = null
+            throw error
+        })
+    mermaidInstance = await mermaidLoader
+    return mermaidInstance
+}
 
 async function ensureMermaid() {
-    if (!mermaidLoadPromise) {
-        mermaidLoadPromise = import('mermaid').then(module => module.default)
-    }
+    const mermaid = await loadMermaid()
+    if (isMermaidInitialized) return mermaid
 
-    mermaidApi = await mermaidLoadPromise
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: 'default',
+        securityLevel: 'loose',
+    })
 
-    if (!isMermaidInitialized) {
-        mermaidApi.initialize({
-            startOnLoad: false,
-            theme: 'default',
-            securityLevel: 'loose',
-        })
-        isMermaidInitialized = true
-    }
-
-    return mermaidApi
+    isMermaidInitialized = true
+    return mermaid
 }
 
 function escapeHtml(value: string) {

@@ -1,37 +1,16 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-function getPackageName(id: string) {
-  const normalized = id.split('node_modules/').pop()?.replace(/\\/g, '/')
-  if (!normalized) return null
-
-  const parts = normalized.split('/')
+function getPackageName(id: string): string {
+  const normalized = id.replace(/\\/g, '/')
+  const nodeModulesIndex = normalized.lastIndexOf('/node_modules/')
+  if (nodeModulesIndex === -1) return ''
+  const parts = normalized.slice(nodeModulesIndex + '/node_modules/'.length).split('/')
   if (parts[0]?.startsWith('@')) {
     return `${parts[0]}/${parts[1] ?? ''}`
   }
-
-  return parts[0]
+  return parts[0] ?? ''
 }
-
-const milkdownPackages = new Set([
-  '@prosemirror-adapter/core',
-  '@prosemirror-adapter/react',
-  'crelt',
-  'orderedmap',
-  'prosemirror-changeset',
-  'prosemirror-commands',
-  'prosemirror-dropcursor',
-  'prosemirror-gapcursor',
-  'prosemirror-history',
-  'prosemirror-inputrules',
-  'prosemirror-keymap',
-  'prosemirror-model',
-  'prosemirror-schema-list',
-  'prosemirror-state',
-  'prosemirror-tables',
-  'prosemirror-transform',
-  'prosemirror-view',
-])
 
 export default defineConfig({
   base: './',
@@ -52,20 +31,19 @@ export default defineConfig({
           if (!id.includes('node_modules')) return
 
           const packageName = getPackageName(id)
-          if (!packageName) return
 
-          if (packageName === 'react' || packageName === 'react-dom' || packageName === 'scheduler') {
+          if (['react', 'react-dom', 'scheduler', 'use-sync-external-store'].includes(packageName)) {
             return 'vendor-react'
           }
-          if (packageName === 'lucide-react') return 'vendor-icons'
-          if (packageName.startsWith('@milkdown/') || milkdownPackages.has(packageName)) {
-            return 'vendor-milkdown'
-          }
-          if (packageName.startsWith('@codemirror/') || packageName === 'codemirror' || packageName.startsWith('@lezer/')) {
-            return 'vendor-codemirror'
-          }
           if (packageName === 'katex') return 'vendor-katex'
-          if (packageName === 'marked') return 'vendor-markdown'
+          if (packageName === 'lucide-react') return 'vendor-icons'
+          if (packageName.startsWith('@tauri-apps/')) return 'vendor-tauri'
+          if (['zustand', 'p-queue'].includes(packageName)) return 'vendor-state'
+
+          // Editor, diagram, and Markdown render packages have intertwined
+          // transitive graphs. Let Rollup place them with their lazy entrypoints
+          // so the generated graph stays aligned with runtime loading.
+          return undefined
         },
       },
     },
