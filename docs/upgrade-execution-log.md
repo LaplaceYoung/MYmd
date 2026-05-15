@@ -910,3 +910,29 @@
   - `npm run iteration:audit -- --offline` with 12 checks passed.
   - `npm run wave0:gate -- --dry-run`
   - `npm run wave0:gate` with 40 iteration-audit checks and all 5 gate steps passed.
+
+### Slice 40
+
+- Scope:
+  - active-goal audit freshness
+  - keep the completion audit aligned with the latest release-management slices
+- Planned touchpoints:
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Updated the active-goal audit refresh note to include Wave 0 gate automation and self-audit coverage.
+  - Updated implementation-history evidence from slices 12-19 and 25-32 to slices 12-19 and 25-39.
+  - Extended `npm run iteration:audit` document markers so the execution log must include `### Slice 39`.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 12 checks passed.
+  - `npm run iteration:audit` with 40 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
