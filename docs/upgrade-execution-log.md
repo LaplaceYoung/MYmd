@@ -1146,6 +1146,33 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
 
+### Slice 49
+
+- Scope:
+  - Wave 2 knowledge network evidence refresh
+  - keep PR #4 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #4 current head with typecheck, production build, repo hygiene, diff check, and targeted Playwright coverage.
+  - Confirmed wikilink completion, backlink alignment, unlinked mention conversion, rename parsing, and file action behavior through 11 tests.
+  - Updated the merge queue PR #4 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 2 knowledge network evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
 ### Slice 46
 
 - Scope:
