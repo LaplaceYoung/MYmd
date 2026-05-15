@@ -884,3 +884,29 @@
   - `npm run iteration:audit`
   - `npm run wave0:gate`
   - Gate output passed iteration audit, TypeScript health, production web build, repo hygiene, and whitespace diff check.
+
+### Slice 39
+
+- Scope:
+  - Wave 0 gate audit coverage
+  - keep release-management automation self-checking
+- Planned touchpoints:
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Extended `npm run iteration:audit` so it verifies the `wave0:gate` package command.
+  - Added script-marker checks for the Wave 0 gate sequence, including iteration audit, typecheck, build, repo hygiene, diff check, dry-run, and skip-build support.
+  - Updated the active-goal audit evidence row so Wave 0 gate wiring is part of the durable project-management checklist.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run wave0:gate -- --dry-run`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 12 checks passed.
+  - `npm run wave0:gate -- --dry-run`
+  - `npm run wave0:gate` with 40 iteration-audit checks and all 5 gate steps passed.

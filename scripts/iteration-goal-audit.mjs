@@ -51,6 +51,30 @@ const REQUIRED_RELEASE_ASSETS = [
   "SHA256SUMS.txt",
   "RELEASE_NOTES.md",
 ];
+const REQUIRED_PACKAGE_SCRIPTS = [
+  {
+    name: "iteration:audit",
+    command: "node scripts/iteration-goal-audit.mjs",
+  },
+  {
+    name: "wave0:gate",
+    command: "node scripts/wave-gate-check.mjs --wave 0",
+  },
+];
+const REQUIRED_SCRIPT_MARKERS = [
+  {
+    path: "scripts/wave-gate-check.mjs",
+    markers: [
+      "Iteration evidence audit",
+      "TypeScript health",
+      "Production web build",
+      "Repository hygiene",
+      "Whitespace diff check",
+      "--dry-run",
+      "--skip-build",
+    ],
+  },
+];
 
 const checks = [];
 const blockers = [];
@@ -188,11 +212,35 @@ function verifyDocs() {
 
 function verifyPackageScript() {
   const packageJson = JSON.parse(readRepoFile("package.json"));
-  const command = packageJson.scripts?.["iteration:audit"];
-  const passed = command === "node scripts/iteration-goal-audit.mjs";
-  addCheck("package script: iteration:audit", passed, command ?? "missing script");
-  if (!passed) {
-    fail("package.json must expose npm run iteration:audit");
+  for (const script of REQUIRED_PACKAGE_SCRIPTS) {
+    const command = packageJson.scripts?.[script.name];
+    const passed = command === script.command;
+    addCheck(`package script: ${script.name}`, passed, command ?? "missing script");
+    if (!passed) {
+      fail(`package.json must expose npm run ${script.name}`);
+    }
+  }
+
+  for (const script of REQUIRED_SCRIPT_MARKERS) {
+    const absolutePath = path.join(ROOT, script.path);
+    if (!existsSync(absolutePath)) {
+      addCheck(`script exists: ${script.path}`, false, "missing file");
+      fail(`${script.path} is missing`);
+      continue;
+    }
+
+    const content = readRepoFile(script.path);
+    const missingMarkers = script.markers.filter((marker) => !content.includes(marker));
+    const passed = missingMarkers.length === 0;
+    addCheck(
+      `script markers: ${script.path}`,
+      passed,
+      passed ? "all required markers present" : `missing: ${missingMarkers.join(", ")}`,
+      { markers: script.markers },
+    );
+    if (!passed) {
+      fail(`${script.path} is missing required markers: ${missingMarkers.join(", ")}`);
+    }
   }
 }
 
