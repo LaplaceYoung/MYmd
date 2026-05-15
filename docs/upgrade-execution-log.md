@@ -1336,6 +1336,33 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
 
+### Slice 56
+
+- Scope:
+  - Wave 4 readonly plugin API evidence refresh
+  - keep PR #9 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #9 current head with typecheck, plugin API registration/cleanup tests, production build, repo hygiene, and diff check.
+  - Confirmed readonly plugin commands use stable namespaced ids, title fallback ids remain available, and sidebar cards plus search providers clean up safely.
+  - Updated the merge queue PR #9 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 4 readonly plugin API evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
 ### Slice 46
 
 - Scope:
