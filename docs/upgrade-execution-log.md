@@ -936,6 +936,44 @@
   - `npm run iteration:audit` with 42 checks passed.
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 43
+
+- Scope:
+  - release packaging gate automation
+  - make post-merge installer packaging validation executable from one command
+- Planned touchpoints:
+  - `scripts/release-gate-check.mjs`
+  - `scripts/iteration-goal-audit.mjs`
+  - `package.json`
+  - `docs/release-iteration-playbook.md`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added `npm run release:gate` for the post-merge packaging lane.
+  - The gate runs Tauri packaging, Electron packaging, release smoke, typecheck, repo hygiene, and whitespace diff checks.
+  - Added dry-run and skip options so the command can be previewed while Wave 0 is still review-gated.
+  - The gate prepends `E:\EnvConfig\cargo\bin` to `PATH` on Windows before native packaging.
+  - Extended `npm run iteration:audit` so it verifies the release gate package command, script markers, and docs markers.
+- Verification target:
+  - `node --check scripts/release-gate-check.mjs`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run release:gate -- --dry-run`
+  - `npm run release:gate -- --skip-packaging --skip-smoke`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/release-gate-check.mjs`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run release:gate -- --dry-run`
+  - `npm run release:gate -- --skip-packaging --skip-smoke` with typecheck, repo hygiene, and diff check passed.
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
 - Verification completed:
   - `node --check scripts/iteration-goal-audit.mjs`
   - `npm run iteration:audit -- --offline` with 12 checks passed.

@@ -19,11 +19,17 @@ const REQUIRED_DOCS = [
   },
   {
     path: "docs/release-iteration-playbook.md",
-    markers: ["## Iteration Loop", "## Required Gates", "npm run release:smoke"],
+    markers: ["## Iteration Loop", "## Required Gates", "npm run release:smoke", "npm run release:gate"],
   },
   {
     path: "docs/iteration-merge-queue-2026-05.md",
-    markers: ["## Current PR Queue", "### Wave 0: Stabilize The Queue", "docs/wave0-review-handoff-2026-05.md", "npm run wave0:gate"],
+    markers: [
+      "## Current PR Queue",
+      "### Wave 0: Stabilize The Queue",
+      "docs/wave0-review-handoff-2026-05.md",
+      "npm run wave0:gate",
+      "npm run release:gate",
+    ],
   },
   {
     path: "docs/active-goal-artifact-audit-2026-05.md",
@@ -60,6 +66,10 @@ const REQUIRED_PACKAGE_SCRIPTS = [
     name: "wave0:gate",
     command: "node scripts/wave-gate-check.mjs --wave 0",
   },
+  {
+    name: "release:gate",
+    command: "node scripts/release-gate-check.mjs",
+  },
 ];
 const REQUIRED_SCRIPT_MARKERS = [
   {
@@ -72,6 +82,20 @@ const REQUIRED_SCRIPT_MARKERS = [
       "Whitespace diff check",
       "--dry-run",
       "--skip-build",
+    ],
+  },
+  {
+    path: "scripts/release-gate-check.mjs",
+    markers: [
+      "Tauri installer build",
+      "Electron portable build",
+      "Release smoke",
+      "TypeScript health",
+      "Repository hygiene",
+      "Whitespace diff check",
+      "--dry-run",
+      "--skip-packaging",
+      "E:\\\\EnvConfig\\\\cargo\\\\bin",
     ],
   },
 ];

@@ -149,13 +149,10 @@ Run release packaging after a merge wave reaches `main` and its wave gate passes
 Required packaging gate:
 
 ```bash
-npm run build:tauri
-npm run build:electron
-npm run release:smoke
-npm run typecheck
-npm run ci:repo-hygiene
-git diff --check
+npm run release:gate
 ```
+
+The expanded gate runs Tauri packaging, Electron packaging, release smoke, typecheck, repo hygiene, and `git diff --check`.
 
 Release staging should follow `release/v1.4.3-hotfixN` until the project version advances.
 
