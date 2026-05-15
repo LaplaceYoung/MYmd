@@ -59,7 +59,7 @@ MYmd should keep converging toward the strongest mainstream Markdown reader/edit
 | Backlink context snippets | Backlinks should answer why a document is connected | Panel groups linked/unlinked mentions, shows snippet, heading label, and jump target |
 | Unlinked mentions | Knowledge network should grow from existing writing | Mention query finds candidate text and converts it into a link |
 | Index progress and retry | Workspace indexing should feel reliable and explainable | UI shows idle/indexing/error/progress, skipped-file details, and retry recovery |
-| Preview/edit isolation | Reading mode should stay stable during navigation | Regression prevents pure preview from entering edit state unexpectedly |
+| Preview/edit isolation | Reading mode should stay stable during navigation | Regression prevents split preview from writing content, dirtying clean tabs, or registering editing commands |
 
 ### P2: Editor Production Power
 

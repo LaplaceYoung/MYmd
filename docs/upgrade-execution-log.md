@@ -489,6 +489,38 @@
   - `MYmd_1.4.3_x64_en-US.msi`: `C9202B842BEE4C0C9E2A0D5C6A3D8776E3CA4F8EACE8A2C745E9004306724D43`
   - `MYmd-Electron-1.4.3-x64-portable.zip`: `9CC2F6FAA7D824C0918D3959BE5207E3BFBA0EFF1B250F3E9DE32196D3E79835`
 
+### Slice 20
+
+- Scope:
+  - P1 preview/edit isolation
+  - keep split preview a rendering surface while source editing remains the write surface
+- Planned touchpoints:
+  - `src/components/Editor/WysiwygEditor.tsx`
+  - `tests/e2e_preview_isolation.spec.ts`
+  - `tests/e2e_editor_runtime_state.spec.ts`
+  - `docs/markdown-roadmap-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Benchmark anchor:
+  - Typora's low-friction editing depends on a single clear editing surface; MYmd split mode now preserves the same mental model by keeping preview read-only and source writable.
+  - Obsidian reading/editing workflows reinforce the same boundary: navigation and preview surfaces should not unexpectedly write document state.
+- Product management baseline:
+  - Read-only WYSIWYG preview no longer writes `markdownUpdated` events back into the editor store.
+  - Read-only preview guards paste-sync and table-width write helpers.
+  - E2E now verifies that switching to split preview keeps a clean tab clean.
+  - Runtime-state E2E now waits for lazy command registration and confirms split mode owns source commands while preview registers no editing command.
+- Verification target:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_preview_isolation.spec.ts tests/e2e_editor_runtime_state.spec.ts --reporter=line`
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run typecheck`
+  - `npx playwright test tests/e2e_preview_isolation.spec.ts tests/e2e_editor_runtime_state.spec.ts --reporter=line` with 3 tests passed
+  - `npm run build`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
 ### Slice 19
 
 - Scope:
