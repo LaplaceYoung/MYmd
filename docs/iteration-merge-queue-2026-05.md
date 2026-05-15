@@ -29,7 +29,7 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 | #10 | `young/writing-stats-markdown-aware` | P2 writing polish | MERGED / REVIEW_REQUIRED | 3 | Wave 3 PR #10 merged to main |
 | #11 | `young/deterministic-image-assets` | P2 resource workflow | MERGED / REVIEW_REQUIRED | 3 | Wave 3 PR #11 merged to main |
 | #12 | `young/iteration-merge-queue` | Release management | MERGED / REVIEW_REQUIRED | 0 | Wave 0 merged to main |
-| #13 | `young/graph-view-filter-set` | P3 graph sensemaking | BLOCKED / REVIEW_REQUIRED | 4 | Main sync complete; review gate before merge |
+| #13 | `young/graph-view-filter-set` | P3 graph sensemaking | MERGED / REVIEW_REQUIRED | 4 | Wave 4 PR #13 merged to main |
 | #14 | `young/vite-chunk-warning-cleanup` | P0 build health | MERGED / REVIEW_REQUIRED | 0 | Wave 0 merged to main |
 
 ## Readiness Snapshot
@@ -46,11 +46,11 @@ Captured on 2026-05-15 after PR #1 fresh Wave 0 readiness verification, PR #7 im
 | #6 | current head typecheck, build, repo hygiene, diff check, and task-list direct-toggle E2E | https://github.com/LaplaceYoung/MYmd/pull/6#issuecomment-4456428484 |
 | #7 | current head typecheck, build, repo hygiene, diff check, immersive modes E2E, and layout profile status-bar regression | https://github.com/LaplaceYoung/MYmd/pull/7#issuecomment-4456478062 |
 | #8 | current head typecheck, build, repo hygiene, diff check, and render API frontmatter/export document tests | https://github.com/LaplaceYoung/MYmd/pull/8#issuecomment-4456517835 |
-| #9 | current head typecheck, build, repo hygiene, diff check, and plugin API registration/cleanup tests | https://github.com/LaplaceYoung/MYmd/pull/9#issuecomment-4456606348 |
+| #9 | main-sync typecheck, build, repo hygiene, diff check, iteration audit, and plugin API registration/cleanup tests | https://github.com/LaplaceYoung/MYmd/pull/9#issuecomment-4457693712 |
 | #10 | current head typecheck, build, repo hygiene, diff check, writing stats tests, and benchmark link checks | https://github.com/LaplaceYoung/MYmd/pull/10#issuecomment-4456544884 |
 | #11 | current head typecheck, build, repo hygiene, diff check, and local asset deterministic naming tests | https://github.com/LaplaceYoung/MYmd/pull/11#issuecomment-4456575580 |
 | #12 | current head Wave 0 gate passed, release gate automation, Cargo environment preflight, gate self-audit coverage, and current build-warning handoff | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4456170849 |
-| #13 | typecheck, build, repo hygiene, diff check, graph panel E2E, cargo check | https://github.com/LaplaceYoung/MYmd/pull/13#issuecomment-4455401410 |
+| #13 | main-sync typecheck, build, repo hygiene, diff check, iteration audit, graph panel E2E, and cargo check | https://github.com/LaplaceYoung/MYmd/pull/13#issuecomment-4457752953 |
 | #14 | current head build clears circular chunk warnings, typecheck, repo hygiene, diff check, and remaining large chunk ownership | https://github.com/LaplaceYoung/MYmd/pull/14#issuecomment-4456181691 |
 
 ## Merge Waves

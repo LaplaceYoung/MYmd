@@ -34,18 +34,18 @@ const REQUIRED_DOCS = [
   },
   {
     path: "docs/active-goal-artifact-audit-2026-05.md",
-    markers: ["## Completion Audit Refresh", "## Prompt To Artifact Checklist", "v1.4.3-hotfix9", "release environment preflight"],
+    markers: ["## Completion Audit Refresh", "## Prompt To Artifact Checklist", "v1.4.3-hotfix10", "release environment preflight"],
   },
   {
     path: "docs/upgrade-execution-log.md",
-    markers: ["### Slice 34", "### Slice 39", "### Slice 44", "### Slice 45", "### Slice 46", "### Slice 47", "### Slice 48", "### Slice 49", "### Slice 50", "### Slice 51", "### Slice 52", "### Slice 53", "### Slice 54", "### Slice 55", "### Slice 56", "### Slice 57", "### Slice 66", "### Slice 67", "Release lane v1.4.3-hotfix9"],
+    markers: ["### Slice 34", "### Slice 39", "### Slice 44", "### Slice 45", "### Slice 46", "### Slice 47", "### Slice 48", "### Slice 49", "### Slice 50", "### Slice 51", "### Slice 52", "### Slice 53", "### Slice 54", "### Slice 55", "### Slice 56", "### Slice 57", "### Slice 66", "### Slice 67", "Release lane v1.4.3-hotfix10"],
   },
   {
     path: "docs/wave0-review-handoff-2026-05.md",
     markers: ["## Review Order", "## Main-Branch Gate After Wave 0", "## Packaging Trigger", "--check-env-only"],
   },
   {
-    path: "docs/release-retrospective-v1.4.3-hotfix9.md",
+    path: "docs/release-retrospective-v1.4.3-hotfix10.md",
     markers: ["## Outcome Map", "## Follow-ups", "## Completion Decision"],
   },
 ];
@@ -105,11 +105,11 @@ const REQUIRED_SCRIPT_MARKERS = [
 const REQUIRED_README_RELEASE_MARKERS = [
   {
     path: "README.md",
-    markers: ["v1.4.3-hotfix9", "MYmd_1.4.3_x64-setup.exe", "MYmd_1.4.3_x64_en-US.msi", "release/v1.4.3-hotfix9"],
+    markers: ["v1.4.3-hotfix10", "MYmd_1.4.3_x64-setup.exe", "MYmd_1.4.3_x64_en-US.msi", "release/v1.4.3-hotfix10"],
   },
   {
     path: "README_en.md",
-    markers: ["v1.4.3-hotfix9", "MYmd_1.4.3_x64-setup.exe", "MYmd_1.4.3_x64_en-US.msi", "release/v1.4.3-hotfix9"],
+    markers: ["v1.4.3-hotfix10", "MYmd_1.4.3_x64-setup.exe", "MYmd_1.4.3_x64_en-US.msi", "release/v1.4.3-hotfix10"],
   },
 ];
 
@@ -344,14 +344,14 @@ function verifyGitHubState() {
   const release = runGhJson([
     "release",
     "view",
-    "v1.4.3-hotfix9",
+    "v1.4.3-hotfix10",
     "--json",
     "tagName,name,isDraft,isPrerelease,publishedAt,url,assets",
   ]);
 
   const assetNames = new Set(release.assets.map((asset) => asset.name));
   const missingAssets = REQUIRED_RELEASE_ASSETS.filter((assetName) => !assetNames.has(assetName));
-  const releasePassed = release.tagName === "v1.4.3-hotfix9" && !release.isDraft && !release.isPrerelease && missingAssets.length === 0;
+  const releasePassed = release.tagName === "v1.4.3-hotfix10" && !release.isDraft && !release.isPrerelease && missingAssets.length === 0;
   addCheck(
     "latest release assets",
     releasePassed,
@@ -363,7 +363,7 @@ function verifyGitHubState() {
     },
   );
   if (!releasePassed) {
-    fail(`v1.4.3-hotfix9 release asset check failed: ${missingAssets.join(", ") || "release metadata mismatch"}`);
+    fail(`v1.4.3-hotfix10 release asset check failed: ${missingAssets.join(", ") || "release metadata mismatch"}`);
   }
 }
 

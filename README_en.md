@@ -18,7 +18,7 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 
 ## Version
 
-- Current version: `v1.4.3-hotfix9`
+- Current version: `v1.4.3-hotfix10`
 - Target platform: `Windows x64`
 - Latest releases: <https://github.com/LaplaceYoung/MYmd/releases>
 - Landing page: <https://laplaceyoung.github.io/MYmd/>
@@ -70,12 +70,12 @@ MYmd is a **Tauri + React + TypeScript** local-first Markdown desktop editor wit
 - Single-instance behavior: file args from second launches are forwarded to the running window.
 - Startup open-file flow avoids welcome-page flicker before CLI file loading finishes.
 
-## v1.4.3-hotfix9 Highlights
+## v1.4.3-hotfix10 Highlights
 
-1. Wave 3 editor production work is merged: footnote export, direct task toggles, Focus/Typewriter regressions, frontmatter properties, writing stats, and deterministic image assets.
-2. Writing stats now count visible Markdown text with CJK-aware reading time.
-3. Pasted and dropped images use content-hashed relative asset paths for safer local file portability.
-4. Rebuilt the Windows NSIS/MSI installers and Electron portable package for `v1.4.3-hotfix9`.
+1. Wave 4 knowledge workflow work is merged: readonly plugin API contracts and graph filters reached main.
+2. Plugin commands, sidebar cards, and search providers now support stable entry ids and cleanup-safe registration.
+3. The knowledge graph now filters by folder, tag, search text, and link depth, and carries filter context into AI graph prompts.
+4. Rebuilt the Windows NSIS/MSI installers and Electron portable package for `v1.4.3-hotfix10`.
 5. Verified release asset SHA256 checks, Electron rendering, Tauri desktop rendering, and CLI-open indexing.
 
 ## Tech Stack
@@ -126,7 +126,7 @@ After a Tauri build on this machine, artifacts are generated in:
 
 Project distribution folder (local staging):
 
-- `release/v1.4.3-hotfix9/MYmd_1.4.3_x64-setup.exe`
+- `release/v1.4.3-hotfix10/MYmd_1.4.3_x64-setup.exe`
 
 ## Project Structure
 
