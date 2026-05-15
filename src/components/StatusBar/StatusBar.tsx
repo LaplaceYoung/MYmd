@@ -105,9 +105,12 @@ export function StatusBar() {
 
     const paperMeta = getPaperPresetMeta(paperPreset, customPaperSize, paperOrientation, pageMarginMm)
     const orientationLabel = getLocalizedOrientationLabel()
+    const paperStatusLabel = paperPreset === 'custom'
+        ? `${getLocalizedPaperLabel()} ${paperMeta.detail}`
+        : getLocalizedPaperLabel()
     const paperLabel = paperMeta.id === 'screen'
-        ? t('status.paperScreen', { label: getLocalizedPaperLabel(), margin: pageMarginMm })
-        : t('status.paperPreset', { label: getLocalizedPaperLabel(), orientation: orientationLabel, margin: pageMarginMm })
+        ? t('status.paperScreen', { label: paperStatusLabel, margin: pageMarginMm })
+        : t('status.paperPreset', { label: paperStatusLabel, orientation: orientationLabel, margin: pageMarginMm })
     const profileLabel = getLocalizedProfileLabel()
     const exportLabel = getLocalizedExportLabel()
 
