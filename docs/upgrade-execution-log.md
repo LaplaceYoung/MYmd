@@ -1997,3 +1997,32 @@
   - `git diff --check`
 - Known risk:
   - Production build still reports existing over-500 kB chunks for heavy editor and diagram packages.
+
+### Release lane v1.4.3-hotfix10
+
+- Scope:
+  - package the merged Wave 4 plugin API and graph filter queue into a Windows release
+  - keep the local-first Markdown knowledge workflow release loop complete after PR #9 and PR #13 reached main
+- Release staging:
+  - `release/v1.4.3-hotfix10`
+  - `MYmd_1.4.3_x64-setup.exe`
+  - `MYmd_1.4.3_x64_en-US.msi`
+  - `MYmd-Electron-1.4.3-x64-portable.zip`
+  - `SHA256SUMS.txt`
+  - `RELEASE_NOTES.md`
+- Verification completed:
+  - `npm run release:gate -- --check-env-only`
+  - `npm run build:tauri`
+  - `npm run build:electron`
+  - `npm run release:smoke -- --release-dir release/v1.4.3-hotfix10 --cdp-port 9564 --cli-cdp-port 9565`
+  - GitHub release verification for `v1.4.3-hotfix10`
+- Release smoke evidence:
+  - Electron title `MYmd - Markdown Editor`, root HTML length `25934`, blocking events `0`.
+  - Tauri title `MYmd`, screenshot contrast `255`, screenshot bytes `27968`.
+  - CLI indexing reported `documentHits: 1`, `headingHits: 5`, `tagHits: 4`, `blockingEventCount: 0`.
+- SHA256:
+  - `MYmd_1.4.3_x64-setup.exe`: `17243DF69830DD6B2D3A7F0951443C82A8E662737B5FAD85E784DC808A6F1BAA`
+  - `MYmd_1.4.3_x64_en-US.msi`: `93DC0D23A3058D228462A49E93D4B684269EBB42A4FFF3726569EFBBCFEA6408`
+  - `MYmd-Electron-1.4.3-x64-portable.zip`: `571D55F15133345560D7CC62889ABA9ED30ECE0F5EDA5C859793869C2E39AA57`
+- Published release:
+  - https://github.com/LaplaceYoung/MYmd/releases/tag/v1.4.3-hotfix10
