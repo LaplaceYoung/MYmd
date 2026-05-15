@@ -1255,6 +1255,33 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
 
+### Slice 53
+
+- Scope:
+  - Wave 3 export/properties evidence refresh
+  - keep PR #8 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #8 current head with typecheck, render API frontmatter/export document tests, production build, repo hygiene, and diff check.
+  - Confirmed leading YAML renders as an export properties card and the full HTML export document path stays covered through the shared render API.
+  - Updated the merge queue PR #8 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 3 export/properties evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
 ### Slice 46
 
 - Scope:
