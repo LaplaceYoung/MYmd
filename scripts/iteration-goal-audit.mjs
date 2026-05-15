@@ -32,6 +32,10 @@ const REQUIRED_DOCS = [
     path: "docs/wave0-review-handoff-2026-05.md",
     markers: ["## Review Order", "## Main-Branch Gate After Wave 0", "## Packaging Trigger"],
   },
+  {
+    path: "docs/release-retrospective-v1.4.3-hotfix8.md",
+    markers: ["## Outcome Map", "## Follow-ups", "## Completion Decision"],
+  },
 ];
 
 const REQUIRED_OPEN_PR_NUMBERS = Array.from({ length: 14 }, (_, index) => index + 1);

@@ -17,7 +17,8 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 7. Update `docs/iteration-merge-queue-2026-05.md` when the slice creates or changes a PR.
 8. Run `npm run iteration:audit` when release-management evidence changes.
 9. Package and publish only after desktop smoke evidence exists.
-10. Update project memory with environment, release, or debugging lessons.
+10. Add a release retrospective after a release is published.
+11. Update project memory with environment, release, or debugging lessons.
 
 ## Planning Template
 
@@ -52,6 +53,7 @@ This playbook turns competitor alignment into a repeatable engineering loop. Eac
 | CLI indexing smoke | Included in `npm run release:smoke` | File association / CLI release verification |
 | Checksums | `Get-FileHash -Algorithm SHA256` for each release asset | GitHub release |
 | Release verification | `gh release view <tag> --json tagName,name,isDraft,isPrerelease,publishedAt,url,assets` | GitHub release |
+| Release retrospective | `docs/release-retrospective-<tag>.md` | Published release |
 
 ## Desktop Smoke Checklist
 

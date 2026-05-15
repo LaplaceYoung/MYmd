@@ -789,3 +789,32 @@
   - `npm run typecheck`
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 36
+
+- Scope:
+  - `v1.4.3-hotfix8` release retrospective
+  - close the review loop for the latest shipped tag-completion release lane
+- Planned touchpoints:
+  - `docs/release-retrospective-v1.4.3-hotfix8.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/release-iteration-playbook.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added a release retrospective mapping benchmark input, requirement scope, implementation evidence, verification, packaging, runtime smoke, published release link, friction, and follow-ups.
+  - Added the retrospective to the repeatable iteration audit so future goal checks cover the release review loop.
+- Verification target:
+  - `npm run iteration:audit`
+  - `npm run iteration:audit -- --offline`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run iteration:audit`
+  - `npm run iteration:audit -- --offline`
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`

@@ -31,7 +31,7 @@ Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading, retry h
 | Verification evidence | PR comments, `npm run typecheck`, `npm run build`, targeted E2E/unit gates, repo hygiene, production preview smoke, split-preview editor sync smoke | Covered for current open slices | Re-run gates after branch sync or merge |
 | Packaging and release evidence | GitHub Release `v1.4.3-hotfix8` with NSIS, MSI, Electron portable, release notes, SHA256 sums | Covered for latest shipped release | Package the next release after a wave reaches `main` |
 | Runtime release quality | `npm run release:smoke` evidence in release lane v1.4.3-hotfix8 | Covered for latest shipped release | Run release smoke on the next staging folder |
-| Retrospective and project memory | `docs/upgrade-execution-log.md` slices, project memory notes | Covered | Add a slice entry after every meaningful implementation or queue change |
+| Retrospective and project memory | `docs/upgrade-execution-log.md` slices, `docs/release-retrospective-v1.4.3-hotfix8.md`, project memory notes | Covered | Add a slice entry after every meaningful implementation or queue change |
 
 Completion decision: the active goal remains ongoing because PR #1-#14 are open and the next release packaging lane starts after a merge wave reaches `main`.
 
@@ -49,6 +49,7 @@ Completion decision: the active goal remains ongoing because PR #1-#14 are open 
 | Keep implementation history auditable | `docs/upgrade-execution-log.md` | Slices 12-19 and 25-32 record scope, touchpoints, baseline, and verification | Covered | Add a new dated entry for every meaningful slice |
 | Package and publish release builds | GitHub release `v1.4.3-hotfix8` | Latest release has NSIS setup, MSI, Electron portable zip, release notes, and SHA256 sums | Covered for latest shipped release | Package again after a merge wave reaches `main` |
 | Verify release runtime quality | `npm run release:smoke` and release notes | Hotfix8 release smoke covered asset hashes, Electron rendering, Tauri rendering, and CLI-open indexing | Covered for latest shipped release | Run smoke on the next release staging folder |
+| Capture release retrospective | `docs/release-retrospective-v1.4.3-hotfix8.md` | Hotfix8 maps benchmark input, scoped requirement, implementation, verification, packaging, runtime smoke, release link, friction, and follow-ups | Covered | Add a retrospective after each published release |
 | Maintain current blocker visibility | `gh pr list` output and merge queue | PR #1-#14 currently report `BLOCKED / REVIEW_REQUIRED` | Active blocker | Review gate must clear before merge and packaging |
 | Track known performance warnings | `docs/markdown-roadmap-2026-05.md`, release notes, build output | Circular manual chunk warnings and SourceEditor language-data overreach are closed; large editor/diagram chunks remain tracked as current build warnings | Open risk | Assign a future editor/diagram chunk slice after current release waves |
 
@@ -60,6 +61,7 @@ Completion decision: the active goal remains ongoing because PR #1-#14 are open 
 - `docs/release-iteration-playbook.md` defines slice planning, verification gates, release smoke, checksums, release evidence, and machine paths.
 - `docs/iteration-merge-queue-2026-05.md` maps PR #1-#14 into merge waves and release triggers.
 - `docs/upgrade-execution-log.md` records completed implementation, validation, packaging, and queue-management slices.
+- `docs/release-retrospective-v1.4.3-hotfix8.md` records the latest published release retrospective and follow-ups.
 
 ### GitHub State
 
