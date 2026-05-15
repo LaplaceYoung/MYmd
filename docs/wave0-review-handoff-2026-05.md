@@ -20,9 +20,9 @@ This handoff gives reviewers one compact path for clearing Wave 0 and starting t
 
 | Order | PR | Branch | Review Focus | Latest Evidence |
 |---:|---:|---|---|---|
-| 1 | #1 | `young/review-code-health-and-performance-stability` | Main stability, performance, broad health baseline | https://github.com/LaplaceYoung/MYmd/pull/1#issuecomment-4455004862 |
-| 2 | #14 | `young/vite-chunk-warning-cleanup` | Build-health cleanup, Mermaid lazy runtime recovery, SourceEditor language budget, split-preview editor sync timing | https://github.com/LaplaceYoung/MYmd/pull/14#issuecomment-4455698048 |
-| 3 | #12 | `young/iteration-merge-queue` | Release sequencing, audit trail, Wave 0 gate automation, release gate environment preflight, self-audit coverage, packaging trigger | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4456101391 |
+| 1 | #1 | `young/review-code-health-and-performance-stability` | Main stability, performance, broad health baseline | https://github.com/LaplaceYoung/MYmd/pull/1#issuecomment-4456205710 |
+| 2 | #14 | `young/vite-chunk-warning-cleanup` | Build-health cleanup, Mermaid lazy runtime recovery, SourceEditor language budget, split-preview editor sync timing | https://github.com/LaplaceYoung/MYmd/pull/14#issuecomment-4456181691 |
+| 3 | #12 | `young/iteration-merge-queue` | Release sequencing, audit trail, Wave 0 gate automation, release gate environment preflight, self-audit coverage, packaging trigger | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4456170849 |
 
 ## Reviewer Checklist
 

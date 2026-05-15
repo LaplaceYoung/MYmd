@@ -1092,3 +1092,32 @@
   - `npm run iteration:audit` with 44 checks passed.
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 46
+
+- Scope:
+  - Wave 0 evidence link refresh
+  - keep reviewer-facing queue links aligned with the latest PR #1, #12, and #14 validation comments
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/wave0-review-handoff-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Updated PR #1 evidence to the latest stability, build, and Mermaid/export regression comment.
+  - Updated PR #12 evidence to the latest current-branch Wave 0 gate comment.
+  - Updated PR #14 evidence to the latest build-health comment confirming circular chunk warnings are cleared on that branch.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks this evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`

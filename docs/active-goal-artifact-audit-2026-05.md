@@ -20,7 +20,7 @@ This audit keeps that goal measurable. It maps the active objective to concrete 
 
 ## Completion Audit Refresh
 
-Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading, retry hardening, SourceEditor language-budget optimization, split-preview editor sync stabilization, and PR #12 added Wave 0 gate automation, release gate automation, release environment preflight, and self-audit coverage.
+Captured on 2026-05-15 after PR #1, PR #12, and PR #14 gained fresh Wave 0 evidence for stability verification, current-branch gate status, release preflight, and build-health warning ownership.
 
 | Deliverable | Evidence Inspected | Current State | Gap To Close |
 |---|---|---|---|

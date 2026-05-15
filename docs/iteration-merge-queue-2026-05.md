@@ -34,11 +34,11 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 
 ## Readiness Snapshot
 
-Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 Wave 0 gate automation, release gate automation, environment preflight, and self-audit refresh, PR #13 graph-filter verification, and PR #14 build-health, Mermaid retry, SourceEditor language-budget, and split-preview editor sync verification.
+Captured on 2026-05-15 after PR #1 fresh Wave 0 readiness verification, PR #12 current-branch Wave 0 gate verification, PR #13 graph-filter verification, and PR #14 build-health verification that cleared circular chunk warnings.
 
 | PR | Latest Evidence | Evidence Surface |
 |---:|---|---|
-| #1 | main sync plus typecheck, build, repo hygiene, diff check, Mermaid/export targeted tests | https://github.com/LaplaceYoung/MYmd/pull/1#issuecomment-4455004862 |
+| #1 | current head typecheck, build, repo hygiene, diff check, and Mermaid/export targeted tests | https://github.com/LaplaceYoung/MYmd/pull/1#issuecomment-4456205710 |
 | #2 | typecheck, build, repo hygiene, diff check, index progress retry E2E | https://github.com/LaplaceYoung/MYmd/pull/2#issuecomment-4455029648 |
 | #3 | typecheck, build, repo hygiene, diff check, preview isolation/runtime E2E | https://github.com/LaplaceYoung/MYmd/pull/3#issuecomment-4455048432 |
 | #4 | typecheck, build, repo hygiene, diff check, wikilink/backlink E2E | https://github.com/LaplaceYoung/MYmd/pull/4#issuecomment-4455063473 |
@@ -49,9 +49,9 @@ Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 Wave 0 gate automation, 
 | #9 | typecheck, build, repo hygiene, diff check, plugin API tests | https://github.com/LaplaceYoung/MYmd/pull/9#issuecomment-4455215928 |
 | #10 | typecheck, build, repo hygiene, diff check, writing stats tests, benchmark link checks | https://github.com/LaplaceYoung/MYmd/pull/10#issuecomment-4455226982 |
 | #11 | typecheck, build, repo hygiene, diff check, local asset tests | https://github.com/LaplaceYoung/MYmd/pull/11#issuecomment-4455248568 |
-| #12 | Wave 0 gate automation, release gate automation, Cargo environment preflight, gate self-audit coverage, active-goal audit freshness, iteration audit 44 checks, release gate skip-packaging check | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4456101391 |
+| #12 | current head Wave 0 gate passed, release gate automation, Cargo environment preflight, gate self-audit coverage, and current build-warning handoff | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4456170849 |
 | #13 | typecheck, build, repo hygiene, diff check, graph panel E2E, cargo check | https://github.com/LaplaceYoung/MYmd/pull/13#issuecomment-4455401410 |
-| #14 | typecheck, build, Mermaid export regression, Mermaid loader retry hardening, SourceEditor language-budget smoke, split-preview editor sync retry, production preview app shell smoke, repo hygiene, diff check | https://github.com/LaplaceYoung/MYmd/pull/14#issuecomment-4455698048 |
+| #14 | current head build clears circular chunk warnings, typecheck, repo hygiene, diff check, and remaining large chunk ownership | https://github.com/LaplaceYoung/MYmd/pull/14#issuecomment-4456181691 |
 
 ## Merge Waves
 
