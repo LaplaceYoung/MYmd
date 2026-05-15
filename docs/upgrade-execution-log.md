@@ -1119,6 +1119,33 @@
   - `npm run ci:repo-hygiene`
   - `git diff --check`
 
+### Slice 48
+
+- Scope:
+  - Wave 1 preview/edit isolation evidence refresh
+  - keep PR #3 merge-queue evidence aligned with current branch verification
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Verified PR #3 current head with typecheck, production build, repo hygiene, diff check, and preview isolation/runtime E2E.
+  - Confirmed split preview readonly behavior and editor runtime state isolation through targeted Playwright coverage.
+  - Updated the merge queue PR #3 evidence link to the latest validation comment.
+  - Extended `npm run iteration:audit` document markers so the execution log tracks the Wave 1 preview/edit safety evidence refresh.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
 ### Slice 46
 
 - Scope:

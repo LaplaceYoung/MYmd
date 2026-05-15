@@ -40,7 +40,7 @@ Captured on 2026-05-15 after PR #1 fresh Wave 0 readiness verification, PR #12 c
 |---:|---|---|
 | #1 | current head typecheck, build, repo hygiene, diff check, and Mermaid/export targeted tests | https://github.com/LaplaceYoung/MYmd/pull/1#issuecomment-4456205710 |
 | #2 | current head typecheck, build, repo hygiene, diff check, and index progress retry E2E | https://github.com/LaplaceYoung/MYmd/pull/2#issuecomment-4456261433 |
-| #3 | typecheck, build, repo hygiene, diff check, preview isolation/runtime E2E | https://github.com/LaplaceYoung/MYmd/pull/3#issuecomment-4455048432 |
+| #3 | current head typecheck, build, repo hygiene, diff check, and preview isolation/runtime E2E | https://github.com/LaplaceYoung/MYmd/pull/3#issuecomment-4456303598 |
 | #4 | typecheck, build, repo hygiene, diff check, wikilink/backlink E2E | https://github.com/LaplaceYoung/MYmd/pull/4#issuecomment-4455063473 |
 | #5 | typecheck, build, repo hygiene, diff check, render API footnote tests | https://github.com/LaplaceYoung/MYmd/pull/5#issuecomment-4455073290 |
 | #6 | task toggle bug fix, typecheck, build, repo hygiene, diff check, task-list E2E | https://github.com/LaplaceYoung/MYmd/pull/6#issuecomment-4455137386 |
