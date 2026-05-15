@@ -34,7 +34,7 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 
 ## Readiness Snapshot
 
-Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 queue refresh, PR #13 graph-filter verification, and PR #14 build-health, Mermaid retry, SourceEditor language-budget, and split-preview editor sync verification.
+Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 Wave 0 gate automation and self-audit refresh, PR #13 graph-filter verification, and PR #14 build-health, Mermaid retry, SourceEditor language-budget, and split-preview editor sync verification.
 
 | PR | Latest Evidence | Evidence Surface |
 |---:|---|---|
@@ -49,7 +49,7 @@ Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 queue refresh, PR #13 gr
 | #9 | typecheck, build, repo hygiene, diff check, plugin API tests | https://github.com/LaplaceYoung/MYmd/pull/9#issuecomment-4455215928 |
 | #10 | typecheck, build, repo hygiene, diff check, writing stats tests, benchmark link checks | https://github.com/LaplaceYoung/MYmd/pull/10#issuecomment-4455226982 |
 | #11 | typecheck, build, repo hygiene, diff check, local asset tests | https://github.com/LaplaceYoung/MYmd/pull/11#issuecomment-4455248568 |
-| #12 | typecheck, repo hygiene, diff check, changelog link checks | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4455204178 |
+| #12 | Wave 0 gate automation, gate self-audit coverage, active-goal audit freshness, iteration audit 40 checks, Wave 0 gate 5 steps | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4455957902 |
 | #13 | typecheck, build, repo hygiene, diff check, graph panel E2E, cargo check | https://github.com/LaplaceYoung/MYmd/pull/13#issuecomment-4455401410 |
 | #14 | typecheck, build, Mermaid export regression, Mermaid loader retry hardening, SourceEditor language-budget smoke, split-preview editor sync retry, production preview app shell smoke, repo hygiene, diff check | https://github.com/LaplaceYoung/MYmd/pull/14#issuecomment-4455698048 |
 
@@ -64,10 +64,8 @@ Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 queue refresh, PR #13 gr
   - #12 `young/iteration-merge-queue`
   - #14 `young/vite-chunk-warning-cleanup`
 - Gate:
-  - `npm run typecheck`
-  - `npm run build`
-  - `npm run ci:repo-hygiene`
-  - targeted tests named in the PR body
+  - `npm run wave0:gate`
+  - PR-specific targeted checks named in the latest evidence comments
 - Exit evidence:
   - PR #1 reports clean merge state and current verification evidence.
   - PR #12 records the current release-wave status before merge packaging begins.

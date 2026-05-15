@@ -23,7 +23,7 @@ const REQUIRED_DOCS = [
   },
   {
     path: "docs/iteration-merge-queue-2026-05.md",
-    markers: ["## Current PR Queue", "### Wave 0: Stabilize The Queue", "docs/wave0-review-handoff-2026-05.md"],
+    markers: ["## Current PR Queue", "### Wave 0: Stabilize The Queue", "docs/wave0-review-handoff-2026-05.md", "npm run wave0:gate"],
   },
   {
     path: "docs/active-goal-artifact-audit-2026-05.md",

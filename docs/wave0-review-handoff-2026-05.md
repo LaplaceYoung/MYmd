@@ -22,7 +22,7 @@ This handoff gives reviewers one compact path for clearing Wave 0 and starting t
 |---:|---:|---|---|---|
 | 1 | #1 | `young/review-code-health-and-performance-stability` | Main stability, performance, broad health baseline | https://github.com/LaplaceYoung/MYmd/pull/1#issuecomment-4455004862 |
 | 2 | #14 | `young/vite-chunk-warning-cleanup` | Build-health cleanup, Mermaid lazy runtime recovery, SourceEditor language budget, split-preview editor sync timing | https://github.com/LaplaceYoung/MYmd/pull/14#issuecomment-4455698048 |
-| 3 | #12 | `young/iteration-merge-queue` | Release sequencing, audit trail, Wave 0 handoff, packaging trigger | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4455710921 |
+| 3 | #12 | `young/iteration-merge-queue` | Release sequencing, audit trail, Wave 0 gate automation, self-audit coverage, packaging trigger | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4455957902 |
 
 ## Reviewer Checklist
 

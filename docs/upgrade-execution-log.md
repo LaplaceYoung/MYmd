@@ -936,3 +936,30 @@
   - `npm run iteration:audit` with 40 checks passed.
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 12 checks passed.
+  - `npm run iteration:audit` with 40 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+
+### Slice 41
+
+- Scope:
+  - Wave 0 evidence link refresh
+  - keep review handoff and merge queue aligned with the latest PR #12 validation comments
+- Planned touchpoints:
+  - `docs/wave0-review-handoff-2026-05.md`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Updated PR #12 evidence links to the latest active-goal audit freshness comment.
+  - Updated the Wave 0 gate description in the merge queue to use `npm run wave0:gate`.
+  - Extended `npm run iteration:audit` document markers so the merge queue must mention `npm run wave0:gate`.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
