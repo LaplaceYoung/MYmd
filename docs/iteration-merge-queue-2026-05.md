@@ -34,7 +34,7 @@ This queue turns the current benchmark-alignment PR set into a controlled releas
 
 ## Readiness Snapshot
 
-Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 Wave 0 gate automation and self-audit refresh, PR #13 graph-filter verification, and PR #14 build-health, Mermaid retry, SourceEditor language-budget, and split-preview editor sync verification.
+Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 Wave 0 gate automation, release gate automation, environment preflight, and self-audit refresh, PR #13 graph-filter verification, and PR #14 build-health, Mermaid retry, SourceEditor language-budget, and split-preview editor sync verification.
 
 | PR | Latest Evidence | Evidence Surface |
 |---:|---|---|
@@ -49,7 +49,7 @@ Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 Wave 0 gate automation a
 | #9 | typecheck, build, repo hygiene, diff check, plugin API tests | https://github.com/LaplaceYoung/MYmd/pull/9#issuecomment-4455215928 |
 | #10 | typecheck, build, repo hygiene, diff check, writing stats tests, benchmark link checks | https://github.com/LaplaceYoung/MYmd/pull/10#issuecomment-4455226982 |
 | #11 | typecheck, build, repo hygiene, diff check, local asset tests | https://github.com/LaplaceYoung/MYmd/pull/11#issuecomment-4455248568 |
-| #12 | Wave 0 gate automation, gate self-audit coverage, active-goal audit freshness, iteration audit 40 checks, Wave 0 gate 5 steps | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4455957902 |
+| #12 | Wave 0 gate automation, release gate automation, Cargo environment preflight, gate self-audit coverage, active-goal audit freshness, iteration audit 44 checks, release gate skip-packaging check | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4456101391 |
 | #13 | typecheck, build, repo hygiene, diff check, graph panel E2E, cargo check | https://github.com/LaplaceYoung/MYmd/pull/13#issuecomment-4455401410 |
 | #14 | typecheck, build, Mermaid export regression, Mermaid loader retry hardening, SourceEditor language-budget smoke, split-preview editor sync retry, production preview app shell smoke, repo hygiene, diff check | https://github.com/LaplaceYoung/MYmd/pull/14#issuecomment-4455698048 |
 
@@ -149,10 +149,11 @@ Run release packaging after a merge wave reaches `main` and its wave gate passes
 Required packaging gate:
 
 ```bash
+npm run release:gate -- --check-env-only
 npm run release:gate
 ```
 
-The expanded gate runs Tauri packaging, Electron packaging, release smoke, typecheck, repo hygiene, and `git diff --check`.
+The expanded gate checks Windows Cargo availability, then runs Tauri packaging, Electron packaging, release smoke, typecheck, repo hygiene, and `git diff --check`.
 
 Release staging should follow `release/v1.4.3-hotfixN` until the project version advances.
 

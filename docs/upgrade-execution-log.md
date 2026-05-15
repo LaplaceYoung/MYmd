@@ -1063,3 +1063,32 @@
   - `npm run iteration:audit` with 44 checks passed.
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 45
+
+- Scope:
+  - Wave 0 review handoff refresh
+  - align reviewer-facing merge and packaging steps with the release gate preflight
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/wave0-review-handoff-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `scripts/iteration-goal-audit.mjs`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Updated PR #12 readiness evidence to the latest release gate preflight verification comment.
+  - Updated the Wave 0 reviewer handoff so the main-branch gate includes `npm run iteration:audit`.
+  - Updated the packaging trigger to run `npm run release:gate -- --check-env-only` before `npm run release:gate`.
+  - Extended `npm run iteration:audit` so the merge queue and Wave 0 handoff must keep the preflight command visible.
+- Verification target:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `node --check scripts/iteration-goal-audit.mjs`
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`

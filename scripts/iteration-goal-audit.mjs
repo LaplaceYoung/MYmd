@@ -29,6 +29,7 @@ const REQUIRED_DOCS = [
       "docs/wave0-review-handoff-2026-05.md",
       "npm run wave0:gate",
       "npm run release:gate",
+      "--check-env-only",
     ],
   },
   {
@@ -37,11 +38,11 @@ const REQUIRED_DOCS = [
   },
   {
     path: "docs/upgrade-execution-log.md",
-    markers: ["### Slice 34", "### Slice 39", "### Slice 44", "Release lane v1.4.3-hotfix8"],
+    markers: ["### Slice 34", "### Slice 39", "### Slice 44", "### Slice 45", "Release lane v1.4.3-hotfix8"],
   },
   {
     path: "docs/wave0-review-handoff-2026-05.md",
-    markers: ["## Review Order", "## Main-Branch Gate After Wave 0", "## Packaging Trigger"],
+    markers: ["## Review Order", "## Main-Branch Gate After Wave 0", "## Packaging Trigger", "--check-env-only"],
   },
   {
     path: "docs/release-retrospective-v1.4.3-hotfix8.md",

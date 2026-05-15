@@ -22,7 +22,7 @@ This handoff gives reviewers one compact path for clearing Wave 0 and starting t
 |---:|---:|---|---|---|
 | 1 | #1 | `young/review-code-health-and-performance-stability` | Main stability, performance, broad health baseline | https://github.com/LaplaceYoung/MYmd/pull/1#issuecomment-4455004862 |
 | 2 | #14 | `young/vite-chunk-warning-cleanup` | Build-health cleanup, Mermaid lazy runtime recovery, SourceEditor language budget, split-preview editor sync timing | https://github.com/LaplaceYoung/MYmd/pull/14#issuecomment-4455698048 |
-| 3 | #12 | `young/iteration-merge-queue` | Release sequencing, audit trail, Wave 0 gate automation, self-audit coverage, packaging trigger | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4455957902 |
+| 3 | #12 | `young/iteration-merge-queue` | Release sequencing, audit trail, Wave 0 gate automation, release gate environment preflight, self-audit coverage, packaging trigger | https://github.com/LaplaceYoung/MYmd/pull/12#issuecomment-4456101391 |
 
 ## Reviewer Checklist
 
@@ -45,6 +45,7 @@ This handoff gives reviewers one compact path for clearing Wave 0 and starting t
 - Confirm PR #1, #12, and #14 are assigned to Wave 0 with clear release triggers.
 - Confirm Wave 1-4 sequencing still follows dependency order: indexing/read safety, knowledge network closure, editor production power, extension/sensemaking.
 - Confirm packaging starts after Wave 0 lands on `main` and the main-branch gate passes.
+- Confirm `npm run release:gate -- --check-env-only` runs before full packaging on Windows.
 - Confirm this handoff is linked from the queue and active-goal audit.
 
 ## Main-Branch Gate After Wave 0
@@ -58,6 +59,7 @@ npm run wave0:gate
 The expanded gate is:
 
 ```bash
+npm run iteration:audit
 npm run typecheck
 npm run build
 npm run ci:repo-hygiene
@@ -71,15 +73,11 @@ Then run the targeted tests listed in the merged PR bodies for PR #1 and PR #14.
 Start release packaging after the main-branch gate passes:
 
 ```bash
-npm run build:tauri
-npm run build:electron
-npm run release:smoke
-npm run typecheck
-npm run ci:repo-hygiene
-git diff --check
+npm run release:gate -- --check-env-only
+npm run release:gate
 ```
 
-Use `E:\EnvConfig\cargo\bin` on `PATH` and `E:\EnvConfig\rust_target` as the Rust target output path for native builds.
+The release gate uses `E:\EnvConfig\cargo\bin` on `PATH` and `E:\EnvConfig\rust_target` as the Rust target output path for native builds.
 
 ## Rollback Boundary
 
