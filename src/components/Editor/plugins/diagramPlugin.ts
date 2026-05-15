@@ -16,6 +16,8 @@ class DiagramNodeView implements NodeView {
     private editContainer: HTMLDivElement
     private inputElement: HTMLTextAreaElement
     private isEditing = false
+    private renderVersion = 0
+    private destroyed = false
     private getPos: () => number | undefined
 
     constructor(
@@ -100,6 +102,7 @@ class DiagramNodeView implements NodeView {
 
     async renderMermaid() {
         const value = this.node.attrs.value || ''
+        const renderVersion = ++this.renderVersion
 
         if (!value.trim()) {
             this.dom.dataset.renderState = 'empty'
@@ -109,9 +112,11 @@ class DiagramNodeView implements NodeView {
 
         try {
             const svg = await renderMermaidSvg(value, 'mermaid-editor')
+            if (this.destroyed || renderVersion !== this.renderVersion) return
             this.dom.dataset.renderState = 'rendered'
             this.previewElement.innerHTML = svg
         } catch (error) {
+            if (this.destroyed || renderVersion !== this.renderVersion) return
             this.dom.dataset.renderState = 'error'
             this.previewElement.innerHTML = getMermaidErrorMarkup(value, error)
         }
@@ -133,6 +138,11 @@ class DiagramNodeView implements NodeView {
 
     ignoreMutation() {
         return true
+    }
+
+    destroy() {
+        this.destroyed = true
+        this.renderVersion += 1
     }
 }
 

@@ -12,11 +12,16 @@ import { collectMarkdownFiles } from "@/utils/workspacePaths";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
+export interface KnowledgeIndexSkippedFile {
+  filePath: string;
+  message: string;
+}
+
 interface RebuildWorkspaceIndexHooks {
   onStart?: (payload: { total: number }) => void;
-  onProgress?: (payload: { processed: number; total: number; filePath: string }) => void;
-  onComplete?: (payload: { processed: number; total: number }) => void;
-  onError?: (payload: { processed: number; total: number; message: string }) => void;
+  onProgress?: (payload: { processed: number; total: number; filePath: string; skipped: number }) => void;
+  onComplete?: (payload: { processed: number; total: number; skipped: number; skippedFiles: KnowledgeIndexSkippedFile[] }) => void;
+  onError?: (payload: { processed: number; total: number; message: string; skipped: number; skippedFiles: KnowledgeIndexSkippedFile[] }) => void;
   signal?: AbortSignal;
   progressStep?: number;
   maxFiles?: number;
@@ -69,6 +74,7 @@ export async function rebuildWorkspaceIndex(
 
   let processed = 0;
   let total = 0;
+  const skippedFiles: KnowledgeIndexSkippedFile[] = [];
   const progressStep = Math.max(1, hooks?.progressStep ?? 20);
   try {
     throwIfAborted(hooks?.signal);
@@ -82,6 +88,8 @@ export async function rebuildWorkspaceIndex(
         const content = await readTextFileWithFallback(filePath);
         await indexKnowledgeDocument(filePath, content, workspacePath);
       } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to read or index file";
+        skippedFiles.push({ filePath, message });
         console.warn("knowledge index skip file:", filePath, error);
       } finally {
         processed += 1;
@@ -91,23 +99,25 @@ export async function rebuildWorkspaceIndex(
           processed === 1;
 
         if (shouldReport) {
-          hooks?.onProgress?.({ processed, total, filePath });
+          hooks?.onProgress?.({ processed, total, filePath, skipped: skippedFiles.length });
         }
       }
     }
 
-    hooks?.onComplete?.({ processed, total });
+    hooks?.onComplete?.({ processed, total, skipped: skippedFiles.length, skippedFiles });
   } catch (error) {
     if (hooks?.signal?.aborted) {
       hooks?.onError?.({
         processed,
         total,
         message: "Knowledge indexing cancelled",
+        skipped: skippedFiles.length,
+        skippedFiles,
       });
       return;
     }
     const message = error instanceof Error ? error.message : "Failed to rebuild workspace index";
-    hooks?.onError?.({ processed, total, message });
+    hooks?.onError?.({ processed, total, message, skipped: skippedFiles.length, skippedFiles });
     throw error;
   }
 }
