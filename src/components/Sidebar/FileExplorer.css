@@ -115,6 +115,69 @@
     padding: 3px 10px;
 }
 
+.file-explorer__index-status {
+    margin: 0 16px 10px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.file-explorer__index-status .btn-secondary {
+    width: auto;
+    padding: 3px 10px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.file-explorer__index-status--indexing {
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    color: var(--accent);
+}
+
+.file-explorer__index-status--warning {
+    border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+    background: color-mix(in srgb, var(--accent) 9%, transparent);
+    color: var(--text-primary);
+}
+
+.file-explorer__index-status--error {
+    border: 1px solid rgba(240, 97, 82, 0.32);
+    background: rgba(240, 97, 82, 0.1);
+    color: var(--danger, #d13438);
+}
+
+.file-explorer__index-copy {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+    line-height: 1.35;
+}
+
+.file-explorer__index-copy small {
+    color: var(--text-muted);
+}
+
+.file-explorer__index-details {
+    color: var(--text-secondary);
+}
+
+.file-explorer__index-details summary {
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.file-explorer__index-file {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-muted);
+}
+
 .file-node-container {
     width: 100%;
 }
