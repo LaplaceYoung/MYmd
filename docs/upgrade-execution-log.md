@@ -1573,3 +1573,26 @@
   - `npm run iteration:audit` with 44 checks passed.
   - `npm run ci:repo-hygiene`
   - `git diff --check`
+
+### Slice 59
+
+- Scope:
+  - post-Wave 2 merge queue state refresh
+  - keep merged unlinked mention conversion state auditable
+- Planned touchpoints:
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Marked PR #4 as merged after the Wave 2 main integration.
+  - Kept Wave 3 editor production PRs in the dirty review queue for targeted re-sync.
+  - Preserved the staged release rule that installer packaging starts after merged main evidence is current.
+- Verification target:
+  - `npm run iteration:audit -- --offline`
+  - `npm run iteration:audit`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+- Verification completed:
+  - `npm run iteration:audit -- --offline` with 16 checks passed.
+  - `npm run iteration:audit` with 44 checks passed.
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
