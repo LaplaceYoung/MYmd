@@ -58,6 +58,7 @@ Captured on 2026-05-15 after PR #1-#11 rechecks, PR #12 queue refresh, PR #13 gr
 ### Wave 0: Stabilize The Queue
 
 - Goal: Keep the stability PR, build-health PR, and queue-management PR current before stacking more release packaging work.
+- Reviewer handoff: `docs/wave0-review-handoff-2026-05.md`
 - PRs:
   - #1 `young/review-code-health-and-performance-stability`
   - #12 `young/iteration-merge-queue`

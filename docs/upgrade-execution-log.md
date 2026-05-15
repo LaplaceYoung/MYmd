@@ -736,3 +736,27 @@
   - `git diff --check`
   - `npm run build`
   - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+
+### Slice 34
+
+- Scope:
+  - Wave 0 review handoff for release readiness
+  - reduce review friction before the next packaging lane
+- Planned touchpoints:
+  - `docs/wave0-review-handoff-2026-05.md`
+  - `docs/iteration-merge-queue-2026-05.md`
+  - `docs/active-goal-artifact-audit-2026-05.md`
+  - `docs/upgrade-execution-log.md`
+- Product management baseline:
+  - Added a reviewer handoff for PR #1, #14, and #12 with review order, focus areas, evidence links, main-branch gates, packaging trigger, and rollback boundaries.
+  - Linked the handoff from the merge queue and active-goal audit so Wave 0 review has one current execution surface.
+- Verification target:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`
+- Verification completed:
+  - `npm run typecheck`
+  - `npm run ci:repo-hygiene`
+  - `git diff --check`
+  - `gh pr list --state open --json number,title,headRefName,mergeStateStatus,reviewDecision,updatedAt,url --limit 25`

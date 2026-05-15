@@ -26,7 +26,7 @@ Captured on 2026-05-15 after PR #14 gained Mermaid runtime lazy loading, retry h
 |---|---|---|---|
 | Benchmark-aligned product direction | `docs/markdown-roadmap-2026-05.md` mainstream matrix and P0-P3 backlog | Covered | Refresh when benchmark sources change roadmap priority |
 | Feature-gap closure path | PR #1-#14 plus roadmap acceptance rows | In progress | Review gates must clear before merge waves can land |
-| Iteration management mechanism | `docs/release-iteration-playbook.md`, `docs/iteration-merge-queue-2026-05.md`, this audit | Covered | Keep queue synchronized after every PR update |
+| Iteration management mechanism | `docs/release-iteration-playbook.md`, `docs/iteration-merge-queue-2026-05.md`, `docs/wave0-review-handoff-2026-05.md`, this audit | Covered | Keep queue synchronized after every PR update |
 | Implementation evidence | PR #1-#14 branches and linked verification comments | In progress | Merge Wave 0 into `main`, then continue waves 1-4 |
 | Verification evidence | PR comments, `npm run typecheck`, `npm run build`, targeted E2E/unit gates, repo hygiene, production preview smoke, split-preview editor sync smoke | Covered for current open slices | Re-run gates after branch sync or merge |
 | Packaging and release evidence | GitHub Release `v1.4.3-hotfix8` with NSIS, MSI, Electron portable, release notes, SHA256 sums | Covered for latest shipped release | Package the next release after a wave reaches `main` |
@@ -43,6 +43,7 @@ Completion decision: the active goal remains ongoing because PR #1-#14 are open 
 | Close MYmd feature gaps | `docs/markdown-roadmap-2026-05.md` | P0-P3 backlog maps product reasons to acceptance evidence | Covered | Pull next slice from open P1/P2/P3 backlog after current PR wave clears review |
 | Build version iteration management | `docs/release-iteration-playbook.md` | Iteration loop, planning template, required gates, smoke checklist, and release asset checklist exist | Covered | Keep playbook aligned with new release automation |
 | Sequence current implementation work | `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 have lanes, states, merge waves, triggers, and verification links | Covered | Update after any PR merge, close, replace, or rebase |
+| Clear Wave 0 review path | `docs/wave0-review-handoff-2026-05.md` | PR #1, #14, and #12 have review order, reviewer checklist, main-branch gate, and packaging trigger | Covered | Use this handoff while review gates clear |
 | Attach verification evidence to slices | PR comments and `docs/iteration-merge-queue-2026-05.md` | PR #1-#14 readiness rows link to verification comments | Covered | Re-run gates after main sync or branch rebase |
 | Keep implementation history auditable | `docs/upgrade-execution-log.md` | Slices 12-19 and 25-32 record scope, touchpoints, baseline, and verification | Covered | Add a new dated entry for every meaningful slice |
 | Package and publish release builds | GitHub release `v1.4.3-hotfix8` | Latest release has NSIS setup, MSI, Electron portable zip, release notes, and SHA256 sums | Covered for latest shipped release | Package again after a merge wave reaches `main` |
